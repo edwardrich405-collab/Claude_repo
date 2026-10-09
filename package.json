@@ -1,0 +1,69 @@
+{
+  "name": "allison",
+  "version": "0.3.0",
+  "description": "Allison, Jack's personal assistant",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/connectors.test.js tests/models.test.js tests/renderer.test.js",
+    "dist": "electron-builder --win nsis --x64"
+  },
+  "keywords": [],
+  "author": "Jack",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.132.1",
+    "imapflow": "^2.3.0",
+    "node-ical": "^0.27.3",
+    "sherpa-onnx-node": "^1.13.8"
+  },
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3"
+  },
+  "productName": "Allison",
+  "build": {
+    "appId": "com.jack.allison",
+    "productName": "Allison",
+    "files": [
+      "src/**",
+      "renderer/**",
+      "package.json",
+      "node_modules/**",
+      "!node_modules/electron/**"
+    ],
+    "asarUnpack": [
+      "node_modules/sherpa-onnx-win-x64/**",
+      "node_modules/sherpa-onnx-node/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Allison",
+      "artifactName": "Allison-Setup-${version}.exe"
+    },
+    "publish": null,
+    "electronLanguages": [
+      "en-US",
+      "en-GB"
+    ],
+    "compression": "maximum"
+  },
+  "optionalDependencies": {
+    "sherpa-onnx-win-x64": "^1.13.8"
+  }
+}

@@ -1,0 +1,29 @@
+const { contextBridge, ipcRenderer } = require("electron");
+const on = ch => fn => ipcRenderer.on(ch, (e, v) => fn(v));
+
+contextBridge.exposeInMainWorld("allie", {
+  desktop: true,
+  loadData: () => ipcRenderer.sendSync("data:load"),
+  saveData: json => ipcRenderer.send("data:save", json),
+  hasKey: () => ipcRenderer.sendSync("key:has"),
+  setKey: key => ipcRenderer.invoke("key:set", key),
+  think: (text, context) => ipcRenderer.invoke("brain:think", { text, context }),
+  onAct: on("act"),
+  actDone: (id, result) => ipcRenderer.send("act:done", { id, result }),
+  hasVoice: () => ipcRenderer.sendSync("tts:has"),
+  speak: (id, text) => ipcRenderer.invoke("tts:speak", { id, text }),
+  onSpeech: on("tts:chunk"),
+  cancelSpeech: () => ipcRenderer.send("tts:cancel"),
+  micPcm: f32 => ipcRenderer.send("mic:pcm", f32.buffer),
+  micReset: () => ipcRenderer.send("mic:reset"),
+  onHeard: on("mic:heard"),
+  onSetup: on("setup"),
+  conn: () => ipcRenderer.sendSync("conn:view"),
+  connect: (name, val, prefs) => ipcRenderer.invoke("conn:set", { name, val, prefs }),
+  refreshConn: prefs => ipcRenderer.send("conn:refresh", prefs),
+  onExt: on("ext"), onNewJobs: on("ext:new-jobs"),
+  onInbox: on("inbox"), openInbox: () => ipcRenderer.send("inbox:open"), inboxPath: () => ipcRenderer.sendSync("inbox:path"),
+  restart: () => ipcRenderer.send("app:restart"),
+  openUrl: url => ipcRenderer.send("open:url", url),
+  theme: t => ipcRenderer.send("theme", t),
+});
