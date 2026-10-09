@@ -886,7 +886,7 @@ small,.sec,.pill,.time,.due,.note,.soon,.cf-sub,.ph p,.cap-user,.hint,.clock,.do
       return `<div class="set"><div class="t">Talk back out loud<small>Allie answers with her voice</small></div><button class="switch" data-voice role="switch" aria-checked="${voiceState.on}" aria-label="Talk back out loud"></button></div>
         <div class="set"><div class="t">Sleep<small>Say “Allison, sleep” or tap the moon. Say “Hey Allie” to wake her.</small></div><button class="switch" data-sleep role="switch" aria-checked="${sleeping}" aria-label="Asleep"></button></div>
         <div class="set"><div class="t">Appearance</div><div class="seg" style="margin:0;width:170px">${[["dark", "Dark"], ["light", "Light"]].map(([k, n]) => `<button type="button" data-theme-set="${k}" aria-pressed="${th === k}">${n}</button>`).join("")}</div></div>
-        ${ON_PC ? `<div class="sec" style="margin-top:14px">Brain</div><form class="crit" data-form="key"><label><span>Claude API key</span><input name="k" type="password" autocomplete="off" placeholder="${allie.hasKey() ? "Saved. Paste a new one to replace it" : "sk-ant-..."}"></label><button class="btn">Save</button></form>
+        ${ON_PC ? `<div class="sec" style="margin-top:14px">Brain</div><div class="set"><div class="t">Thinks with<small>${allie.brainMode() === "local" ? "Local model on this PC. Free, private, no web search" : "Claude. Sharpest, can search the web"}</small></div><div class="seg" style="margin:0;width:170px">${[["claude", "Claude"], ["local", "Local"]].map(([k, n]) => `<button type="button" data-brain="${k}" aria-pressed="${allie.brainMode() === k}">${n}</button>`).join("")}</div></div><form class="crit" data-form="key"><label><span>Claude API key</span><input name="k" type="password" autocomplete="off" placeholder="${allie.hasKey() ? "Saved. Paste a new one to replace it" : "sk-ant-..."}"></label><button class="btn">Save</button></form>
         <div class="set"><div class="t">What the key does<small>Lets Allie understand anything you say, act on the app and search the web. Get one at console.anthropic.com. It's stored encrypted on this PC.</small></div></div>` : ""}
         <div class="sec" style="margin-top:14px">Connections</div>
         ${connForms()}
@@ -1633,7 +1633,7 @@ small,.sec,.pill,.time,.due,.note,.soon,.cf-sub,.ph p,.cap-user,.hint,.clock,.do
     const my = ++thinking; setBusy(true); setState("thinking");
     allie.think(q, brainContext()).then(r => {
       if (my !== thinking) return;
-      if (r.error) { setState("idle"); setBusy(false); const [cmd, extra] = interpret(q); if (cmd !== "say") run(cmd, extra); else if (r.error === "key") sayLive("My Claude key didn't work, Jack. Check it in Settings."); else talk(extra); return; }
+      if (r.error) { setState("idle"); setBusy(false); const [cmd, extra] = interpret(q); if (cmd !== "say") run(cmd, extra); else if (r.error === "key") sayLive("My Claude key didn't work, Jack. Check it in Settings."); else if (r.error === "local") sayLive("My local brain isn't running. Open Ollama, or switch me to Claude in Settings."); else talk(extra); return; }
       setState("speaking"); speakText(r.say, () => { setState("idle"); setBusy(false); });
     });
   }
@@ -1726,7 +1726,7 @@ small,.sec,.pill,.time,.due,.note,.soon,.cf-sub,.ph p,.cap-user,.hint,.clock,.do
 
   /* ---------------- Inside the panels ---------------- */
   world.addEventListener("click", e => {
-    const t = e.target.closest("[data-del-char],[data-inbox],[data-disc],[data-url],[data-close],[data-voice],[data-sleep],[data-star],[data-del-todo],[data-view],[data-show-done],[data-cal],[data-day],[data-del-ev],[data-timer],[data-proj],[data-del-proj],[data-range],[data-sort],[data-quick],[data-del-food],[data-unit],[data-open],[data-theme-set],[data-reset],[data-biz],[data-stage],[data-vtime],[data-del-vid],[data-gstep],[data-del-goal],[data-del-money],[data-scan]");
+    const t = e.target.closest("[data-del-char],[data-inbox],[data-disc],[data-url],[data-close],[data-voice],[data-sleep],[data-star],[data-del-todo],[data-view],[data-show-done],[data-cal],[data-day],[data-del-ev],[data-timer],[data-proj],[data-del-proj],[data-range],[data-sort],[data-quick],[data-del-food],[data-unit],[data-open],[data-theme-set],[data-brain],[data-reset],[data-biz],[data-stage],[data-vtime],[data-del-vid],[data-gstep],[data-del-goal],[data-del-money],[data-scan]");
     if (!t) return;
     const d = t.dataset;
     if (d.delChar) { S.chars = S.chars.filter(c => c.id !== +d.delChar); changed("biz"); }
@@ -1757,6 +1757,7 @@ small,.sec,.pill,.time,.due,.note,.soon,.cf-sub,.ph p,.cap-user,.hint,.clock,.do
     else if (d.unit !== undefined) { S.unit = S.unit === "lb" ? "kg" : "lb"; changed("weight"); }
     else if (d.open) { if (busy) stopTalking(); capU.textContent = ""; run(d.open); }
     else if (d.themeSet) switchTheme(d.themeSet, e.clientX, e.clientY);
+    else if (d.brain) { allie.setBrainMode(d.brain); refresh("settings"); }
     else if (d.biz) { bizTab = d.biz; refresh("businesses"); }
     else if (d.stage) { const [id, i] = d.stage.split(":").map(Number), v = S.videos.find(x => x.id === id); if (v) { v.stage = i; changed("biz"); } }
     else if (d.vtime) { const v = S.videos.find(x => x.id === +d.vtime); if (v) { const p = projectNamed(v.title); if (S.timer && S.timer.pid === p.id) stopTimer(); else startTimer(p.id); } }

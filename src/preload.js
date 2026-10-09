@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld("allie", {
   loadData: () => ipcRenderer.sendSync("data:load"),
   saveData: json => ipcRenderer.send("data:save", json),
   hasKey: () => ipcRenderer.sendSync("key:has"),
+  brainMode: () => ipcRenderer.sendSync("brain:mode"),
+  setBrainMode: m => ipcRenderer.sendSync("brain:setMode", m),
   setKey: key => ipcRenderer.invoke("key:set", key),
   think: (text, context) => ipcRenderer.invoke("brain:think", { text, context }),
   onAct: on("act"),

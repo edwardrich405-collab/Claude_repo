@@ -37,6 +37,9 @@ ipcMain.handle("key:set", (e, key) => {
   brain.setKey(key); return true;
 });
 ipcMain.on("key:has", e => { e.returnValue = brain.ready(); });
+// Claude or the local model; the choice is kept in brain.json next to Jack's data.
+ipcMain.on("brain:mode", e => { e.returnValue = brain.getMode(); });
+ipcMain.on("brain:setMode", (e, m) => { brain.setMode(m); try { fs.writeFileSync(file("brain.json"), JSON.stringify({ mode: brain.getMode() })); } catch (err) {} logLine("brain", brain.getMode()); e.returnValue = brain.getMode(); });
 
 // Thinking: actions Claude picks are carried out by the window, which reports back.
 let actSeq = 0; const pending = new Map();
@@ -50,7 +53,7 @@ ipcMain.handle("brain:think", async (e, { text, context }) => {
     return { say };
   } catch (err) {
     const m = String(err && err.message || err);
-    return { error: /401|authentication|api.key/i.test(m) ? "key" : /ENOTFOUND|ECONN|fetch failed|network/i.test(m) ? "offline" : "other", detail: m.slice(0, 300) };
+    return { error: /local model offline/.test(m) ? "local" : /401|authentication|api.key/i.test(m) ? "key" : /ENOTFOUND|ECONN|fetch failed|network/i.test(m) ? "offline" : "other", detail: m.slice(0, 300) };
   }
 });
 
@@ -131,6 +134,7 @@ app.whenReady().then(() => {
   session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(perm === "media"));
   session.defaultSession.setPermissionCheckHandler((wc, perm) => perm === "media");
   brain.setKey(loadKey());
+  try { brain.setMode(JSON.parse(fs.readFileSync(file("brain.json"), "utf8")).mode); } catch (e) {}
   hub = makeHub(app, safeStorage, send, logLine);
   createWindow();
 });

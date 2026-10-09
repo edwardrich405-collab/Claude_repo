@@ -33,10 +33,17 @@ When he says goodnight or tells you to sleep, use the sleep tool and say nothing
 
 let client = null;
 function setKey(key) { client = key ? new Anthropic({ apiKey: key }) : null; }
-const ready = () => !!client;
+
+// Which brain answers: "claude" (needs the key) or "local" (a free model on this PC through Ollama, no web search).
+const LOCAL = { url: "http://127.0.0.1:11434", model: "qwen3:30b-a3b" };
+let mode = "claude";
+const setMode = m => { mode = m === "local" ? "local" : "claude"; };
+const getMode = () => mode;
+const ready = () => mode === "local" || !!client;
 
 const history = [];
 async function think(text, context, onAction) {
+  if (mode === "local") return thinkLocal(text, context, onAction);
   if (!client) throw new Error("no key");
   history.push({ role: "user", content: text });
   while (history.length > 16) history.shift();
@@ -71,4 +78,32 @@ async function think(text, context, onAction) {
   }
 }
 
-module.exports = { setKey, ready, think };
+// The same tools and personality, run by the local model through Ollama's chat API.
+const LOCAL_TOOLS = TOOLS.map(t => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.input_schema } }));
+async function thinkLocal(text, context, onAction, fetchFn = fetch) {
+  history.push({ role: "user", content: text });
+  while (history.length > 16) history.shift();
+  while (history.length && history[0].role !== "user") history.shift();
+  const msgs = [{ role: "system", content: SYSTEM + "\nYou can't search the web right now; if he asks for something current, say so in a sentence." }]
+    .concat(history.slice(0, -1), { role: "user", content: `${text}\n\n<app_state>\n${context}\n</app_state>` });
+  const say = s => { s = String(s || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim() || "Done."; history.push({ role: "assistant", content: s }); return s; };
+  for (let turn = 0; turn < 6; turn++) {
+    let res;
+    try { res = await fetchFn(LOCAL.url + "/api/chat", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ model: LOCAL.model, messages: msgs, tools: LOCAL_TOOLS, stream: false, think: false, keep_alive: "30m", options: { temperature: 0.6 } }) }); }
+    catch (e) { throw new Error("local model offline: " + e.message); }
+    if (!res.ok) throw new Error("local model offline: " + res.status + " " + (await res.text()).slice(0, 200));
+    const m = (await res.json()).message || {}, calls = m.tool_calls || [];
+    msgs.push({ role: "assistant", content: m.content || "", tool_calls: calls.length ? calls : undefined });
+    if (!calls.length) return say(m.content);
+    for (const c of calls) {
+      const f = c.function || {}; let args = f.arguments || {}, out = "done";
+      if (typeof args === "string") { try { args = JSON.parse(args); } catch (e) { args = {}; } }
+      try { out = (await onAction(f.name, args)) || "done"; } catch (e) { out = "failed: " + e.message; }
+      msgs.push({ role: "tool", tool_name: f.name, content: String(out) });
+    }
+  }
+  return say("Done.");
+}
+
+module.exports = { setKey, ready, think, setMode, getMode, LOCAL, _thinkLocal: thinkLocal };

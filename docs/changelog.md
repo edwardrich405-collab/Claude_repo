@@ -2,6 +2,11 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.6.0 (2026-10-09)
+- Allie can think with a free local model on this PC (Qwen3 30B through Ollama) instead of Claude. Switch in Settings, Brain, Thinks with: Claude or Local. The choice is remembered.
+- The local brain uses the same personality and can do everything in the app (to-dos, timers, tabs, notes), but can't search the web.
+- If Ollama isn't running she says so instead of going quiet.
+
 ## 0.5.0 (2026-10-09)
 - Design pass using Apple's fluid-interface rules (the apple-design skill).
 - The camera now glides to a tab on a smooth spring with no overshoot. If you were already sliding the canvas, that speed carries into the move, and asking for another tab mid-flight just changes course instead of restarting.
