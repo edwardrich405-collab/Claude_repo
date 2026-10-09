@@ -15,3 +15,11 @@ test("voices.js defines every line", () => {
   const v = ctx.window.ALLIE_VOICES.allie;
   for (const k of ["hello", "sleep", "wake", "micOff"]) assert.ok(v[k] && /^data:audio/.test(v[k][1]), k);
 });
+
+test("live lines stay short, and sleep doesn't explain how to wake her", () => {
+  const h = fs.readFileSync(path.join(R, "index.html"), "utf8");
+  const lines = JSON.parse(h.match(/const LINES = (\{.*?\});/)[1]);
+  for (const k of ["sleep", "wake", "hello", "added"]) assert.ok(lines[k] && lines[k].split(" ").length <= 6, k);
+  assert.doesNotMatch(lines.sleep, /hey allie|tap|moon|wake/i);
+  for (const k of ["jobs", "mail", "today", "calendar", "todo", "time", "calories", "finances", "businesses"]) assert.match(h, new RegExp(`if \\(key === "${k}"\\) \\{?[\\s\\S]{0,40}`), k);
+});

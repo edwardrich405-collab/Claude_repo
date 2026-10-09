@@ -1,16 +1,23 @@
 // Allie's voice (Kokoro) and ears (streaming Zipformer), both running offline through sherpa-onnx.
-const path = require("path");
+const path = require("path"), fs = require("fs"), os = require("os");
 const sherpa = require("sherpa-onnx-node");
+const { clean, sentences, pauseAfter, trim } = require("./speech-text");
 
 let tts = null, rec = null, stream = null, heard = "";
 
+// Her voice is Kokoro's "Heart" (af_heart, slot 3), its most natural one, at normal speed with US English pronunciations.
+// The old British blend is still in the voice table at slot 52 (lexicon gb, speed 0.95) if she ever wants it back.
+const VOICE = { sid: 3, speed: 1.0, lexicon: "lexicon-us-en.txt", lang: "en-us" };
+const threads = () => Math.max(2, Math.min(6, Math.floor(os.cpus().length / 2)));
+
 function loadTts(p) {
-  const K = path.join(p.dl, "kokoro");
+  const K = path.join(p.dl, "kokoro"), us = path.join(K, VOICE.lexicon), haveUs = fs.existsSync(us);
   tts = new sherpa.OfflineTts({
     model: { kokoro: { model: p.kokoro, voices: path.join(K, "voices-allie.bin"), tokens: path.join(K, "tokens.txt"),
-      dataDir: path.join(K, "espeak-ng-data"), lexicon: path.join(K, "lexicon-gb-en.txt"), lang: "en" }, numThreads: 2 },
+      dataDir: path.join(K, "espeak-ng-data"), lexicon: haveUs ? us : path.join(K, "lexicon-gb-en.txt"), lang: haveUs ? VOICE.lang : "en" }, numThreads: threads() },
     maxNumSentences: 1,
   });
+  return (haveUs ? "us" : "gb") + " lexicon, " + threads() + " threads";
 }
 
 function loadAsr(p) {
@@ -24,16 +31,21 @@ function loadAsr(p) {
   stream = rec.createStream();
 }
 
-// Slot 52 of the voice table holds Allie's own blend (60% Emma, 40% Heart).
+// One sentence at a time: clean the text, generate, trim the silence the model adds, then a short natural pause.
+// The window plays each piece as soon as it arrives, so the next one is being made while this one plays.
 let ttsSeq = 0;
 async function speak(text, onChunk) {
   if (!tts) throw new Error("voice not loaded");
-  const id = ++ttsSeq;
-  await tts.generateAsync({ text, sid: 52, speed: 0.95, onProgress: ({ samples }) => {
-    if (id !== ttsSeq) return 0;
-    onChunk(Float32Array.from(samples));
-    return 1;
-  } });
+  const id = ++ttsSeq, rate = tts.sampleRate;
+  for (const s of sentences(clean(text))) {
+    if (id !== ttsSeq) return false;
+    const a = await tts.generateAsync({ text: s, sid: VOICE.sid, speed: VOICE.speed, onProgress: () => (id === ttsSeq ? 1 : 0) });
+    if (id !== ttsSeq) return false;
+    const voiced = trim(a.samples, rate);
+    if (!voiced.length) continue;
+    const out = new Float32Array(voiced.length + Math.round(rate * pauseAfter(s))); out.set(voiced);
+    onChunk(out);
+  }
   return id === ttsSeq;
 }
 const cancel = () => { ttsSeq++; };
@@ -49,4 +61,4 @@ function hear(samples, onText) {
 }
 function resetEars() { if (rec) { rec.reset(stream); heard = ""; } }
 
-module.exports = { loadTts, loadAsr, speak, cancel, hear, resetEars, sampleRate: () => (tts ? tts.sampleRate : 24000), hasTts: () => !!tts };
+module.exports = { loadTts, loadAsr, speak, cancel, hear, resetEars, sampleRate: () => (tts ? tts.sampleRate : 24000), hasTts: () => !!tts, VOICE };

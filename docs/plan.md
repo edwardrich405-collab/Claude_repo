@@ -1,6 +1,6 @@
 # Allison: plan and rules
 
-Jack's personal assistant. Allie is a pink particle cloud on an infinite canvas, talks with a British voice, and calls him Jack.
+Jack's personal assistant. Allie is a pink particle cloud on an infinite canvas, talks with Kokoro's natural "Heart" voice, laid-back and brief (never explains tabs or features, sums up what's in them instead), and calls him Jack.
 
 ## How Claude works on this project
 - Claude edits the real files in this folder. Every update is one git commit with a clear message, so any update can be undone (`git revert <id>`).

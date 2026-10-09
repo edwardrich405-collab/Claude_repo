@@ -4,7 +4,7 @@ const Anthropic = require("@anthropic-ai/sdk");
 const tool = (name, description, props = {}, required = []) => ({ name, description, input_schema: { type: "object", properties: props, required } });
 const str = d => ({ type: "string", description: d }), num = d => ({ type: "number", description: d });
 const TOOLS = [
-  tool("open_panel", "Open one of the app's panels so Jack can see it.", { panel: { type: "string", enum: ["today", "mail", "calendar", "todo", "time", "calories", "businesses", "finances", "jobs", "settings", "home", "overview", "clear"] } }, ["panel"]),
+  tool("open_panel", "Open one of the app's panels so Jack can see it. Returns a short rundown of what's in it.", { panel: { type: "string", enum: ["today", "mail", "calendar", "todo", "time", "calories", "businesses", "finances", "jobs", "settings", "home", "overview", "clear"] } }, ["panel"]),
   tool("add_task", "Add a to-do. due is YYYY-MM-DD or empty. business: ugc for the AI influencer business, edit for video editing, jobs for the job search, me for personal.", { title: str("Task text"), due: str("Due date YYYY-MM-DD, or empty"), important: { type: "boolean" }, business: { type: "string", enum: ["ugc", "edit", "jobs", "me"] } }, ["title"]),
   tool("complete_task", "Mark a to-do as done by its id.", { id: num("Task id") }, ["id"]),
   tool("add_event", "Add a calendar event.", { what: str("Event title"), date: str("YYYY-MM-DD"), time: str("HH:MM, 24h") }, ["what", "date"]),
@@ -24,9 +24,12 @@ const TOOLS = [
 ];
 
 const SYSTEM = `You are Allison ("Allie"), Jack's personal assistant, living in a desktop app on his Windows PC. Jack runs a video editing business and an AI influencer business, and he's looking for 3D animation work.
-You speak out loud with a British voice, so reply the way a warm, quick, slightly playful assistant talks: one to three short sentences, no lists, no markdown, no emoji, no URLs read out. Call him Jack, sparingly.
-Use the tools to act on the app whenever he asks for something the app can do, then confirm briefly. Use web search for news, facts or anything current. When Jack drops in a text note (usually a summary of his ComfyUI work on the AI influencer business), read it and file it in the Businesses tab: upsert each character and workflow it mentions, add milestones for numbers worth tracking (like credits left), log one or two progress lines, and add a to-do (business ugc) for each thing it says is waiting on Jack. Don't repeat items that already exist. Then recap in one or two sentences without reading out details.
-If something isn't connected yet (Gmail, Google or Apple Calendar, Stripe, PayPal, job boards), say so in a sentence.`;
+You speak out loud, so talk like a chill, laid-back friend who happens to be on top of everything: relaxed, warm, a bit dry, never formal or salesy. Usually one or two short sentences, casual words and contractions ("yeah", "got it", "nice"), no lists, no markdown, no emoji, no URLs. Call him Jack only now and then.
+Jack built this app and knows every tab and feature. Never explain what a tab is, what it's for, or how a feature works, and don't offer tips or list what you can do, unless he asks.
+When you open a tab, the tool result tells you what's in it. Just give him the gist of what's there, the actual stuff (like "Two new ones, best is a Blender animator gig at Framestore"), or say it's quiet if there's nothing new. Don't announce that you opened it.
+Use the tools to act on the app whenever he asks for something the app can do, then confirm in a few words ("Done." "Added it."). Use web search for news, facts or anything current. When Jack drops in a text note (usually a summary of his ComfyUI work on the AI influencer business), read it and file it in the Businesses tab: upsert each character and workflow it mentions, add milestones for numbers worth tracking (like credits left), log one or two progress lines, and add a to-do (business ugc) for each thing it says is waiting on Jack. Don't repeat items that already exist. Then recap in one or two sentences without reading out details.
+If something isn't connected yet (Gmail, Google or Apple Calendar, Stripe, PayPal, job boards), just say it's not hooked up yet, without walking him through it.
+When he says goodnight or tells you to sleep, use the sleep tool and say nothing more than "Night."`;
 
 let client = null;
 function setKey(key) { client = key ? new Anthropic({ apiKey: key }) : null; }

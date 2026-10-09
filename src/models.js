@@ -47,6 +47,19 @@ async function fetchPack(app, k, onProgress) {
   fs.rmSync(tarFile, { force: true });
 }
 
+// The Heart voice wants US English pronunciations, which the first download didn't keep, so that one file is fetched on its own.
+const US_LEXICON = "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/main/lexicon-us-en.txt";
+async function fetchUsLexicon(app) {
+  const f = path.join(paths(app).dl, "kokoro", "lexicon-us-en.txt"), part = f + ".part";
+  if (fs.existsSync(f)) return false;
+  const res = await fetch(US_LEXICON, { redirect: "follow" });
+  if (!res.ok) throw new Error("Download failed (" + res.status + ")");
+  await pipeline(Readable.fromWeb(res.body), fs.createWriteStream(part));
+  if (fs.statSync(part).size < 1e6) { fs.rmSync(part, { force: true }); throw new Error("lexicon download too small"); }
+  fs.renameSync(part, f);
+  return true;
+}
+
 // Allie's voice is her own blend, 60% Emma and 40% Heart, written into slot 52 of the voice table.
 function makeAllie(dir) {
   const buf = fs.readFileSync(path.join(dir, "voices.bin")), f = new Float32Array(buf.buffer, buf.byteOffset, buf.length / 4);
@@ -56,4 +69,4 @@ function makeAllie(dir) {
   fs.rmSync(path.join(dir, "voices.bin"), { force: true });
 }
 
-module.exports = { paths, done, fetchPack, makeAllie };
+module.exports = { paths, done, fetchPack, makeAllie, fetchUsLexicon };

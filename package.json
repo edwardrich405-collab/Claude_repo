@@ -1,11 +1,11 @@
 {
   "name": "allison",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Allison, Jack's personal assistant",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "test": "node --test tests/connectors.test.js tests/models.test.js tests/renderer.test.js",
+    "test": "node --test tests/connectors.test.js tests/models.test.js tests/renderer.test.js tests/speech.test.js",
     "dist": "electron-builder --win nsis --x64"
   },
   "keywords": [],

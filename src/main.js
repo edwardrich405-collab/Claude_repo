@@ -90,7 +90,11 @@ async function startVoice() {
   logLine("starting voice", p.dl);
   try { await models.fetchPack(app, "asr", prog); voice.loadAsr(p); logLine("ears ready"); send("setup", { stage: "ears" }); }
   catch (err) { console.error("asr", err); send("setup", { stage: "error", what: "ears", detail: String(err.message) }); }
-  try { await models.fetchPack(app, "kokoro", prog); voice.loadTts(p); logLine("voice ready"); send("setup", { stage: "voice" }); }
+  try {
+    await models.fetchPack(app, "kokoro", prog);
+    try { if (await models.fetchUsLexicon(app)) logLine("downloaded US pronunciations"); } catch (err) { logLine("US pronunciations not downloaded, using British", err.message); }
+    logLine("voice ready", voice.loadTts(p)); send("setup", { stage: "voice" });
+  }
   catch (err) { console.error("tts", err); send("setup", { stage: "error", what: "voice", detail: String(err.message) }); }
 }
 

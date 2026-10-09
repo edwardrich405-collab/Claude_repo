@@ -1293,6 +1293,61 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   // Allie's lines, recorded with a free Kokoro neural voice and played through Web Audio so her particles move with her voice.
   const VOICES = window.ALLIE_VOICES || {};
   const CAPS = {"hello":"Hey, Jack. I'm listening. Ask me about your day, your to-dos, your edit timer or what you've eaten.","home":"I'm right here, Jack. What do you need?","clear":"All cleared away. Clean slate.","overview":"Here's everything you've got open.","mail":"Your inbox isn't connected yet. Once the app links your Gmail, I'll sort it by business and flag what needs a reply.","finances":"This is your money in one place. Stripe and PayPal plug in with the app, and you can add anything by hand.","jobs":"Every morning I'll scan LinkedIn and the job boards for new 3D animation roles, so you see them right as they're posted.","settings":"Here's how I'm set up. You can mute me here if I'm being too chatty.","today":"Here's your day, Jack. Your schedule's up top, and today's to-dos are right underneath.","calendar":"Here's your month. Tap any day to see what's on, or add something new.","todo":"Here's your to-do list. Anything with a date shows up on your calendar too.","added":"Done. It's on your list.","time":"Here's your time tracker. Pick what you're working on, hit play, and I'll keep count.","timerStart":"Timer's running. Go make something beautiful, I'll keep count.","timerStop":"Stopped. I've logged that session for you.","calories":"Here's what you've eaten today, and how your weight's trending.","logged":"Got it. I've logged that for you.","sleep":"Okay, I'll stop listening. Tap the moon, or say hey Allie, when you need me.","wake":"I'm up. What do you need, Jack?","web":"I'll be able to search the web for that once I'm running as the real app.","fallback":"I didn't quite catch that. Try your day, your to-dos, your timer or your calories.","micOff":"I can't hear you in this preview. Voice works in the desktop app, so type to me for now.","businesses":"Here's how your businesses are doing. Your video edits on one side, and the influencer project on the other.","videoAdded":"Added. Keep me posted as it moves along."};
+  // With her live voice she keeps it short and laid-back; the recordings above are only for the browser preview.
+  const LINES = {"hello":"Hey Jack. What's up?","home":"Yeah?","clear":"Cleared.","overview":"Here's everything.","added":"Added.","timerStart":"Timer's on.","timerStop":"Stopped. Logged it.","logged":"Logged.","sleep":"Night.","wake":"Yeah, Jack?","web":"Can't look that up right now.","fallback":"Didn't catch that.","micOff":"Can't hear you here, type to me.","videoAdded":"Added."};
+  // Opening a tab: a quick rundown of what's actually in it, never what the tab is for.
+  const spokenTime = ms => { const m = Math.round(ms / MIN), h = Math.floor(m / 60), r = m % 60; return h ? `${h} ${h === 1 ? "hour" : "hours"}${r ? " " + r + " minutes" : ""}` : `${m} ${m === 1 ? "minute" : "minutes"}`; };
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many || one + "s"}`;
+  const person = s => String(s || "someone").replace(/<[^>]*>|"/g, "").trim() || "someone";
+  function rundown(key) {
+    if (key === "jobs") {
+      const fresh = EXT.jobs.filter(j => j.isNew), top = fresh[0] || EXT.jobs[0];
+      if (!top) return "Nothing on the job boards yet.";
+      const at = top.company ? ` at ${top.company}` : "";
+      return fresh.length ? `${plural(fresh.length, "new one")}. Top one's ${top.title}${at}.` : `Nothing new. Latest is still ${top.title}${at}.`;
+    }
+    if (key === "mail") {
+      if (!EXT.on.gmail) return "Gmail's not hooked up yet.";
+      const un = EXT.mail.filter(m => m.unread);
+      return un.length ? `${plural(un.length, "unread")}. Latest's from ${person(un[0].from)}, ${un[0].subject}.` : "Inbox is clear.";
+    }
+    if (key === "today") {
+      const now = new Date().toTimeString().slice(0, 5), evs = EV().filter(e => e.d === TODAY && (e.t || "") >= now).sort((a, b) => (a.t || "").localeCompare(b.t || ""));
+      const todo = S.todos.filter(t => !t.done && inMyDay(t)).length;
+      const ev = evs.length ? `Next up, ${evs[0].what} at ${fmtT(evs[0].t || "12:00")}` + (evs.length > 1 ? `, then ${plural(evs.length - 1, "more thing")}.` : ".") : "Nothing else on the calendar today.";
+      return ev + (todo ? ` ${plural(todo, "to-do")} for today.` : "");
+    }
+    if (key === "calendar") {
+      const evs = EV().filter(e => e.d >= TODAY && e.d <= dayOff(7)).sort((a, b) => (a.d + (a.t || "")).localeCompare(b.d + (b.t || "")));
+      return evs.length ? `${plural(evs.length, "thing")} this week. Next is ${evs[0].what}, ${evs[0].d === TODAY ? "today" : evs[0].d === dayOff(1) ? "tomorrow" : parseKey(evs[0].d).toLocaleDateString("en-US", { weekday: "long" })}.` : "Week's clear.";
+    }
+    if (key === "todo") {
+      const o = S.todos.filter(t => !t.done), late = o.filter(t => t.due && t.due < TODAY).length, star = o.find(t => t.star);
+      if (!o.length) return "List's empty. Nice.";
+      return `${plural(o.length, "open")}${late ? `, ${late} overdue` : ""}.` + (star ? ` Big one is ${star.t}.` : "");
+    }
+    if (key === "time") {
+      const p = S.timer && S.projects.find(x => x.id === S.timer.pid), day = dayTotal(TODAY);
+      return p ? `Timer's on ${p.name}, ${spokenTime(running())} in.` : day >= MIN ? `${spokenTime(day)} logged today.` : "Nothing tracked today yet.";
+    }
+    if (key === "calories") {
+      const eaten = foodToday().reduce((a, f) => a + f.kcal, 0), left = S.goal - eaten;
+      return !eaten ? "Nothing logged yet today." : left >= 0 ? `${eaten} calories so far, ${left} left.` : `${eaten} calories, ${-left} over.`;
+    }
+    if (key === "finances") {
+      const mk = TODAY.slice(0, 7), mo = S.money.concat(EXT.money).filter(m => m.d.slice(0, 7) === mk);
+      const inc = Math.round(mo.filter(m => m.amt > 0).reduce((a, m) => a + m.amt, 0)), out = Math.round(-mo.filter(m => m.amt < 0).reduce((a, m) => a + m.amt, 0));
+      return inc || out ? `This month, $${inc} in and $${out} out.` : "Nothing in or out this month yet.";
+    }
+    if (key === "businesses") {
+      const live = S.videos.filter(v => v.stage < 3), rev = live.filter(v => v.stage === 2).length, note = (S.notes || []).slice(-1)[0];
+      const ed = live.length ? `${plural(live.length, "edit")} on the go${rev ? `, ${rev} in review` : ""}.` : "No edits on the go.";
+      return ed + (note ? ` Latest on the influencer side: ${note.text.replace(/[.!?]*$/, ".")}` : "");
+    }
+    if (key === "settings") return "Here you go.";
+    return "";
+  }
+  const liveVoice = () => !!(window.allie && allie.desktop) && voiceState.on && allie.hasVoice();
   const voiceName = "allie";
   let actx = null, analyser = null, srcNode = null, level = 0; const tdata = new Float32Array(1024), bufs = {};
   function ensureAudio() {
@@ -1319,6 +1374,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   }
   const showAll = () => { clearInterval(typer); capA.querySelectorAll(".w").forEach(s => s.classList.add("on")); };
   function caption(key, done) {
+    if (liveVoice()) return speakText(LINES[key] || CAPS[key], done);
     const text = CAPS[key], v = (VOICES[voiceName] || {})[key], s0 = seq;
     const finish = () => { if (s0 !== seq) return; showAll(); done && done(); };
     const silent = () => { const d = v ? v[0] : Math.max(1.5, text.length / 15); reveal(text, d); later(finish, d * 1000 + 250); };
@@ -1347,7 +1403,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
     requestAnimationFrame(() => {
       const an = anchorFor(el); A.tx = an.x; A.ty = an.y; frameBox(an.box);
       $$(".rail button").forEach(b => b.classList.toggle("here", b.dataset.cmd === el.dataset.key));
-      later(() => { setState("speaking"); caption(key, () => { setState("idle"); setBusy(false); }); }, 650);
+      later(() => { const fin = () => { setState("idle"); setBusy(false); }, sum = PANELS[key] && rundown(key); setState("speaking"); if (sum) speakText(sum, fin); else caption(key, fin); }, 650);
     });
   }
   function talk(key) { setBusy(true); setState("speaking"); caption(key, () => { setState("idle"); setBusy(false); }); }
@@ -1494,7 +1550,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
     requestAnimationFrame(() => { const an = anchorFor(el); A.tx = an.x; A.ty = an.y; frameBox(an.box); $$(".rail button").forEach(b => b.classList.toggle("here", b.dataset.cmd === key)); });
   }
   const ACT = {
-    open_panel: i => showQuiet(i.panel),
+    open_panel: i => { showQuiet(i.panel); return PANELS[i.panel] ? "Opened. What's in it: " + rundown(i.panel) : "done"; },
     add_task: i => { const dup = S.todos.find(t => !t.done && t.t.toLowerCase() === String(i.title).toLowerCase()); if (dup) return "already there"; addTodo(cap1(i.title), i.due || "", { myDay: i.due === TODAY ? TODAY : "", star: !!i.important }); const t = S.todos[S.todos.length - 1]; if (BIZ[i.business]) t.biz = i.business; changed("todos"); showQuiet("todo"); return "added #" + freshId; },
     complete_task: i => { const t = S.todos.find(x => x.id === +i.id); if (!t) return "no such task"; t.done = true; changed("todos"); },
     add_event: i => { S.events.push({ id: freshId = uid(), d: i.date, t: i.time || "12:00", what: cap1(i.what), biz: guessBiz(i.what) }); calSel = i.date; changed("events"); showQuiet("calendar"); },
@@ -1575,7 +1631,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   const ago = t => { const m = Math.max(1, Math.round((Date.now() - t) / 6e4)); return m < 60 ? m + "m ago" : m < 1440 ? Math.round(m / 60) + "h ago" : Math.round(m / 1440) + "d ago"; };
   if (DESK) {
     allie.onExt(x => { EXT = x; ["mail", "calendar", "today", "finances", "jobs", "settings"].forEach(refresh); });
-    allie.onNewJobs(n => { if (!sleeping && !busy) sayLive(`${n} new 3D ${n === 1 ? "job" : "jobs"} just got posted, Jack. Have a look.`); });
+    allie.onNewJobs(n => { if (!sleeping && !busy) sayLive(`Heads up, ${n} new 3D ${n === 1 ? "job" : "jobs"} just came in.`); });
     setTimeout(() => allie.refreshConn(S.jobPrefs), 4000);
   }
 
@@ -1607,7 +1663,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   }
   function setSleep(on) {
     if (busy) stopTalking();
-    if (on) { capU.textContent = ""; sleeping = true; syncSleep(); talk("sleep"); }
+    if (on) { capU.textContent = ""; sleeping = true; syncSleep(); setBusy(true); setState("speaking"); speakText(LINES.sleep, () => { setState("idle"); setBusy(false); }); }
     else { sleeping = false; syncSleep(); talk("wake"); }
   }
   sleepBtn.addEventListener("click", () => setSleep(!sleeping));
