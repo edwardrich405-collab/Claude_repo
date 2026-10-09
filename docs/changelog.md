@@ -2,6 +2,9 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.4.1 (2026-10-09)
+- Allie's voice is now Kokoro's "Bella" instead of "Heart", so she doesn't sound like Jack's friend's assistant. Same model, same natural delivery.
+
 ## 0.4.0 (2026-10-09)
 - New voice: Allie now speaks with Kokoro's "Heart" voice at normal speed, the most natural one it has, with US English pronunciations. The old British blend is still on this PC if Jack wants it back.
 - She sounds less robotic: prices, percentages, dates, times and acronyms are read the way a person says them ("34 dollars 99", "73 percent", "October 14th", "A I"), markdown and emoji are stripped, each sentence is made while the last one plays, and the silence the voice model adds around each sentence is trimmed and replaced with a short natural pause.

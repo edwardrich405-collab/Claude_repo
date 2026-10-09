@@ -5,9 +5,9 @@ const { clean, sentences, pauseAfter, trim } = require("./speech-text");
 
 let tts = null, rec = null, stream = null, heard = "";
 
-// Her voice is Kokoro's "Heart" (af_heart, slot 3), its most natural one, at normal speed with US English pronunciations.
+// Her voice is Kokoro's "Bella" (af_bella, slot 2), its most natural voice after Heart (Jack's friend uses Heart), at normal speed with US English pronunciations.
 // The old British blend is still in the voice table at slot 52 (lexicon gb, speed 0.95) if she ever wants it back.
-const VOICE = { sid: 3, speed: 1.0, lexicon: "lexicon-us-en.txt", lang: "en-us" };
+const VOICE = { sid: 2, speed: 1.0, lexicon: "lexicon-us-en.txt", lang: "en-us" };
 const threads = () => Math.max(2, Math.min(6, Math.floor(os.cpus().length / 2)));
 
 function loadTts(p) {
