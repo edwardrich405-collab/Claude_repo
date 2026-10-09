@@ -39,9 +39,18 @@ async function speak(text, onChunk) {
   const id = ++ttsSeq, rate = tts.sampleRate;
   for (const s of sentences(clean(text))) {
     if (id !== ttsSeq) return false;
-    const a = await tts.generateAsync({ text: s, sid: VOICE.sid, speed: VOICE.speed, onProgress: () => (id === ttsSeq ? 1 : 0) });
+    // Under Electron the finished result can't be handed back ("TTS settlement failed"), so the audio is copied out as it's made.
+    const got = [];
+    try {
+      await tts.generateAsync({ text: s, sid: VOICE.sid, speed: VOICE.speed, onProgress: ({ samples }) => {
+        if (id !== ttsSeq) return 0;
+        got.push(Float32Array.from(samples)); return 1;
+      } });
+    } catch (err) { if (!got.length) throw err; }
     if (id !== ttsSeq) return false;
-    const voiced = trim(a.samples, rate);
+    const all = new Float32Array(got.reduce((n, g) => n + g.length, 0)); let at = 0;
+    for (const g of got) { all.set(g, at); at += g.length; }
+    const voiced = trim(all, rate);
     if (!voiced.length) continue;
     const out = new Float32Array(voiced.length + Math.round(rate * pauseAfter(s))); out.set(voiced);
     onChunk(out);
@@ -61,4 +70,4 @@ function hear(samples, onText) {
 }
 function resetEars() { if (rec) { rec.reset(stream); heard = ""; } }
 
-module.exports = { loadTts, loadAsr, speak, cancel, hear, resetEars, sampleRate: () => (tts ? tts.sampleRate : 24000), hasTts: () => !!tts, VOICE };
+module.exports = { loadTts, loadAsr, speak, cancel, hear, resetEars, sampleRate: () => (tts ? tts.sampleRate : 24000), hasTts: () => !!tts, VOICE, _useTts: t => { tts = t; } };

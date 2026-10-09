@@ -57,7 +57,7 @@ ipcMain.handle("brain:think", async (e, { text, context }) => {
 // Voice: live speech streams to the window sentence by sentence; the microphone streams back.
 ipcMain.handle("tts:speak", async (e, { id, text }) => {
   try { const done = await voice.speak(text, samples => send("tts:chunk", { id, samples, rate: voice.sampleRate() })); return { ok: done }; }
-  catch (err) { return { ok: false, error: String(err.message || err) }; }
+  catch (err) { logLine("speak failed", err.message || err); return { ok: false, error: String(err.message || err) }; }
 });
 ipcMain.on("tts:cancel", () => voice.cancel());
 ipcMain.on("tts:has", e => { e.returnValue = voice.hasTts(); });

@@ -2,6 +2,9 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.4.2 (2026-10-09)
+- Fixed: Allie's voice was silent after 0.4.0. Inside the app the voice engine can't hand back a finished sentence, so the audio is now copied out while it's being made, like before. If speaking ever fails again it's written to allison.log.
+
 ## 0.4.1 (2026-10-09)
 - Allie's voice is now Kokoro's "Bella" instead of "Heart", so she doesn't sound like Jack's friend's assistant. Same model, same natural delivery.
 
