@@ -66,10 +66,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stro
   -webkit-backdrop-filter:blur(40px) saturate(180%);backdrop-filter:blur(40px) saturate(180%);
   box-shadow:0 30px 80px var(--shadow-panel);cursor:default;transition:box-shadow .45s var(--ease-out),transform .45s var(--ease-out)}
 .panel.wide{width:520px}
-.panel.entering{animation:pop .6s cubic-bezier(.22,.9,.28,1) both}
-@keyframes pop{0%{opacity:0;transform:translate(var(--fx,0px),var(--fy,0px)) scale(.92)}55%{opacity:1}100%{opacity:1;transform:none}}
-.panel.leaving{animation:out .34s cubic-bezier(.4,0,.7,.2) forwards;pointer-events:none}
-@keyframes out{to{opacity:0;transform:translate(var(--fx,0px),var(--fy,0px)) scale(.94)}}
+.panel.leaving{pointer-events:none}
 .panel.glow{box-shadow:0 30px 80px var(--shadow-panel),0 0 0 1px rgba(255,120,200,.4),0 0 70px rgba(255,90,190,.2)}
 .panel.lifted{transform:scale(1.012);box-shadow:0 46px 100px var(--shadow-panel),0 0 0 1px rgba(255,120,200,.22)}
 .ph{position:relative;display:flex;align-items:flex-start;gap:12px;padding:18px 18px 12px 22px;cursor:grab;user-select:none}
@@ -394,7 +391,7 @@ button.chip:active{transform:scale(.95)}
   .clockface .bigtime{font-size:34px}
   .ring{width:108px;height:108px}
 }
-@media (prefers-reduced-motion:reduce){.panel.entering,.panel.leaving,.detail,.bar,.mic[aria-pressed="true"],.fresh,.week .b,.ring .val,.macro .tr i,.island{animation-duration:.01s}.cap-allie .w{transition:none}}
+@media (prefers-reduced-motion:reduce){.detail,.bar,.mic[aria-pressed="true"],.fresh,.week .b,.ring .val,.macro .tr i,.island{animation-duration:.01s}.cap-allie .w{transition:none}}
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
 
 /* ---- v9: depth, sleep, minimal dock, new sections ---- */
@@ -404,8 +401,6 @@ button.chip:active{transform:scale(.95)}
 .panel.lg{box-shadow:var(--shx,0px) calc(28px + var(--shy,0px)) 70px var(--shadow-panel),calc(var(--shx,0px) * .3) calc(6px + var(--shy,0px) * .3) 16px var(--shadow)}
 .panel.lifted{transform:perspective(1500px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));scale:1.012;box-shadow:var(--shx,0px) calc(44px + var(--shy,0px)) 100px var(--shadow-panel),0 0 0 1px rgba(255,120,200,.22)}
 .panel.glow{box-shadow:var(--shx,0px) calc(28px + var(--shy,0px)) 80px var(--shadow-panel),0 0 0 1px rgba(255,120,200,.4),0 0 70px rgba(255,90,190,.2)}
-@keyframes pop{0%{opacity:0;translate:var(--fx,0px) var(--fy,0px);scale:.92}55%{opacity:1}100%{opacity:1;translate:none;scale:none}}
-@keyframes out{to{opacity:0;translate:var(--fx,0px) var(--fy,0px);scale:.94}}
 .rail{transform:translateY(-50%) perspective(700px) rotateY(9deg);transform-origin:left center;box-shadow:18px 24px 50px var(--shadow),4px 6px 14px var(--shadow)}
 .dock{gap:12px}
 .controls{display:flex;align-items:center;gap:12px}
@@ -553,6 +548,36 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
 .top{right:150px;-webkit-app-region:no-drag}
 .top .chip.setup{font-size:12px;padding:0 12px;color:var(--label-2);white-space:nowrap}
 .ctl.mic[aria-pressed="true"]{box-shadow:0 0 0 2px rgba(255,79,168,.35),0 6px 22px rgba(255,46,140,.35)}
+
+/* ---- Design pass (Apple's fluid-interface rules) ---- */
+/* Motion: no overshoot on things that weren't thrown; presses answer instantly, releases ease back. */
+:root{--spring:cubic-bezier(.22,1,.36,1)}
+button:active,.tile:active,.day:active,.vopt:active,.check input:active{transition-duration:.08s!important;transition-timing-function:ease-out!important}
+/* The voice meter's bars sat in a column because the Finances chart also uses .bars. */
+.vu .bars{flex-direction:row;gap:3px;margin:0}
+/* Lines and fields that were hard-coded white, so they vanished in light mode. */
+.mailrow,.jobrow,.connform{border-bottom-color:var(--hair)}
+.connform input{background:var(--field);border-color:var(--hair);color:var(--label);outline:none;transition:border-color .2s}
+.connform input:focus{border-color:var(--blue)}
+.connform input::placeholder{color:var(--label-3)}
+.flow{background:var(--fill-2)}
+:root[data-theme="light"] .link{color:#d6338a}
+/* Type: tracking by size. Large text tightens, small text opens up a touch, never one value for all. */
+small,.sec,.pill,.time,.due,.note,.soon,.cf-sub,.ph p,.cap-user,.hint,.clock,.dow,.vu,.tile small,.stat small,.mailrow span,.jobrow span{letter-spacing:0}
+.dow,.pill,.jobrow .new{letter-spacing:.01em}
+.bigtime,.ring .mid b,.wnow b,.bizsum b{letter-spacing:-.03em}
+.cap-allie{letter-spacing:-.02em}
+/* Accessibility: calmer motion, solid surfaces, stronger lines when Windows asks for them. */
+@media (prefers-reduced-motion:reduce){.rail button:hover,.chips button:hover,.ctl:hover,.x:hover,.round:hover,.play:hover,.bar-input:focus-within{transform:none}.cap-allie .w{filter:none}}
+@media (prefers-reduced-transparency:reduce){
+  .lg,.panel,.panel.lg,.rail,.chip,.zoom,.bar-input,.vu,.ctl:not(.mic):not(.stop){background:var(--mat-strong)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .lg::after,.spill{display:none}
+}
+@media (prefers-contrast:more){
+  :root{--hair:rgba(255,255,255,.34);--hair-strong:rgba(255,255,255,.5);--label-2:rgba(235,235,245,.86);--label-3:rgba(235,235,245,.64)}
+  :root[data-theme="light"]{--hair:rgba(0,0,0,.34);--hair-strong:rgba(0,0,0,.5);--label-2:rgba(60,60,67,.9);--label-3:rgba(60,60,67,.72)}
+  .panel,.rail,.chip,.vu{border:1px solid var(--hair-strong)!important}
+}
 </style>
 <div class="dragbar"></div>
 <header class="top">
@@ -619,7 +644,8 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   const TODAY = dkey(D0);
   const seed = () => ({ v: 2, next: 100, goal: 2400, unit: "lb", last: null, timer: null, todos: [], events: [], projects: [], food: {}, weights: [], money: [], videos: [],
     goals: [], jobPrefs: { what: "3D animator, character animator, Blender generalist", where: "Remote or Los Angeles", scan: true } });
-  let S = null; try { S = JSON.parse((window.allie ? allie.loadData() : localStorage.getItem("allie.data")) || "null"); } catch (e) {}
+  const ON_PC = !!(window.allie && allie.desktop); // in a plain browser, window.allie is the canvas with that id
+  let S = null; try { S = JSON.parse((ON_PC ? allie.loadData() : localStorage.getItem("allie.data")) || "null"); } catch (e) {}
   if (S && S.v === 1) {
     // Keep only what Jack added himself; the old sample data had ids under 100.
     const n = seed(), mine = x => x.id > 100; n.next = S.next; n.goal = S.goal;
@@ -630,8 +656,8 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   }
   if (!S || S.v !== 2) S = seed();
   for (const k of ["videos", "goals", "weights", "money"]) if (!S[k]) S[k] = [];
-  const save = () => { clearTimeout(save.t); save.t = setTimeout(() => { const j = JSON.stringify(S); if (window.allie) allie.saveData(j); else try { localStorage.setItem("allie.data", j); } catch (e) {} }, 150); };
-  addEventListener("beforeunload", () => { if (window.allie) allie.saveData(JSON.stringify(S)); });
+  const save = () => { clearTimeout(save.t); save.t = setTimeout(() => { const j = JSON.stringify(S); if (ON_PC) allie.saveData(j); else try { localStorage.setItem("allie.data", j); } catch (e) {} }, 150); };
+  addEventListener("beforeunload", () => { if (ON_PC) allie.saveData(JSON.stringify(S)); });
   const uid = () => ++S.next;
   let freshId = 0;
   // Each panel that shows a piece of your data redraws when that data changes, so everything stays in step.
@@ -860,7 +886,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
       return `<div class="set"><div class="t">Talk back out loud<small>Allie answers with her voice</small></div><button class="switch" data-voice role="switch" aria-checked="${voiceState.on}" aria-label="Talk back out loud"></button></div>
         <div class="set"><div class="t">Sleep<small>Say “Allison, sleep” or tap the moon. Say “Hey Allie” to wake her.</small></div><button class="switch" data-sleep role="switch" aria-checked="${sleeping}" aria-label="Asleep"></button></div>
         <div class="set"><div class="t">Appearance</div><div class="seg" style="margin:0;width:170px">${[["dark", "Dark"], ["light", "Light"]].map(([k, n]) => `<button type="button" data-theme-set="${k}" aria-pressed="${th === k}">${n}</button>`).join("")}</div></div>
-        ${window.allie ? `<div class="sec" style="margin-top:14px">Brain</div><form class="crit" data-form="key"><label><span>Claude API key</span><input name="k" type="password" autocomplete="off" placeholder="${allie.hasKey() ? "Saved. Paste a new one to replace it" : "sk-ant-..."}"></label><button class="btn">Save</button></form>
+        ${ON_PC ? `<div class="sec" style="margin-top:14px">Brain</div><form class="crit" data-form="key"><label><span>Claude API key</span><input name="k" type="password" autocomplete="off" placeholder="${allie.hasKey() ? "Saved. Paste a new one to replace it" : "sk-ant-..."}"></label><button class="btn">Save</button></form>
         <div class="set"><div class="t">What the key does<small>Lets Allie understand anything you say, act on the app and search the web. Get one at console.anthropic.com. It's stored encrypted on this PC.</small></div></div>` : ""}
         <div class="sec" style="margin-top:14px">Connections</div>
         ${connForms()}
@@ -873,8 +899,25 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   const more = el => { const b = el.querySelector(".pb"); if (b) b.classList.toggle("more", b.scrollTop + b.clientHeight < b.scrollHeight - 4); };
   const sizeRO = new ResizeObserver(es => es.forEach(e => { e.target._w = e.target.offsetWidth; e.target._h = e.target.offsetHeight; more(e.target); }));
   const LENS_PANEL = { bezel: 34, scale: 110, blur: 14, sat: 200 };
+  // Panels grow out of Allie and shrink back into her on a critically damped spring. Both can be interrupted:
+  // reopening a panel that is closing turns it around from wherever it is, instead of starting a new one.
+  const springCurve = (response, ms) => { const w = 2 * Math.PI / response, pts = [];
+    for (let i = 0; i <= 40; i++) { const t = i / 40 * ms / 1000; pts.push((1 - (1 + w * t) * Math.exp(-w * t)).toFixed(4)); }
+    return "linear(" + pts.join(",") + ")"; };
+  const PANEL_IN = springCurve(0.42, 560), PANEL_OUT = "cubic-bezier(.4,0,.7,.2)", closing = {};
+  const now3 = el => { const s = getComputedStyle(el); return { opacity: +s.opacity, scale: s.scale === "none" ? 1 : parseFloat(s.scale) || 1, translate: s.translate === "none" ? "0px 0px" : s.translate }; };
+  const away = el => el.style.getPropertyValue("--fx") + " " + el.style.getPropertyValue("--fy");
+  function showPanel(el, op, sc) {
+    const from = el._anim ? now3(el) : { opacity: op, scale: sc, translate: away(el) };
+    if (el._anim) el._anim.cancel();
+    const calm = calmMotion();
+    el._anim = el.animate([calm ? { opacity: from.opacity } : from, calm ? { opacity: 1 } : { opacity: 1, scale: 1, translate: "0px 0px" }],
+      { duration: calm ? 160 : 560, easing: calm ? "ease-out" : PANEL_IN });
+    el._anim.onfinish = () => { el._anim = null; };
+  }
   function openPanel(key) {
     if (open[key]) { refresh(key); return open[key]; }
+    if (closing[key]) { const el = closing[key]; delete closing[key]; clearTimeout(el._rm); el.classList.remove("leaving"); open[key] = el; sizeRO.observe(el); el.style.zIndex = ++zTop; refresh(key); showPanel(el); railState(); return el; }
     const P = PANELS[key], el = document.createElement("section");
     el.className = "panel lg" + (P.wide ? " wide" : "");
     el.style.zIndex = ++zTop; el.style.setProperty("--c", P.c); el.dataset.key = key;
@@ -883,8 +926,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
     el._w = el.offsetWidth; el._h = el.offsetHeight;
     const [x, y] = freeSpot(key, el._w, el._h);
     el.style.left = x + "px"; el.style.top = y + "px";
-    aim(el, x, y); el.classList.add("entering"); el.style.visibility = "";
-    el.addEventListener("animationend", e => { if (e.target === el && e.animationName === "pop") el.classList.remove("entering"); });
+    aim(el, x, y); el.style.visibility = ""; showPanel(el, 0, 0.92);
     $(".pb", el).addEventListener("scroll", () => more(el), { passive: true });
     sizeRO.observe(el); lens(el, LENS_PANEL);
     open[key] = el; railState();
@@ -917,8 +959,12 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   function closePanel(key) {
     const el = open[key]; if (!el) return; delete open[key]; railState();
     aim(el, parseFloat(el.style.left), parseFloat(el.style.top));
-    el.classList.remove("entering", "lifted"); el.classList.add("leaving"); sizeRO.unobserve(el);
-    setTimeout(() => { el.remove(); if (el._lgRO) el._lgRO.disconnect(); const f = el._lgId && document.getElementById(el._lgId); if (f) f.remove(); }, 360);
+    el.classList.remove("lifted"); el.classList.add("leaving"); sizeRO.unobserve(el); closing[key] = el;
+    const from = el._anim ? now3(el) : { opacity: 1, scale: 1, translate: "0px 0px" }, calm = calmMotion();
+    if (el._anim) el._anim.cancel();
+    el._anim = el.animate([calm ? { opacity: from.opacity } : from, calm ? { opacity: 0 } : { opacity: 0, scale: 0.94, translate: away(el) }],
+      { duration: calm ? 140 : 320, easing: calm ? "ease-in" : PANEL_OUT, fill: "forwards" });
+    el._rm = setTimeout(() => { if (closing[key] !== el) return; delete closing[key]; el.remove(); if (el._lgRO) el._lgRO.disconnect(); const f = el._lgId && document.getElementById(el._lgId); if (f) f.remove(); }, (calm ? 140 : 320) + 40);
   }
   function railState() { $$(".rail button[data-cmd]").forEach(b => b.classList.toggle("on", !!open[b.dataset.cmd])); }
   function rectOf(el) { return { x: parseFloat(el.style.left), y: parseFloat(el.style.top), w: el.offsetWidth, h: el.offsetHeight }; }
@@ -933,8 +979,20 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
     const g = 28 * CAM.z; vp.style.backgroundSize = `${g}px ${g}px`; vp.style.backgroundPosition = `${tx}px ${ty}px`;
     
   }
-  const ease = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-  function flyCam(x, y, z, dur = 1000) { ZT = null; PT.x = PT.y = 0; INR.vx = INR.vy = 0; camAnim = { f: { ...CAM }, t: { x, y, z: clampZ(z) }, s: performance.now(), dur }; }
+  // The camera flies on a critically damped spring (no overshoot): a new target mid-flight just re-aims it, and a glide in progress carries its speed into the flight.
+  const CV = { x: 0, y: 0, z: 0 }, CAM_RESPONSE = 0.55, calmMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function flyCam(x, y, z) {
+    ZT = null; PT.x = PT.y = 0;
+    if (!camAnim) { CV.x = INR.vx; CV.y = INR.vy; CV.z = 0; }
+    INR.vx = INR.vy = 0; camAnim = { t: { x, y, z: clampZ(z) } };
+    if (calmMotion()) { CAM.x = x; CAM.y = y; CAM.z = clampZ(z); camAnim = null; applyCam(); world.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 220, easing: "ease-out" }); }
+  }
+  function camSpring(dt) {
+    const w = 2 * Math.PI / CAM_RESPONSE, t = camAnim.t, n = Math.ceil(dt / 0.008), h = dt / n;
+    for (let i = 0; i < n; i++) for (const k of ["x", "y", "z"]) { CV[k] += (w * w * (t[k] - CAM[k]) - 2 * w * CV[k]) * h; CAM[k] += CV[k] * h; }
+    applyCam();
+    if (Math.hypot(t.x - CAM.x, t.y - CAM.y) * CAM.z < 0.3 && Math.hypot(CV.x, CV.y) * CAM.z < 2 && Math.abs(t.z - CAM.z) < 0.0005) { CAM.x = t.x; CAM.y = t.y; CAM.z = t.z; CV.x = CV.y = CV.z = 0; camAnim = null; applyCam(); }
+  }
   let lastBox = null;
   function frameBox(b, pad = 50) {
     lastBox = [b, pad];
@@ -1147,9 +1205,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   let last = performance.now(), T = 0, fr = 0, pAx = 0, pAy = 0, bph = 0, ftA = 0;
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000) || 0.016; last = now; T += dt; fr++; camStep(dt);
-    if (camAnim) { const k = Math.min(1, (now - camAnim.s) / camAnim.dur), e = ease(k);
-      CAM.x = camAnim.f.x + (camAnim.t.x - camAnim.f.x) * e; CAM.y = camAnim.f.y + (camAnim.t.y - camAnim.f.y) * e; CAM.z = camAnim.f.z + (camAnim.t.z - camAnim.f.z) * e;
-      applyCam(); if (k >= 1) camAnim = null; }
+    if (camAnim) camSpring(dt);
     // Allie floats on a soft spring
     const kS = 9, dS = 4.6;
     A.vx += ((A.tx - A.x) * kS - A.vx * dS) * dt; A.vy += ((A.ty - A.y) * kS - A.vy * dS) * dt;
@@ -1347,7 +1403,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
     if (key === "settings") return "Here you go.";
     return "";
   }
-  const liveVoice = () => !!(window.allie && allie.desktop) && voiceState.on && allie.hasVoice();
+  const liveVoice = () => ON_PC && voiceState.on && allie.hasVoice();
   const voiceName = "allie";
   let actx = null, analyser = null, srcNode = null, level = 0; const tdata = new Float32Array(1024), bufs = {};
   function ensureAudio() {
@@ -1497,7 +1553,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
   let rec = null, failed = false;
   /* ---------------- Desktop: live voice, always-on ears, Claude ---------------- */
   // Speaking any sentence live (Claude's answers), streamed from the offline voice and played through the same analyser.
-  const DESK = !!(window.allie && allie.desktop);
+  const DESK = ON_PC;
   let ttsId = 0, ttsAt = 0, ttsLive = new Set(), ttsDone = null;
   if (DESK) allie.onSpeech(({ id, samples, rate }) => {
     if (id !== ttsId || !actx) return;
@@ -1754,7 +1810,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
     } else if (kind === "key") {
       const k = val("k"); allie.setKey(k).then(ok => { refresh("settings"); sayLive(ok ? "Got it. I'm all ears, Jack." : "Key removed. I'll stick to the basics."); }); return;
     } else if (kind === "jobs") {
-      S.jobPrefs.what = val("what") || S.jobPrefs.what; S.jobPrefs.where = val("where") || S.jobPrefs.where; changed("jobs"); if (window.allie) allie.refreshConn(S.jobPrefs);
+      S.jobPrefs.what = val("what") || S.jobPrefs.what; S.jobPrefs.where = val("where") || S.jobPrefs.where; changed("jobs"); if (ON_PC) allie.refreshConn(S.jobPrefs);
     }
     const inp = focus && open[panel] && open[panel].querySelector(`form[data-form="${kind}"] [name="${focus}"]`);
     if (inp) inp.focus({ preventScroll: true });
@@ -1851,7 +1907,7 @@ body.asleep .ctl.mic{filter:saturate(.25) brightness(.75)}
     if (open.settings) refresh("settings");
   }
   function applyTheme(t, keep) {
-    root.dataset.theme = t; syncTheme(); if (window.allie) allie.theme(t);
+    root.dataset.theme = t; syncTheme(); if (ON_PC) allie.theme(t);
     if (keep) try { localStorage.setItem("allie.theme", t); } catch (e) {}
   }
   let savedTheme = null; try { savedTheme = localStorage.getItem("allie.theme"); } catch (e) {}

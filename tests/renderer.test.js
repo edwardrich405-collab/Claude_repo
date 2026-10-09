@@ -23,3 +23,15 @@ test("live lines stay short, and sleep doesn't explain how to wake her", () => {
   assert.doesNotMatch(lines.sleep, /hey allie|tap|moon|wake/i);
   for (const k of ["jobs", "mail", "today", "calendar", "todo", "time", "calories", "finances", "businesses"]) assert.match(h, new RegExp(`if \\(key === "${k}"\\) \\{?[\\s\\S]{0,40}`), k);
 });
+
+test("design-pass fixes stay fixed", () => {
+  const h = fs.readFileSync(path.join(R, "index.html"), "utf8");
+  // voice meter bars side by side, even though the Finances chart also uses .bars
+  assert.match(h, /\.vu \.bars\{[^}]*flex-direction:row/);
+  // connection fields use theme colours, so they show in light mode
+  assert.match(h, /\.connform input\{[^}]*background:var\(--field\)/);
+  // in a plain browser window.allie is the canvas, so desktop calls must check allie.desktop
+  assert.doesNotMatch(h, /if \(window\.allie\)|window\.allie \?/);
+  // panels animate with interruptible springs, not the old keyframes
+  assert.doesNotMatch(h, /panel\.entering|@keyframes pop\b/);
+});

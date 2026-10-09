@@ -2,6 +2,17 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.5.0 (2026-10-09)
+- Design pass using Apple's fluid-interface rules (the apple-design skill).
+- The camera now glides to a tab on a smooth spring with no overshoot. If you were already sliding the canvas, that speed carries into the move, and asking for another tab mid-flight just changes course instead of restarting.
+- Tabs grow out of Allie and shrink back into her on the same kind of spring, and a tab that's closing can be turned around mid-way instead of a second copy appearing.
+- Buttons react the instant they're pressed, with no bounce.
+- Text spacing is tuned by size: big numbers and headings are a touch tighter, small labels a touch looser.
+- Fixed: the voice meter next to the mic showed its bars stacked in a column instead of side by side.
+- Fixed: in light mode the Gmail, calendar, Stripe and PayPal fields in Settings were invisible, and some dividers too.
+- Follows Windows' accessibility settings: Reduce motion (the camera cuts instead of flying, tabs fade), Transparency effects off (solid panels) and Contrast themes (stronger lines and text).
+- Added tools/screenshots.js, which takes screenshots of the screen in dark, light and a small window for design checks.
+
 ## 0.4.2 (2026-10-09)
 - Fixed: Allie's voice was silent after 0.4.0. Inside the app the voice engine can't hand back a finished sentence, so the audio is now copied out while it's being made, like before. If speaking ever fails again it's written to allison.log.
 

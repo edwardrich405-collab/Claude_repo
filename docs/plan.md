@@ -6,7 +6,7 @@ Jack's personal assistant. Allie is a pink particle cloud on an infinite canvas,
 - Claude edits the real files in this folder. Every update is one git commit with a clear message, so any update can be undone (`git revert <id>`).
 - Before writing anything: check `git status` and `git log`. If files changed since the last release, adopt those changes first. Never overwrite a file without reading it.
 - Problems are diagnosed from evidence first: %APPDATA%\Allison\allison.log and data.json, with timestamps.
-- Run `npm test` before and after every change and add a test for each new behaviour or bug fix. UI changes get screenshots in light and dark and in a small window.
+- Run `npm test` before and after every change and add a test for each new behaviour or bug fix. UI changes follow the apple-design skill and get screenshots in light and dark and in a small window (`npx electron tools/screenshots.js`).
 - Bump the version in package.json and add a changelog entry (docs/changelog.md) every release, then tell Jack in a few lines what changed and whether to restart.
 
 ## Rules
