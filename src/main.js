@@ -103,7 +103,11 @@ function watchOwnFiles() {
   const root = path.join(__dirname, ".."); let tR = 0, tS = 0;
   const watch = (dir, fn) => { try { fs.watch(dir, { recursive: true }, (ev, f) => { if (f && !/\.(tmp|swp)$|~$/.test(f)) fn(f); }); } catch (e) { logLine("watch", dir, e.message); } };
   watch(path.join(root, "renderer"), () => { clearTimeout(tR); tR = setTimeout(() => { logLine("screen changed, reloading"); win && win.webContents.reloadIgnoringCache(); }, 400); });
-  watch(path.join(root, "src"), f => { clearTimeout(tS); tS = setTimeout(() => { logLine("app code changed", f); send("setup", { stage: "restart", file: f }); }, 600); });
+  // Windows also reports a file being read (its last-access time), so only a real change in modified time counts.
+  const src = path.join(root, "src"), stamp = f => { try { return fs.statSync(path.join(src, f)).mtimeMs; } catch (e) { return -1; } }, seen = {};
+  try { for (const f of fs.readdirSync(src)) seen[f] = stamp(f); } catch (e) {}
+  watch(src, f => { const m = stamp(f); if (seen[f] === m) return; seen[f] = m;
+    clearTimeout(tS); tS = setTimeout(() => { logLine("app code changed", f); send("setup", { stage: "restart", file: f }); }, 600); });
 }
 ipcMain.on("app:restart", () => { app.relaunch(); app.exit(0); });
 

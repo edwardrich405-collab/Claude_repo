@@ -8,6 +8,7 @@ Newest first. Plain words, so Allie can read this to explain her own updates.
 - Her first words come about half a second after she starts, using more of the processor.
 - More chill: she no longer explains what a tab is. Opening a tab gets a quick rundown of what's in it (new jobs, unread mail, what's next today, to-dos, timer, calories, money this month, edits on the go).
 - Going to sleep is just "Night." No instructions on how to wake her.
+- Fixed: "Update ready, Restart now" no longer pops up every time she starts. Windows was reporting her reading a file as a change.
 ## 0.3.0 (2026-10-09)
 - Allison now runs straight from this project folder instead of an installer. Claude edits the files here and the app picks changes up by itself.
 - Screen changes reload in place. App-code changes show "Update ready · Restart now / Later" in the top bar.
