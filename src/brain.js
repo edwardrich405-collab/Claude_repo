@@ -84,13 +84,13 @@ async function thinkLocal(text, context, onAction, fetchFn = fetch) {
   history.push({ role: "user", content: text });
   while (history.length > 16) history.shift();
   while (history.length && history[0].role !== "user") history.shift();
-  const msgs = [{ role: "system", content: SYSTEM + "\nYou can't search the web right now; if he asks for something current, say so in a sentence." }]
+  const msgs = [{ role: "system", content: SYSTEM + "\nAnswer general questions from what you know. You can't search the web right now, so only for live things (news, prices, weather, today's scores) say you can't check. /no_think" }]
     .concat(history.slice(0, -1), { role: "user", content: `${text}\n\n<app_state>\n${context}\n</app_state>` });
-  const say = s => { s = String(s || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim() || "Done."; history.push({ role: "assistant", content: s }); return s; };
+  const say = s => { s = String(s || "").replace(/^[\s\S]*<\/think>/, "").replace(/<think>[\s\S]*$/, "").trim() || "Done."; history.push({ role: "assistant", content: s }); return s; };
   for (let turn = 0; turn < 6; turn++) {
     let res;
     try { res = await fetchFn(LOCAL.url + "/api/chat", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model: LOCAL.model, messages: msgs, tools: LOCAL_TOOLS, stream: false, think: false, keep_alive: "30m", options: { temperature: 0.6 } }) }); }
+      body: JSON.stringify({ model: LOCAL.model, messages: msgs, tools: LOCAL_TOOLS, stream: false, think: false, keep_alive: "30m", options: { temperature: 0.7, num_ctx: 8192 } }) }); }
     catch (e) { throw new Error("local model offline: " + e.message); }
     if (!res.ok) throw new Error("local model offline: " + res.status + " " + (await res.text()).slice(0, 200));
     const m = (await res.json()).message || {}, calls = m.tool_calls || [];
