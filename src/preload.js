@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("allie", {
   onAct: on("act"),
   actDone: (id, result) => ipcRenderer.send("act:done", { id, result }),
   hasVoice: () => ipcRenderer.sendSync("tts:has"),
+  hasEars: () => ipcRenderer.sendSync("asr:has"),
   speak: (id, text) => ipcRenderer.invoke("tts:speak", { id, text }),
   onSpeech: on("tts:chunk"),
   cancelSpeech: () => ipcRenderer.send("tts:cancel"),

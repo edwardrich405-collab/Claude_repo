@@ -42,7 +42,7 @@ test("the world: only sleep, settings, home, chat, stop and thinking stay fixed;
   assert.match(chrome, /id="think"/);
   assert.doesNotMatch(h, /id="mic"|class="rail"/);
   // Allie stops when Jack talks over her (not on her own echo), and a stop button shows while she talks
-  assert.match(h, /if \(w\.length < 2 \|\| own \/ w\.length >= 0\.5\) return;\n\s*stopTalking\(\);/);
+  assert.match(h, /if \(w\.length < 2 \|\| own \/ w\.length >= 0\.5\) return;\r?\n\s*stopTalking\(\);/);
   assert.match(h, /sb\.hidden = !b/);
   // the sea, the boat and Allie's body live in sea.js, loaded before the page script
   assert.match(h, /<script src="sea.js"><\/script>/);

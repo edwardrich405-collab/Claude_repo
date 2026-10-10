@@ -70,4 +70,4 @@ function hear(samples, onText) {
 }
 function resetEars() { if (rec) { rec.reset(stream); heard = ""; } }
 
-module.exports = { loadTts, loadAsr, speak, cancel, hear, resetEars, sampleRate: () => (tts ? tts.sampleRate : 24000), hasTts: () => !!tts, VOICE, _useTts: t => { tts = t; } };
+module.exports = { loadTts, loadAsr, speak, cancel, hear, resetEars, sampleRate: () => (tts ? tts.sampleRate : 24000), hasTts: () => !!tts, hasAsr: () => !!rec, VOICE, _useTts: t => { tts = t; } };

@@ -64,6 +64,7 @@ ipcMain.handle("tts:speak", async (e, { id, text }) => {
 });
 ipcMain.on("tts:cancel", () => voice.cancel());
 ipcMain.on("tts:has", e => { e.returnValue = voice.hasTts(); });
+ipcMain.on("asr:has", e => { e.returnValue = voice.hasAsr(); });
 ipcMain.on("mic:pcm", (e, buf) => voice.hear(new Float32Array(buf), r => send("mic:heard", r)));
 ipcMain.on("mic:reset", () => voice.resetEars());
 // Models the screen needs (the boat), read from renderer/models. Only plain file names, nothing outside that folder.

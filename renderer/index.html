@@ -2269,6 +2269,8 @@ body.at-home .dock > :not(.controls){display:none}
       else if (s.stage === "restart") { chipS.hidden = false; chipS.innerHTML = 'Update ready <button type="button" class="link" data-restart>Restart now</button> <button type="button" class="link" data-later>Later</button>'; }
       else if (s.stage === "error") { chipS.hidden = false; chipS.textContent = s.what === "voice" ? "Voice download failed · restart to retry" : "Couldn't start listening"; chipS.title = s.detail || ""; }
     });
+    // The page can reload after the ears finished loading (a screen update), so it doesn't wait to be told.
+    if (allie.hasEars()) startEars();
   }
   sizeScene(); setHere("home"); goHome(true); island(); syncSleep(); restoreChat();
   const hr = new Date().getHours();
