@@ -184,6 +184,10 @@ palette.
 ## A GPU gotcha (fixed in 0.11.1)
 On Jack's Windows GPU, `pow()` of a tiny negative number returns NaN, and the bloom blur spreads one NaN pixel into big
 dark circles. Always clamp `pow` bases (`pow(max(x,0.),k)`). `BLUR_FS` and `FINAL_FS` also drop NaN pixels as a backstop.
+That wasn't the whole story (0.11.2): `beam()` worked on the raw, unnormalized view ray (length ~ focal length), so its
+closest-approach maths cancelled out badly. It now normalizes the ray and caps its reach, returns 0 for any NaN/inf,
+and `WATER_FS` and `ASCII_FS` sanitize their inputs/outputs: a NaN brightness makes the ASCII pass print blank cells,
+which is what Jack saw. Keep ray maths on unit vectors.
 SwiftShader (the screenshot tool) doesn't show this, so check on the real PC.
 
 ## A bug fixed in 0.10.0

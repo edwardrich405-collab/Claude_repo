@@ -572,18 +572,21 @@ float sky(vec3 R,out float cloud){
   return l;
 }
 // The lighthouse beam: two shafts of light turning slowly from the lamp. How close does this pixel's ray pass to them?
-float beam(vec3 C,vec3 d,float tMax){
+// Worked with a unit-length ray and a capped reach, so nothing overflows or cancels out on any GPU (an unnormalized
+// ray made some Windows GPUs return NaN, which blanked big patches of the screen wherever the beam pointed).
+float beam(vec3 C,vec3 d0,float tMax){
   if(uBeam<=0.) return 0.;
+  float dl=length(d0); vec3 d=d0/dl; tMax=min(tMax*dl,60000.);
   float b=0.;
   for(int k=0;k<2;k++){
     float a=uBeamA+float(k)*3.14159; vec3 bd=normalize(vec3(sin(a),-.02,cos(a)));
-    vec3 w0=C-uBeamP; float A=dot(d,d),Bq=dot(d,bd),D=dot(d,w0),E=dot(bd,w0),den=A-Bq*Bq;
-    if(abs(den)<1e-6) continue;
+    vec3 w0=C-uBeamP; float A=dot(d,d),Bq=dot(d,bd),D=dot(d,w0),E=dot(bd,w0),den=max(1.-Bq*Bq,0.);
+    if(den<1e-5) continue;
     float t=clamp((Bq*E-D)/den,0.,tMax), s=clamp((A*E-Bq*D)/den,0.,2600.);
     float dist=length(w0+t*d-s*bd), r=7.+s*.09;
     b+=exp(-dist*dist/(r*r))*pow(max(1.-s/2600.,0.),1.6)*(.4+.6*exp(-s/500.));
   }
-  return b*uBeam;
+  b*=uBeam; return isnan(b)||isinf(b)||!(b<1e6)?0.:b;
 }
 void main(){
   vec2 px=gl_FragCoord.xy/uRes, sp=px*uScr-uScr*.5;
@@ -624,6 +627,7 @@ void main(){
   l+=bm*.8;
   // far out, the sea melts into the haze at the horizon
   l=mix(l,uSkyHor*.9,smoothstep(6000.,34000.,dist));
+  if(isnan(l)||isinf(l)) l=0.; // never hand the ASCII pass a NaN: it would print blank cells
   o=vec4(l,foam*.45*mix(1.,.65,1.-sh),0.,1.);
 }`;
   // Turns the scene into ASCII: each small cell becomes a pixel-font character picked by how bright it is, coloured from
@@ -638,6 +642,7 @@ vec3 lit(vec3 c){return aces(c*uExp)*uBoatTint;}
 void main(){
   vec2 fc=gl_FragCoord.xy, cell=floor(fc/uCell), inC=fract(fc/uCell), cuv=(cell+.5)*uCell/uRes, uv=fc/uRes;
   vec4 s=texture(uImg,cuv), px=texture(uImg,uv);
+  if(any(isnan(s))||any(isinf(s))) s=vec4(0.,0.,0.,1.); if(any(isnan(px))||any(isinf(px))) px=vec4(0.,0.,0.,1.);
   float asp=uRes.x/uRes.y, vig=mix(.55,1.,smoothstep(1.35,.35,length((cuv-.5)*vec2(1.25,1.))));
   vec2 gd=(cuv-uGlow)*vec2(asp,1.); float glow=uGlowAmt*exp(-dot(gd,gd)/.3);
   float l=(s.a>.5?s.r:luma(lit(s.rgb))*1.1)*vig*uDim+glow;

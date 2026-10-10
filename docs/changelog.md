@@ -2,6 +2,9 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.11.2 (2026-10-10)
+- Fixed for real: patches of the screen going flat and blank wherever the lighthouse beam pointed. The beam's maths ran on a very long, un-shortened ray, which some graphics cards couldn't handle; it now works on a unit-length ray with a capped reach. The water and character passes also refuse any broken value, so a bad pixel can never blank the screen again.
+
 ## 0.11.1 (2026-10-10)
 - Fixed: big dark circles that wiped out the sea and followed the lighthouse beam on some PCs. The beam's maths could hand the graphics card a "not a number" at its far end, and the glow pass smeared it into circles. The beam is fixed and the glow and final passes now skip any such pixel.
 
