@@ -25,3 +25,10 @@ test("mode switch", () => {
   brain.setMode("local"); assert.strictEqual(brain.getMode(), "local"); assert.ok(brain.ready());
   brain.setMode("nonsense"); assert.strictEqual(brain.getMode(), "claude");
 });
+
+test("Allie can take Jack to every place, the workbench included", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "src", "brain.js"), "utf8");
+  const m = src.match(/tool\("go_to"[\s\S]*?enum: (\[[^\]]*\])/);
+  assert.ok(m, "go_to tool");
+  assert.deepStrictEqual(JSON.parse(m[1]), ["home", "life", "studio", "journal", "craft"]);
+});

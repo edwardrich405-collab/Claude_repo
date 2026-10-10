@@ -70,9 +70,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .panel.leaving{pointer-events:none}
 .panel::after{content:"";position:absolute;left:8%;right:8%;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--mint-dim),transparent);opacity:.6;pointer-events:none}
 .panel.glow{box-shadow:inset 0 1px 0 var(--panel-hi),0 30px 70px var(--shadow-panel),0 0 0 1px var(--mint-dim),0 0 80px var(--sea-glow)}
-.panel.lifted{box-shadow:inset 0 1px 0 var(--panel-hi),0 44px 90px var(--shadow-panel),0 0 0 1px var(--mint-dim)}
-.ph{position:relative;display:flex;align-items:flex-start;gap:12px;padding:18px 16px 12px 20px;cursor:grab;user-select:none}
-.ph:active{cursor:grabbing}
+.ph{position:relative;display:flex;align-items:flex-start;gap:12px;padding:18px 16px 12px 20px;user-select:none}
 .ph .ic{width:34px;height:34px;display:grid;place-items:center;color:var(--c,var(--mint));flex:none;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--c,var(--mint)) 45%,transparent))}
 .ph .ic svg{width:30px;height:30px;stroke-width:1.8}
 .ph .tt{flex:1;min-width:0}
@@ -183,15 +181,87 @@ textarea.draft:focus{border-color:var(--blue)}
   box-shadow:inset 0 1px 0 var(--panel-hi),0 8px 20px var(--shadow),0 0 22px color-mix(in srgb,var(--c) 22%,transparent);
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:transform .35s var(--spring),box-shadow .3s}
 .float i svg{width:22px;height:22px;stroke-width:1.8;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--c) 55%,transparent))}
-.float span{font:500 10.5px/1 var(--mono);letter-spacing:.02em;white-space:nowrap;color:var(--label-2);text-shadow:0 1px 3px var(--cap-shadow),0 0 10px var(--cap-shadow)}
+.float span{font:500 11px/1 var(--mono);letter-spacing:.02em;white-space:nowrap;color:var(--mint);padding:4px 7px;border-radius:4px;
+  background:color-mix(in srgb,var(--bg) 72%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--mint) 22%,transparent);text-shadow:0 0 8px var(--sea-glow)}
+.float span::before{content:"[ "}.float span::after{content:" ]"}
 .float:hover i,.float:focus-visible i{transform:translateY(-3px) scale(1.06);box-shadow:inset 0 1px 0 var(--panel-hi),0 12px 26px var(--shadow),0 0 30px color-mix(in srgb,var(--c) 45%,transparent)}
-.float:hover span{color:var(--label)}
+.float:hover span{background:var(--mint);color:var(--bg);text-shadow:none}
 .float:active i{transform:scale(.94);transition-duration:.08s}
 .float.on i{border-color:var(--c);box-shadow:inset 0 1px 0 var(--panel-hi),0 0 0 2px color-mix(in srgb,var(--c) 35%,transparent),0 0 30px color-mix(in srgb,var(--c) 40%,transparent)}
 .float.live span{color:var(--pink)}
 .float.live i::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--pink);opacity:.7;animation:pulse 1.6s ease-out infinite}
 @keyframes pulse{from{transform:scale(.9);opacity:.8}to{transform:scale(1.25);opacity:0}}
-:root[data-theme="light"] .float span{color:#f7f5e3;text-shadow:0 1px 4px rgba(10,40,26,.7)}
+:root[data-theme="light"] .float span{color:#f7f5e3;background:rgba(18,60,42,.55);box-shadow:inset 0 0 0 1px rgba(247,245,227,.25);text-shadow:none}
+:root[data-theme="light"] .float:hover span{background:#f7f5e3;color:#173a2b}
+/* A tab out on the water: a wrapper carries its 3D placement, the panel inside animates on its own. */
+.tabw{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;align-items:center;gap:12px}
+.tabw > .panel{position:relative;left:auto;top:auto}
+.tabw.back > .panel > *,.tabw.back .grab{visibility:hidden}
+.tabw.lifted > .panel{box-shadow:inset 0 1px 0 var(--panel-hi),0 44px 90px var(--shadow-panel),0 0 0 1px var(--mint-dim)}
+/* The grab bar under a tab: drag it to carry the tab somewhere else on the water. */
+.grab{width:150px;height:26px;border:0;background:none;padding:0;display:grid;place-items:center;cursor:grab;touch-action:none}
+.grab i{display:block;width:92px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--label) 34%,transparent);box-shadow:0 0 12px var(--sea-glow);transition:width .3s var(--spring),background .2s}
+.grab:hover i,.grab:focus-visible i,.tabw.lifted .grab i{width:124px;background:color-mix(in srgb,var(--label) 80%,transparent)}
+.tabw.lifted .grab{cursor:grabbing}
+/* Settings: a sheet on the right, in front of everything on the water. */
+#sheet{position:fixed;inset:0;z-index:4550;pointer-events:none}
+body.sheet-open .dock{left:calc((100vw - 472px)/2);width:min(640px,calc(100vw - 504px))}
+@media (max-width:760px){body.sheet-open .dock{left:50%;width:calc(100% - 32px)}}
+.panel.sheet{position:fixed;left:auto;top:calc(env(safe-area-inset-top,0px) + 66px);right:16px;width:min(440px,calc(100vw - 32px));max-height:calc(100vh - 176px);display:flex;flex-direction:column;pointer-events:auto;transform-origin:100% 50%}
+.panel.sheet .pb{max-height:none;flex:1 1 auto;min-height:0}
+#settings[aria-pressed="true"]{color:var(--mint);box-shadow:inset 0 1px 0 var(--panel-hi),0 0 0 1px var(--mint-dim),0 0 22px var(--sea-glow)}
+/* The workbench mat lies on the desk in build mode; widgets get cards on it. */
+.bench-mat{position:absolute;left:0;top:0;width:760px;min-height:400px;transform-origin:0 0;z-index:3960;padding:22px 26px;border-radius:10px;
+  background:linear-gradient(180deg,rgba(28,46,44,.9),rgba(18,32,32,.92));border:1px solid rgba(165,235,220,.22);
+  box-shadow:inset 0 0 0 6px rgba(0,0,0,.12),inset 0 1px 0 rgba(210,255,245,.12);color:#dff2ec;transition:opacity .3s;
+  background-image:linear-gradient(rgba(165,235,220,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(165,235,220,.07) 1px,transparent 1px),linear-gradient(180deg,rgba(28,46,44,.92),rgba(18,32,32,.94));background-size:28px 28px,28px 28px,auto}
+:root[data-theme="light"] .bench-mat{background-image:linear-gradient(rgba(20,62,46,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(20,62,46,.08) 1px,transparent 1px),linear-gradient(180deg,#eef0e2,#e2e6d4);color:#173a2b;border-color:rgba(20,62,46,.2)}
+.bench-mat.away{opacity:0}
+.bench-mat header{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
+.bench-mat header b{font:600 22px var(--mono)}.bench-mat header small{font:12px var(--mono);opacity:.6}
+.bench-mat .bm-done{margin-left:auto}
+.bm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.bm-card{border-radius:12px;padding:12px 14px;background:var(--panel-a);border:1px solid var(--panel-rim);box-shadow:0 10px 24px var(--shadow)}
+.bm-card h3{margin:0 0 8px;font:600 14px var(--mono)}
+.bm-empty{margin:60px auto 0;max-width:440px;text-align:center;font:14px/1.6 var(--mono);opacity:.75}
+.bm-empty code{font:inherit;padding:1px 6px;border-radius:4px;background:rgba(127,127,127,.18)}
+/* Labels over the places you can go: click one to sail there. */
+#places{position:absolute;left:0;top:0;width:0;height:0;z-index:3950}
+.place{position:absolute;left:0;top:0;border:0;background:none;padding:0;cursor:pointer;font:600 12.5px/1 var(--mono);letter-spacing:.04em;color:var(--mint);white-space:nowrap}
+.place span{display:inline-block;padding:6px 10px;border-radius:5px;background:color-mix(in srgb,var(--bg) 70%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--mint) 30%,transparent),0 0 22px var(--sea-glow);transition:background .2s,color .2s}
+.place span::before{content:"[ "}.place span::after{content:" ]"}
+.place:hover span,.place:focus-visible span{background:var(--mint);color:var(--bg)}
+:root[data-theme="light"] .place{color:#f7f5e3}
+:root[data-theme="light"] .place span{background:rgba(18,60,42,.55);box-shadow:inset 0 0 0 1px rgba(247,245,227,.3)}
+#home[aria-pressed="true"]{color:var(--mint)}
+/* The chat on the beach: the conversation with Allie, out only at home. */
+.chatlog{position:fixed;right:16px;top:calc(env(safe-area-inset-top,0px) + 66px);bottom:24px;width:min(400px,calc(100vw - 32px));z-index:4560;display:none;flex-direction:column;border-radius:16px;
+  background:linear-gradient(180deg,var(--panel-a),var(--panel-b));border:1px solid var(--panel-rim);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);
+  box-shadow:inset 0 1px 0 var(--panel-hi),0 30px 70px var(--shadow-panel);animation:rise .4s var(--spring)}
+body.at-home .chatlog{display:flex}
+/* closed: just the input line, centred near the bottom */
+.chatlog:not(.open){top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);right:auto;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));border-radius:999px;animation:none}
+.chatlog:not(.open) .cl-h,.chatlog:not(.open) .cl-list,.chatlog:not(.open) .cl-min{display:none}
+.chatlog:not(.open) .cl-in{border-top:0;padding:6px 6px 6px 18px}
+.chatlog.open{animation:rise .35s var(--spring)}
+.cl-min{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:0;background:none;color:var(--label-3);font:600 18px/1 var(--font);display:grid;place-items:center}
+.cl-min:hover{background:var(--fill);color:var(--label)}
+body.at-home.sheet-open .chatlog{display:none}
+body.at-home .dock .captions,body.at-home .dock .controls,body.at-home #bar{display:none}
+body.at-home .dock{display:none}
+.cl-h{display:flex;align-items:baseline;gap:10px;padding:16px 18px 10px;border-bottom:1px solid var(--hair)}
+.cl-h b{font:600 18px var(--mono);letter-spacing:.01em}
+.cl-h small{font-size:12.5px;color:var(--label-3)}
+.cl-list{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:8px;scrollbar-width:none}
+.cl-list::-webkit-scrollbar{display:none}
+.msg{max-width:86%;padding:9px 13px;border-radius:14px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;animation:rise .35s var(--spring)}
+.msg.allie{align-self:flex-start;background:var(--fill-2);border:1px solid var(--hair);border-bottom-left-radius:5px}
+.msg.you{align-self:flex-end;background:color-mix(in srgb,var(--mint) 22%,transparent);border:1px solid color-mix(in srgb,var(--mint) 30%,transparent);border-bottom-right-radius:5px}
+.cl-sep{align-self:center;font:11px var(--mono);color:var(--label-3);padding:2px 0 6px}
+.cl-in{display:flex;gap:8px;align-items:center;padding:10px 10px 10px 14px;border-top:1px solid var(--hair)}
+.cl-in input{flex:1;min-width:0;border:0;background:none;outline:none;font:14.5px var(--mono);color:var(--label);padding:8px 0}
+.cl-in input::placeholder{color:var(--label-3)}
+@media (max-width:760px){body.at-home .dock{left:50%;width:calc(100% - 32px)}.chatlog{top:auto;height:46vh}}
 /* Allie asleep: little z's drifting up from her */
 #zzz{position:absolute;left:0;top:0;z-index:4001;pointer-events:none;font:700 14px var(--mono);color:#b6f0e2;text-shadow:0 0 8px rgba(120,230,205,.6)}
 :root[data-theme="light"] #zzz{color:#fbf8de;text-shadow:0 1px 4px rgba(10,40,26,.6)}
@@ -213,14 +283,14 @@ textarea.draft:focus{border-color:var(--blue)}
 #sleep[aria-pressed="true"] .i{fill:currentColor}
 .chip.setup{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:999px;background:var(--mat);border:1px solid var(--panel-rim);font:12px var(--mono);color:var(--label-2);white-space:nowrap}
 .link{background:none;border:0;padding:0;color:var(--pink);font:inherit;font-size:12px;cursor:pointer}
-.hint{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);z-index:4600;font:12px var(--mono);color:var(--label-3);pointer-events:none;white-space:nowrap;transition:opacity .8s;text-shadow:0 0 6px var(--cap-shadow)}
+.hint{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);z-index:4600;font:12px var(--mono);color:var(--label-3);pointer-events:none;white-space:normal;text-align:center;max-width:calc(100vw - 280px);transition:opacity .8s;text-shadow:0 0 6px var(--cap-shadow)}
 
 .scrim{position:fixed;left:0;right:0;bottom:0;height:260px;z-index:4100;pointer-events:none;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg) 70%,transparent))}
 .dock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);width:min(640px,calc(100% - 32px));z-index:4600;display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none}
 .dock > *{pointer-events:auto}
 .captions{text-align:center;max-width:600px;pointer-events:none;min-height:24px;text-shadow:0 1px 3px var(--cap-shadow),0 0 24px var(--cap-shadow)}
-.cap-user{font:13px var(--mono);color:var(--label-2);margin-bottom:6px;min-height:1px}
-.cap-allie{font-size:20px;font-weight:500;letter-spacing:-.02em;line-height:1.35;text-wrap:balance;color:var(--label)}
+.cap-user{font:12px var(--mono);color:var(--label-2);margin-bottom:4px;min-height:1px}
+.cap-allie{font-size:15.5px;font-weight:500;letter-spacing:-.01em;line-height:1.4;text-wrap:balance;color:var(--label)}
 .cap-allie .w{display:inline-block;opacity:0;filter:blur(6px);transform:translateY(5px);transition:opacity .5s var(--ease-out),filter .5s var(--ease-out),transform .5s var(--ease-out)}
 .cap-allie .w.on{opacity:1;filter:none;transform:none}
 :root[data-theme="light"] .captions{color:#f6f5e4}
@@ -242,7 +312,7 @@ textarea.draft:focus{border-color:var(--blue)}
 .think{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:999px;font:12.5px var(--mono);color:var(--mint);background:var(--mat);border:1px solid var(--panel-rim);box-shadow:0 0 22px var(--sea-glow);animation:rise .3s var(--spring)}
 .think .spin{width:1ch;display:inline-block}
 
-@media (max-width:700px){.cap-allie{font-size:17px}.float{font-size:12px}}
+@media (max-width:700px){.cap-allie{font-size:14.5px}.float{font-size:12px}}
 @media (prefers-reduced-motion:reduce){.cap-allie .w{transition:none;filter:none}.bar-input,.think{animation:none}}
 @media (prefers-reduced-transparency:reduce){
   .panel,.fx,.bar-input,.think,.chip.setup{background:var(--mat-strong)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
@@ -480,6 +550,9 @@ textarea.draft:focus{border-color:var(--blue)}
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5M6.5 10v9h11v-9M10 19v-5h4v5"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M8 5v14M16 5v14M3.5 9.5H8M3.5 14.5H8M16 9.5h4.5M16 14.5h4.5"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5c.6 4.2 2.3 5.9 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.6 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.7 1 2.4 2.5 2.7-1.5.3-2.2 1-2.5 2.7-.3-1.7-1-2.4-2.5-2.7 1.5-.3 2.2-1 2.5-2.7z"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></symbol>
 
   <symbol id="i-today" viewBox="0 0 24 24"><path d="M4 18h16M7 18a5 5 0 0 1 10 0M12 6v3M5.6 9.6l1.8 1.8M18.4 9.6l-1.8 1.8"/></symbol>
@@ -496,7 +569,12 @@ textarea.draft:focus{border-color:var(--blue)}
   <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fe6d4"/><stop offset="1" stop-color="#ef7fa3"/></linearGradient>
 </defs></svg>
 
-<div id="viewport"><canvas id="sea" aria-hidden="true"></canvas><div id="floats"></div><div id="world"></div><canvas id="bird" aria-hidden="true"></canvas><div id="zzz" hidden aria-hidden="true"><b>z</b><b>Z</b><b>z</b></div></div>
+<div id="viewport"><canvas id="sea" aria-hidden="true"></canvas><div id="places"></div>
+<section id="bench" class="bench-mat" hidden aria-label="Workbench">
+  <header><b>workbench</b><small>build mode</small><button type="button" class="btn bm-done">Done</button></header>
+  <div class="bm-grid"></div>
+  <p class="bm-empty">Nothing built yet. Widgets you make with Claude go in <code>renderer/widgets</code> and show up here.</p>
+</section><div id="floats"></div><div id="world"></div><canvas id="bird" aria-hidden="true"></canvas><div id="zzz" hidden aria-hidden="true"><b>z</b><b>Z</b><b>z</b></div></div>
 
 
 <style>
@@ -519,9 +597,18 @@ textarea.draft:focus{border-color:var(--blue)}
 <div class="dragbar"></div>
 <header class="top">
   <button class="fx" id="sleep" type="button" aria-pressed="false" aria-label="Put Allie to sleep" title="Sleep"><svg class="i"><use href="#i-moon"/></svg></button>
+  <button class="fx" id="settings" type="button" aria-pressed="false" aria-label="Settings" title="Settings"><svg class="i"><use href="#i-gear"/></svg></button>
+  <button class="fx" id="home" type="button" aria-pressed="true" aria-label="Back to the beach" title="Home"><svg class="i"><use href="#i-home"/></svg></button>
 </header>
-<div class="hint" id="hint">drag to sail · scroll to zoom · double-click the water to go home</div>
+<div id="sheet"></div>
+<div class="hint" id="hint">drag to look around · scroll to zoom · ← → between tabs · say “take me to my life”</div>
 
+<section class="chatlog" id="chatlog" aria-label="Chat with Allie">
+  <div class="cl-h"><b>Allie</b><small>on the shore</small></div>
+  <div class="cl-list" id="cl-list" aria-live="polite"></div>
+  <button type="button" class="cl-min" id="cl-min" aria-label="Shrink the chat" title="Shrink">–</button>
+  <form class="cl-in" id="cl-form" autocomplete="off"><input id="cl-ask" type="text" placeholder="Ask me anything, or say take me to my life" aria-label="Message Allie"><button class="round send" type="submit" aria-label="Send"><svg class="i"><use href="#i-up"/></svg></button></form>
+</section>
 <div class="scrim" aria-hidden="true"></div>
 <div class="dock">
   <div class="think" id="think" hidden role="status" aria-label="Allie is thinking"><span class="spin" aria-hidden="true">⠋</span>thinking</div>
@@ -540,6 +627,7 @@ textarea.draft:focus{border-color:var(--blue)}
 
 <script src="voices.js"></script>
 <script src="sea.js"></script>
+<script src="widgets/index.js"></script>
 <script>
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
@@ -576,7 +664,7 @@ textarea.draft:focus{border-color:var(--blue)}
   const uid = () => ++S.next;
   let freshId = 0;
   // Each panel that shows a piece of your data redraws when that data changes, so everything stays in step.
-  const DEPS = { todos: ["today", "todo", "calendar"], events: ["today", "calendar"], time: ["time", "today", "businesses"], food: ["calories", "today"], weight: ["calories"], money: ["finances"], biz: ["businesses"], jobs: ["jobs"] };
+  const DEPS = { todos: ["today", "todo", "calendar"], events: ["today", "calendar"], time: ["time", "today", "businesses", "editing"], food: ["calories", "today"], weight: ["calories"], money: ["finances"], biz: ["businesses", "editing", "influencer"], jobs: ["jobs"] };
   function changed(...what) { save(); new Set(what.flatMap(w => DEPS[w])).forEach(refresh); island(); clearTimeout(changed.t); changed.t = setTimeout(() => { freshId = 0; }, 900); }
 
   const fmtT = t => { const [h, m] = t.split(":").map(Number); return `${(h % 12) || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`; };
@@ -625,9 +713,11 @@ textarea.draft:focus{border-color:var(--blue)}
     today:      { x: -740,  y: -562, title: "Today", ic: "today", c: "#ff4fa8" },
     calendar:   { x: -1199, y: -222, title: "Calendar", sub: "Events, and to-dos with a date", ic: "cal", c: "var(--red)" },
     todo:       { x: 311,   y: 385,  title: "To-do", ic: "check", c: "var(--orange)" },
-    time:       { x: 740,   y: 414,  title: "Work timer", sub: "What you worked on, and for how long", ic: "timer", c: "var(--edit)" },
+    time:       { x: 740,   y: 414,  title: "Clock", sub: "What you worked on, and for how long", ic: "timer", c: "var(--edit)" },
     calories:   { x: -414,  y: 474,  title: "Calories", ic: "flame", c: "#ff6b3d" },
     businesses: { x: -1000, y: 380,  title: "Businesses", sub: "Video editing and your AI influencer", ic: "brief", c: "var(--ugc)", wide: true },
+    editing:    { title: "Video editing", sub: "Your edits, from brief to delivered", ic: "film", c: "var(--edit)", wide: true },
+    influencer: { title: "AI influencer", sub: "Characters, workflows and the numbers", ic: "spark", c: "var(--ugc)", wide: true },
     finances:   { x: -873,  y: -60,  title: "Finances", sub: "Money in and out, without your bank login", ic: "wallet", c: "var(--green)" },
     jobs:       { x: 1051,  y: 89,   title: "3D animation jobs", sub: "Fresh postings every morning", ic: "cube", c: "var(--jobs)" },
     settings:   { x: -311,  y: 814,  title: "Settings", sub: "How Allie behaves and looks", ic: "gear", c: "var(--gray)" }
@@ -754,6 +844,11 @@ textarea.draft:focus{border-color:var(--blue)}
         ${wHtml}
         <form class="add" data-form="weight"><input name="w" type="number" step="0.1" min="20" max="700" inputmode="decimal" placeholder="Today's weight in ${u}" aria-label="Today's weight"><button class="btn primary">Log</button></form>`;
     }
+    // the studio's two tabs are the old Businesses tab's two halves, without its switch
+    if (key === "editing" || key === "influencer") {
+      const keep = bizTab; bizTab = key === "editing" ? "edit" : "ugc";
+      const h = body("businesses").replace(/^<div class="seg">[\s\S]*?<\/div>/, ""); bizTab = keep; return h;
+    }
     if (key === "businesses") {
       const tabs = `<div class="seg">${[["edit", "Video editing"], ["ugc", "AI influencer"]].map(([k, n]) => `<button type="button" data-biz="${k}" aria-pressed="${bizTab === k}">${n}</button>`).join("")}</div>`;
       if (bizTab === "edit") {
@@ -832,34 +927,63 @@ textarea.draft:focus{border-color:var(--blue)}
     el._anim.onfinish = () => { el._anim = null; };
   }
 
-  /* ---------------- The bay: where tabs stand on the water ---------------- */
-  // World units match screen pixels when something is FOC away from the camera. The water is y = 0, x runs right,
-  // z runs toward you. Panels are billboards standing H0 above the water, so they always face you and stay readable.
-  const H0 = 34;
-  const SLOT = {
-    today:      { x: -720,  z: -520 },
-    mail:       { x: 60,    z: -860 },
-    todo:       { x: 800,   z: -520 },
-    calendar:   { x: -1220, z: -40 },
-    time:       { x: 1240,  z: -20 },
-    calories:   { x: -840,  z: 500 },
-    settings:   { x: 860,   z: 540 },
-    businesses: { x: -560,  z: -1240 },
-    finances:   { x: -1560, z: -760 },
-    jobs:       { x: 700,   z: -1300 }
+  /* ---------------- Places: the beach, the boat, the lighthouse and the bottle ---------------- */
+  // The water is y = 0. Home is the beach: the camera stands on the sand looking out to sea, with the boat (My Life)
+  // ahead, the lighthouse island (Studio) off to the left and a bottle (the journal) drifting near it.
+  const SHORE = 2300;
+  const PLACES = {
+    home:    { label: "home", x: 0, z: SHORE - 450 },
+    life:    { label: "my life", x: 0, z: 0, ring: 450, keys: ["today", "mail", "calendar", "todo", "calories"] },
+    studio:  { label: "studio", x: -1750, z: -1500, ring: 760, keys: ["editing", "influencer", "time", "finances", "jobs"] },
+    journal: { label: "journal", x: -1180, z: -860 },
+    // the workbench on its terrace by the lighthouse, facing out from the island
+    craft:   { label: "workbench", x: -1750 + AllieSea.TERRACE.x, z: -1500 + AllieSea.TERRACE.z, y: AllieSea.TERRACE.h, yaw: Math.atan2(AllieSea.TERRACE.x, AllieSea.TERRACE.z) }
   };
+  const POST = [-170, 0, SHORE + 60];
+  const TABPLACE = {}; for (const p in PLACES) for (const k of PLACES[p].keys || []) TABPLACE[k] = p;
+  // the first tab of a ring faces the beach, so it's the one you see as you arrive from home
+  for (const p in PLACES) PLACES[p].a0 = p === "life" ? 0 : Math.atan2(PLACES.home.x - PLACES[p].x, PLACES.home.z - PLACES[p].z);
+  let HERE = "home", PIV = PLACES.home;
+
+  /* ---------------- The rings: tabs stand above their buttons, facing outward ---------------- */
+  // Each place has a ring of floating buttons around it, and a tab opens standing just above its button, facing out,
+  // so as you circle round you see each tab face on. A tab is TAB_K world units per pixel: it looks pixel-sharp when the
+  // camera is FOC * TAB_K in front of it.
+  const H0 = 165, TAB_K = 0.55;
+  const placeOf = key => PLACES[TABPLACE[key] || "life"];
+  const ringAngle = key => { const P = placeOf(key), i = Math.max(0, P.keys.indexOf(key)); return P.a0 + i / P.keys.length * 2 * Math.PI; };
+  const tabAngle = el => Math.atan2(el._wx - el._px, el._wz - el._pz);
+  const isTab = el => el && !el._fixed && el._w;
+  // Tabs moved with their grab bar stay where you put them (on this PC).
+  let PLACED = {}; try { PLACED = JSON.parse(localStorage.getItem("allie.tabs") || "{}") || {}; } catch (e) {}
+  const savePlaced = () => { try { localStorage.setItem("allie.tabs", JSON.stringify(PLACED)); } catch (e) {} };
+  function homeSpot(key) {
+    const p = PLACED[key]; if (p && isFinite(p.x) && isFinite(p.z)) return [p.x, p.z];
+    const P = placeOf(key), a = ringAngle(key); return [P.x + Math.sin(a) * P.ring, P.z + Math.cos(a) * P.ring];
+  }
+  // A tab's frame: right (r), up (u) and the way it faces (n). It turns to face out from the boat and leans back to
+  // meet the camera's tilt, so it reads cleanly face on.
+  function tabFrame(el, b) {
+    const a = tabAngle(el), sa = Math.sin(a), ca = Math.cos(a);
+    return { a, r: [ca, 0, -sa], u: [-b.sp * sa, b.cp, -b.sp * ca], n: [b.cp * sa, b.sp, b.cp * ca], o: [sa, 0, ca] };
+  }
 
   function openPanel(key) {
+    if (key === "settings") return openSheet();
+    if (key === "businesses") key = bizTab === "ugc" ? "influencer" : "editing";
     if (open[key]) { refresh(key); return open[key]; }
-    if (closing[key]) { const el = closing[key]; delete closing[key]; clearTimeout(el._rm); el.classList.remove("leaving"); open[key] = el; sizeRO.observe(el); refresh(key); showPanel(el); floatState(); return el; }
-    const P = PANELS[key], el = document.createElement("section");
+    if (closing[key]) { const el = closing[key]; delete closing[key]; clearTimeout(el._rm); el.classList.remove("leaving"); el._wrap.classList.remove("leaving"); open[key] = el; sizeRO.observe(el); refresh(key); showPanel(el); floatState(); return el; }
+    const P = PANELS[key], el = document.createElement("section"), wrap = document.createElement("div");
     el.className = "panel" + (P.wide ? " wide" : "");
     el.style.setProperty("--c", P.c); el.dataset.key = key;
-    el.innerHTML = `<div class="ph" data-drag><span class="ic">${icon(P.ic)}</span><div class="tt"><h2>${P.title}</h2><p class="sub">${subOf(key)}</p></div><button class="x" data-close aria-label="Close ${P.title}">${icon("x")}</button></div><div class="pb">${body(key)}</div>`;
-    el.style.visibility = "hidden"; world.appendChild(el);
+    el.innerHTML = `<div class="ph"><span class="ic">${icon(P.ic)}</span><div class="tt"><h2>${P.title}</h2><p class="sub">${subOf(key)}</p></div><button class="x" data-close aria-label="Close ${P.title}">${icon("x")}</button></div><div class="pb">${body(key)}</div>`;
+    wrap.className = "tabw"; wrap.dataset.key = key; wrap.appendChild(el);
+    wrap.insertAdjacentHTML("beforeend", `<button type="button" class="grab" data-grab aria-label="Move ${P.title}" title="Drag to move"><i></i></button>`);
+    el._wrap = wrap; wrap.style.visibility = "hidden"; world.appendChild(wrap);
     el._w = el.offsetWidth; el._h = el.offsetHeight;
-    [el._wx, el._wz] = freeSpot(key, el._w, el._h);
-    put(el, basis(CAM)); aim(el); el.style.visibility = ""; showPanel(el, 0, 0.9);
+    const PL = placeOf(key); el._place = TABPLACE[key] || "life"; el._px = PL.x; el._pz = PL.z;
+    [el._wx, el._wz] = homeSpot(key);
+    put(el, basis(CAM)); aim(el); showPanel(el, 0, 0.9);
     $(".pb", el).addEventListener("scroll", () => more(el), { passive: true });
     sizeRO.observe(el);
     open[key] = el; floatState();
@@ -867,211 +991,432 @@ textarea.draft:focus{border-color:var(--blue)}
   }
   // Panels rise toward wherever Allie is on screen.
   function aim(el) {
-    const dx = (BIRD.sx || W / 2) - el._sx, dy = (BIRD.sy || H / 2) - (el._sy - el._h * el._s / 2), d = Math.hypot(dx, dy) || 1;
+    const dx = (BIRD.sx || W / 2) - (el._sx || W / 2), dy = (BIRD.sy || H / 2) - ((el._sy || H / 2) - el._h * (el._s || 1) / 2), d = Math.hypot(dx, dy) || 1;
     el.style.setProperty("--fx", (dx / d * 30).toFixed(1) + "px"); el.style.setProperty("--fy", (dy / d * 30 + 26).toFixed(1) + "px");
-  }
-  // Where a panel and the boat land on screen from a wide view of the whole bay: new panels go to their own spot
-  // unless something already covers it, then spiral outward until they're clear.
-  const BAY = { x: 0, y: 0, z: -300, d: 3000, p: 0.62 };
-  function rectAt(b, x, z, w, h) { const p = project(b, x, H0, z); return p && { x: p.x - w / 2 * p.s, y: p.y - h * p.s, w: w * p.s, h: h * p.s }; }
-  function boatRect(b) {
-    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-    for (const [x, y, z] of [[-240, 0, -110], [240, 0, -110], [-240, 0, 110], [240, 0, 110], [-240, 110, 0], [240, 50, 0]]) { const p = project(b, x, y, z); if (!p) continue; x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
-    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
-  }
-  const overlaps = (a, b, g) => a.x < b.x + b.w + g && a.x + a.w + g > b.x && a.y < b.y + b.h + g && a.y + a.h + g > b.y;
-  function freeSpot(key, w, h) {
-    const b = basis(BAY), S0 = SLOT[key];
-    const others = Object.entries(open).filter(([k]) => k !== key).map(([, e]) => rectAt(b, e._wx, e._wz, e._w, e._h)).filter(Boolean);
-    others.push(boatRect(b));
-    const fits = (x, z) => { const r = rectAt(b, x, z, w, h); return r && !others.some(o => overlaps(r, o, 8)); };
-    if (fits(S0.x, S0.z)) return [S0.x, S0.z];
-    for (let ring = 1; ring < 60; ring++) for (let k = 0; k < 16; k++) {
-      const a = (k / 16) * 6.283, x = Math.round(S0.x + Math.cos(a) * ring * 140), z = Math.round(S0.z + Math.sin(a) * ring * 110);
-      if (fits(x, z)) return [x, z];
-    }
-    return [S0.x, S0.z];
   }
   function refresh(key) {
     const el = open[key]; if (!el || el.classList.contains("leaving")) return;
     const pb = $(".pb", el), top = pb.scrollTop; pb.innerHTML = body(key); pb.scrollTop = top; $(".sub", el).textContent = subOf(key); more(el);
   }
+  // focusKey: the tab the camera is looking at face on, if any.
   let focusKey = null;
   function closePanel(key) {
+    if (key === "settings") return closeSheet();
     const el = open[key]; if (!el) return; delete open[key]; floatState();
     aim(el);
-    el.classList.remove("lifted"); el.classList.add("leaving"); sizeRO.unobserve(el); closing[key] = el;
+    el.classList.add("leaving"); el._wrap.classList.add("leaving"); el._wrap.classList.remove("lifted"); sizeRO.unobserve(el); closing[key] = el;
     const from = el._anim ? now3(el) : { opacity: 1, scale: 1, translate: "0px 0px" }, calm = calmMotion();
     if (el._anim) el._anim.cancel();
     el._anim = el.animate([calm ? { opacity: from.opacity } : from, calm ? { opacity: 0 } : { opacity: 0, scale: 0.9, translate: "0px 40px" }],
       { duration: calm ? 140 : 340, easing: calm ? "ease-in" : PANEL_OUT, fill: "forwards" });
-    el._rm = setTimeout(() => { if (closing[key] !== el) return; delete closing[key]; el.remove(); }, (calm ? 140 : 340) + 40);
+    el._rm = setTimeout(() => { if (closing[key] !== el) return; delete closing[key]; el._wrap.remove(); }, (calm ? 140 : 340) + 40);
     // Allie doesn't stay on a tab that sank; the camera heads home if that tab was the one in view.
     const wasFocus = focusKey === key; if (wasFocus) focusKey = null;
-    if (BIRD.perch === key) birdTo("boat", wasFocus ? homeView() : null); else if (wasFocus) goHome();
+    if (BIRD.perch === key) birdTo(HERE, wasFocus ? homeView() : null); else if (wasFocus) goHome();
   }
 
-  /* ---------------- Camera ---------------- */
-  // A camera looking down at the water: the point it looks at (x, y, z), how far back it sits (d) and how steeply it looks down (p).
+  /* ---------------- Settings: a sheet in front, on the right ---------------- */
+  // Settings isn't out on the water. It slides in on the right while the camera backs off, so every tab can be seen
+  // floating around the boat behind it. Closing it takes you back to where you were.
+  const sheetHost = $("#sheet"), setBtn = $("#settings"), homeBtn = $("#home");
+  let preSheet = null;
+  function openSheet() {
+    if (open.settings) { refresh("settings"); return open.settings; }
+    const P = PANELS.settings, el = document.createElement("section");
+    el.className = "panel sheet"; el.dataset.key = "settings"; el.style.setProperty("--c", P.c); el._fixed = true;
+    el.setAttribute("role", "dialog"); el.setAttribute("aria-label", P.title);
+    el.innerHTML = `<div class="ph"><span class="ic">${icon(P.ic)}</span><div class="tt"><h2>${P.title}</h2><p class="sub">${subOf("settings")}</p></div><button class="x" data-close aria-label="Close ${P.title}">${icon("x")}</button></div><div class="pb">${body("settings")}</div>`;
+    sheetHost.appendChild(el);
+    $(".pb", el).addEventListener("scroll", () => more(el), { passive: true }); sizeRO.observe(el);
+    open.settings = el; setBtn.setAttribute("aria-pressed", "true"); document.body.classList.add("sheet-open");
+    const calm = calmMotion();
+    el.animate([{ opacity: 0, translate: calm ? "0px 0px" : "44px 0px" }, { opacity: 1, translate: "0px 0px" }], { duration: calm ? 160 : 480, easing: calm ? "ease-out" : PANEL_IN });
+    preSheet = { cam: { ...camAim() }, focus: focusKey };
+    focusKey = null; flyCam(sheetView());
+    return el;
+  }
+  function closeSheet() {
+    const el = open.settings; if (!el) return; delete open.settings; sizeRO.unobserve(el); setBtn.setAttribute("aria-pressed", "false"); document.body.classList.remove("sheet-open");
+    const calm = calmMotion();
+    el.style.pointerEvents = "none";
+    el.animate([{ opacity: 1, translate: "0px 0px" }, { opacity: 0, translate: calm ? "0px 0px" : "44px 0px" }], { duration: calm ? 120 : 260, easing: PANEL_OUT, fill: "forwards" }).onfinish = () => el.remove();
+    if (preSheet) {
+      const p = preSheet; preSheet = null;
+      if (p.focus && open[p.focus]) flyCam(focusView(open[p.focus])); else if (p.focus) goHome(); else { focusKey = null; flyCam(p.cam); }
+    }
+  }
+  // Something else took over (a tab opened, home): the sheet goes without moving the camera back.
+  function dropSheet() { if (open.settings) { preSheet = null; closeSheet(); } }
+  // Behind the sheet: the whole ring, with the boat in the space left of it.
+  function sheetView() {
+    const v = homeView(); v.d *= 1.22; v.p = 0.66;
+    const shift = W < 760 ? 0 : (Math.min(440, W - 32) + 32) / 2, s = FOC / v.d;
+    v.x += Math.cos(v.a) * shift / s; v.z -= Math.sin(v.a) * shift / s;
+    return v;
+  }
+
+  /* ---------------- Camera: circling the boat ---------------- */
+  // The camera looks at a point (x, y, z) from distance d, from angle a around it, tilted down by p. Swiping turns it
+  // around the boat, which is always the pivot: the camera and the point it looks at swing round together.
   const vp = $("#viewport");
   let W = innerWidth, H = innerHeight, FOC = H * 1.05;
-  const CAM = { x: 0, y: 0, z: 0, d: 1200, p: 0.84 };
-  const clampD = d => Math.max(300, Math.min(6000, d));
-  function basis(c) { const sp = Math.sin(c.p), cp = Math.cos(c.p); return { cx: c.x, cy: c.y + c.d * sp, cz: c.z + c.d * cp, sp, cp }; }
+  const CAM = { x: 0, y: 40, z: 0, d: 1400, a: 0, p: 0.6 };
+  const clampD = d => Math.max(240, Math.min(5200, d)), clampP = p => Math.max(0.12, Math.min(1.25, p));
+  const wrapA = a => Math.atan2(Math.sin(a), Math.cos(a));
+  const dot3 = (p, q) => p[0] * q[0] + p[1] * q[1] + p[2] * q[2];
+  // R, U, B: the camera's right, up and back (toward the viewer) in world space.
+  function basis(c) {
+    const sp = Math.sin(c.p), cp = Math.cos(c.p), sa = Math.sin(c.a), ca = Math.cos(c.a), B = [cp * sa, sp, cp * ca];
+    return { cx: c.x + c.d * B[0], cy: c.y + c.d * B[1], cz: c.z + c.d * B[2], sp, cp, sa, ca, R: [ca, 0, -sa], U: [-sp * sa, cp, -sp * ca], B };
+  }
   function project(b, x, y, z) {
-    const vx = x - b.cx, vy = y - b.cy, vz = z - b.cz, zc = -vy * b.sp - vz * b.cp;
+    const v = [x - b.cx, y - b.cy, z - b.cz], zc = -dot3(v, b.B);
     if (zc < 5) return null;
-    const s = FOC / zc; return { x: W / 2 + vx * s, y: H / 2 - (vy * b.cp - vz * b.sp) * s, s, zc };
+    const s = FOC / zc; return { x: W / 2 + dot3(v, b.R) * s, y: H / 2 - dot3(v, b.U) * s, s, zc };
   }
-  function waterAt(b, sx, sy) {
-    const dx = sx - W / 2, up = H / 2 - sy, dy = -b.sp * FOC + b.cp * up, dz = -b.cp * FOC - b.sp * up;
-    if (dy > -1e-3) return null; const t = -b.cy / dy; return { x: b.cx + dx * t, z: b.cz + dz * t };
+  // Where the ray under a screen point meets the level y = h.
+  function rayAt(b, sx, sy, h = 0) {
+    const dx = sx - W / 2, up = H / 2 - sy, d = [0, 1, 2].map(i => b.R[i] * dx + b.U[i] * up - b.B[i] * FOC);
+    if (Math.abs(d[1]) < 1e-6) return null;
+    const t = (h - b.cy) / d[1]; if (t <= 0) return null;
+    return { x: b.cx + d[0] * t, z: b.cz + d[2] * t };
   }
-  // The camera flies on a critically damped spring (no overshoot): a new target mid-flight just re-aims it, and a glide in progress carries its speed into the flight.
-  const CV = { x: 0, y: 0, z: 0, d: 0, p: 0 }, CAM_RESPONSE = 0.6; let camAnim = null;
+  // The camera flies on a critically damped spring (no overshoot): a new target mid-flight just re-aims it, and a swipe
+  // in progress carries its speed into the flight.
+  const CV = { x: 0, y: 0, z: 0, d: 0, a: 0, p: 0 }, CAM_RESPONSE = 0.5; let camAnim = null;
+  const camAim = () => { const c = camAnim ? camAnim.t : CAM; return { x: c.x, y: c.y, z: c.z, d: c.d, a: c.a, p: c.p }; };
   function flyCam(t) {
-    ZT = null;
-    if (!camAnim) { CV.x = INR.vx; CV.z = INR.vz; CV.y = CV.d = CV.p = 0; }
-    INR.vx = INR.vz = 0; camAnim = { t: { ...t, d: clampD(t.d) } };
-    if (calmMotion()) { Object.assign(CAM, camAnim.t); camAnim = null; vp.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 240, easing: "ease-out" }); }
+    const tt = { x: t.x, y: t.y, z: t.z, d: clampD(t.d), p: clampP(t.p), a: CAM.a + wrapA(t.a - CAM.a) };
+    if (!camAnim) { CV.a = INR.va; CV.p = INR.vp; CV.x = CV.y = CV.z = CV.d = 0; }
+    // a long trip across the water takes longer than a turn to the next tab
+    INR.va = INR.vp = 0; ZD = null; camAnim = { t: tt, resp: Math.min(1.5, CAM_RESPONSE + Math.hypot(tt.x - CAM.x, tt.z - CAM.z) / 3600) };
+    if (calmMotion()) { Object.assign(CAM, tt); camAnim = null; for (const k in CV) CV[k] = 0; vp.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 240, easing: "ease-out" }); }
   }
   function camSpring(dt) {
-    const w = 2 * Math.PI / CAM_RESPONSE, t = camAnim.t, n = Math.ceil(dt / 0.008), h = dt / n;
+    const w = 2 * Math.PI / (camAnim.resp || CAM_RESPONSE), t = camAnim.t, n = Math.ceil(dt / 0.008), h = dt / n;
     for (let i = 0; i < n; i++) for (const k in CV) { CV[k] += (w * w * (t[k] - CAM[k]) - 2 * w * CV[k]) * h; CAM[k] += CV[k] * h; }
     const s = FOC / CAM.d;
-    if (Math.hypot(t.x - CAM.x, t.y - CAM.y, t.z - CAM.z) * s < 0.3 && Math.abs(t.d - CAM.d) * s < 0.3 && Math.abs(t.p - CAM.p) < 0.0005 && Math.hypot(CV.x, CV.z) * s < 2) { Object.assign(CAM, t); for (const k in CV) CV[k] = 0; camAnim = null; }
+    if (Math.hypot(t.x - CAM.x, t.y - CAM.y, t.z - CAM.z) * s < 0.3 && Math.abs(t.d - CAM.d) * s < 0.3 && Math.abs(t.a - CAM.a) < 0.0004 && Math.abs(t.p - CAM.p) < 0.0004 && Math.abs(CV.a) < 0.01) {
+      Object.assign(CAM, t); for (const k in CV) CV[k] = 0; camAnim = null; CAM.a = wrapA(CAM.a);
+    }
   }
-  // Home: the boat in the middle with the floating buttons around it.
-  const homeView = () => ({ x: 0, y: 20, z: 60, d: FOC / Math.max(0.5, Math.min(1.45, W / 1000, (H - 120) / 560)), p: 0.86 });
+  // How each place is seen. home: from the sand looking out to sea. life and studio: their ring of buttons and tabs
+  // around them, from the side you arrived on (or keeping your angle). journal: close to the bottle, the island behind.
+  const ringFit = () => FOC / Math.max(0.4, Math.min(0.85, W / 1650, (H - 80) / 920));
+  function placeView(name, keep) {
+    const P = PLACES[name], c = camAim(), bc = basis(c);
+    const a = keep && HERE === name ? c.a : Math.atan2(bc.cx - P.x, bc.cz - P.z);
+    if (name === "home") return { x: P.x, y: 70, z: P.z, d: 1000, a: keep && HERE === "home" ? c.a : 0, p: 0.15 };
+    if (name === "journal") { const b = bottlePos(), ai = Math.atan2(b[0] - PLACES.studio.x, b[2] - PLACES.studio.z) + 0.3; return { x: b[0], y: 28, z: b[2], d: 560, a: keep && HERE === name ? c.a : ai, p: 0.26 }; }
+    if (name === "craft") { const t = P.y + AllieSea.BENCH.top, k = Math.min(W * 0.72, 920) / 760; return { x: P.x, y: t, z: P.z, d: 150 * FOC / (k * 760) * 1.02, a: keep && HERE === name ? c.a : P.yaw, p: 0.92 }; }
+    if (name === "studio") return { x: P.x, y: 210, z: P.z, d: ringFit() * 1.38, a, p: 0.42 };
+    return { x: P.x, y: 40, z: P.z, d: ringFit(), a, p: 0.62 };
+  }
+  const homeView = () => placeView(HERE, true);
+  // Where you are decides what swiping turns around, which labels show and whether the beach chat is out.
+  function setHere(name) {
+    if (!PLACES[name]) return; HERE = name; PIV = PLACES[name];
+    document.body.classList.toggle("at-home", name === "home"); homeBtn.setAttribute("aria-pressed", String(name === "home"));
+    for (const el of LABELS) el.hidden = el.dataset.place === name || (el.dataset.place === "craft" && name !== "studio");
+    document.body.classList.toggle("at-craft", name === "craft"); if (name === "craft") showBench(); else hideBench();
+  }
+  // Going somewhere: the camera sails there and Allie flies along.
+  function travel(name) {
+    if (!PLACES[name]) return;
+    const v = placeView(name); dropSheet(); focusKey = null; setHere(name); birdTo(name, v);
+  }
   function goHome(now) { focusKey = null; const v = homeView(); if (now) { Object.assign(CAM, v); camAnim = null; } else flyCam(v); }
-  // Focus on a panel: at its real size when it fits (so text stays sharp), with room for Allie on its top edge.
+  // Face a tab: straight on, at its real pixel size when it fits (so text is sharp), with room for Allie on its top edge.
+  const FOCUS_P = 0.48;
   function focusView(el) {
-    const w = el._w, h = el._h, top = 96, bottom = W < 700 ? 150 : 190, avail = H - top - bottom;
-    const s = Math.min(1, avail / (h + 30), (W - 80) / (w + 160)), d = FOC / s;
-    const off = (top + avail / 2) - H / 2;
-    focusKey = el.dataset.key;
-    return { x: el._wx, y: H0 + h / 2 + off / s, z: el._wz, d, p: 0.4 };
+    const w = el._w, h = el._h, top = 104, bottom = W < 700 ? 150 : 190, avail = H - top - bottom;
+    const s = Math.min(1, avail / (h + 40), (W - 80) / (w + 160)), d = FOC * TAB_K / s;
+    const a = tabAngle(el), sp = Math.sin(FOCUS_P), cp = Math.cos(FOCUS_P), U = [-sp * Math.sin(a), cp, -sp * Math.cos(a)];
+    const off = (h * TAB_K / 2) + ((top + avail / 2) - H / 2) * TAB_K / s;
+    focusKey = el.dataset.key; if (el._place && el._place !== HERE) setHere(el._place);
+    return { x: el._wx + U[0] * off, y: H0 + U[1] * off, z: el._wz + U[2] * off, d, a, p: FOCUS_P };
   }
   function focusOn(el) { flyCam(focusView(el)); }
-  // Everything open at once: back the camera off until every panel and the boat fit.
+  // Everything at once: up and back until the whole ring is in view.
   function overview() {
-    const ps = Object.values(open); if (!ps.length) return goHome();
-    const cx = ps.reduce((a, e) => a + e._wx, 0) / (ps.length + 1), cz = ps.reduce((a, e) => a + e._wz, 0) / (ps.length + 1);
-    let c = null;
-    for (let d = 1400; d < 9000; d *= 1.1) {
-      c = { x: cx, y: 120, z: cz, d, p: 0.6 }; const b = basis(c);
-      const rs = ps.map(e => rectAt(b, e._wx, e._wz, e._w, e._h)).concat([boatRect(b)]);
-      if (rs.every(r => r && r.x > 30 && r.y > 60 && r.x + r.w < W - 30 && r.y + r.h < H - 170)) break;
-    }
-    focusKey = null; flyCam(c);
+    dropSheet(); focusKey = null;
+    const tabs = Object.values(open).filter(el => isTab(el) && el._place === HERE), v = { ...homeView(), p: 0.8 }, n = tabs.length + 1;
+    v.x = (tabs.reduce((t, e) => t + e._wx, 0) + PIV.x) / n; v.z = (tabs.reduce((t, e) => t + e._wz, 0) + PIV.z) / n;
+    const on = p => p && p.x > 30 && p.x < W - 30 && p.y > 60 && p.y < H - 170;
+    const fits = b => on(project(b, PIV.x, 40, PIV.z)) && tabs.every(el => { const f = tabFrame(el, b), hw = el._w * TAB_K / 2, h = el._h * TAB_K;
+      return [[-hw, 0], [hw, 0], [-hw, h], [hw, h]].every(([sx, ty]) => on(project(b, el._wx + f.r[0] * sx + f.u[0] * ty, H0 + f.u[1] * ty, el._wz + f.r[2] * sx + f.u[2] * ty))); });
+    for (let i = 0; i < 40 && !fits(basis(v)); i++) v.d *= 1.08;
+    flyCam(v);
   }
-  // Zoom and wheel-pan ease toward their target; a released drag glides on and slows down.
-  let ZT = null; const PT = { x: 0, z: 0 }, INR = { vx: 0, vz: 0 };
-  function zoomNow(sx, sy, nd) {
-    const h0 = waterAt(basis(CAM), sx, sy); CAM.d = nd; const h1 = waterAt(basis(CAM), sx, sy);
-    if (h0 && h1) { CAM.x += h0.x - h1.x; CAM.z += h0.z - h1.z; }
+
+  // Turning around where you are (the boat, the island, the bottle). On the beach you can only look a little left and right.
+  function orbit(da, dp) {
+    if (da && HERE === "home") da = Math.max(-0.7, Math.min(0.7, CAM.a + da)) - CAM.a;
+    if (da && HERE === "craft") { const a0 = PLACES.craft.yaw; da = a0 + Math.max(-0.6, Math.min(0.6, wrapA(CAM.a + da - a0))) - CAM.a; }
+    if (da) { const c = Math.cos(da), s = Math.sin(da), x = CAM.x - PIV.x, z = CAM.z - PIV.z; CAM.x = PIV.x + c * x + s * z; CAM.z = PIV.z + c * z - s * x; CAM.a += da; }
+    if (dp) CAM.p = HERE === "home" ? Math.max(0.03, Math.min(0.5, CAM.p + dp)) : HERE === "craft" ? Math.max(0.5, Math.min(1.3, CAM.p + dp)) : clampP(CAM.p + dp);
   }
+  // Zoom eases toward its target; a released swipe keeps turning and slows down.
+  let ZD = null; const INR = { va: 0, vp: 0 };
   function camStep(dt) {
-    if (ZT) { const k = 1 - Math.exp(-dt * 11); let nd = CAM.d + (ZT.d - CAM.d) * k; if (Math.abs(ZT.d - nd) < 0.5) nd = ZT.d; zoomNow(ZT.sx, ZT.sy, nd); if (nd === ZT.d) ZT = null; }
-    if (PT.x || PT.z) { const k = 1 - Math.exp(-dt * 13), mx = PT.x * k, mz = PT.z * k; CAM.x += mx; CAM.z += mz; PT.x -= mx; PT.z -= mz;
-      if (Math.abs(PT.x) + Math.abs(PT.z) < 0.05) { CAM.x += PT.x; CAM.z += PT.z; PT.x = PT.z = 0; } }
-    if (INR.vx || INR.vz) { CAM.x += INR.vx * dt; CAM.z += INR.vz * dt; const d = Math.exp(-dt * 3); INR.vx *= d; INR.vz *= d;
-      if (Math.hypot(INR.vx, INR.vz) * FOC / CAM.d < 6) INR.vx = INR.vz = 0; }
-    // the bay is big, not endless
-    const r = Math.hypot(CAM.x, CAM.z), R = 4200; if (r > R) { CAM.x *= R / r; CAM.z *= R / r; }
+    if (ZD !== null) { const k = 1 - Math.exp(-dt * 11); CAM.d += (ZD - CAM.d) * k; if (Math.abs(ZD - CAM.d) < 0.5) { CAM.d = ZD; ZD = null; } }
+    if (INR.va || INR.vp) {
+      orbit(INR.va * dt, INR.vp * dt); const k = Math.exp(-dt * GLIDE); INR.va *= k; INR.vp *= k;
+      if (Math.abs(INR.va) < 0.01 && Math.abs(INR.vp) < 0.01) INR.va = INR.vp = 0;
+    }
   }
-  // Taking the camera yourself always wins over it following Allie.
-  function userCam() { camAnim = null; if (BIRD.fly) BIRD.fly.cam = null; }
-  function zoomAt(sx, sy, f) { userCam(); INR.vx = INR.vz = 0; focusKey = null; ZT = { sx, sy, d: clampD((ZT ? ZT.d : CAM.d) / f) }; }
-  addEventListener("resize", () => { W = innerWidth; H = innerHeight; FOC = H * 1.05; sizeScene(); if (focusKey && open[focusKey]) focusOn(open[focusKey]); else if (!camAnim) goHome(true); });
+  const GLIDE = 3.2;
+  function userCam() { camAnim = null; }
+  function zoomBy(f) { userCam(); INR.va = INR.vp = 0; ZD = clampD((ZD === null ? CAM.d : ZD) / f); if (ZD > homeView().d * 0.72) focusKey = null; }
+  // After a swipe: if you were among the tabs, settle face on to the one nearest where the swipe was heading,
+  // carrying the swipe's speed into the turn. Out at home it just glides to a stop.
+  function release(va, vp_, fromFocus) {
+    const tabs = Object.values(open).filter(el => isTab(el) && el._place === HERE), aEnd = CAM.a + va / GLIDE;
+    if ((fromFocus || CAM.d < homeView().d * 0.72) && tabs.length) {
+      let best = null, bd = 1e9; for (const el of tabs) { const d = Math.abs(wrapA(tabAngle(el) - aEnd)); if (d < bd) { bd = d; best = el; } }
+      if (best && bd < 0.8) { INR.va = calmMotion() ? 0 : va; INR.vp = 0; birdTo(best.dataset.key, focusView(best)); return; }
+    }
+    if (!calmMotion()) { INR.va = va; INR.vp = vp_; }
+  }
+  // Left and right arrows step to the next tab around the boat.
+  function stepTab(dir) {
+    const c = camAim(), tabs = Object.values(open).filter(el => isTab(el) && el._place === HERE).map(el => [el, wrapA(tabAngle(el) - c.a)]);
+    if (!tabs.length) { if (HERE === "home" || HERE === "craft") return; focusKey = null; const da = dir * 0.7, cs = Math.cos(da), sn = Math.sin(da), x = c.x - PIV.x, z = c.z - PIV.z; flyCam({ ...c, x: PIV.x + cs * x + sn * z, z: PIV.z + cs * z - sn * x, a: c.a + da }); return; }
+    const ahead = tabs.filter(([, r]) => dir > 0 ? r > 0.05 : r < -0.05).sort((x, y) => dir > 0 ? x[1] - y[1] : y[1] - x[1]);
+    const next = ahead.length ? ahead[0][0] : tabs.sort((x, y) => dir > 0 ? x[1] - y[1] : y[1] - x[1])[0][0];
+    dropSheet(); birdTo(next.dataset.key, focusView(next));
+  }
+  addEventListener("resize", () => {
+    W = innerWidth; H = innerHeight; FOC = H * 1.05; sizeScene();
+    if (open.settings) flyCam(sheetView()); else if (focusKey && open[focusKey]) focusOn(open[focusKey]); else if (!camAnim) goHome(true);
+  });
+  let wheelEnd = 0, wheelFocus = false;
   vp.addEventListener("wheel", e => {
     // a panel with more to show scrolls itself; everywhere else the wheel moves the camera
     const sc = !e.ctrlKey && !e.metaKey && Math.abs(e.deltaY) > Math.abs(e.deltaX) && e.target.closest && e.target.closest(".pb");
     if (sc && (e.deltaY > 0 ? sc.scrollTop + sc.clientHeight < sc.scrollHeight - 1 : sc.scrollTop > 0)) return;
     e.preventDefault(); hideHint();
+    const k = e.deltaMode === 1 ? 20 : 1;
+    // a sideways swipe on a trackpad turns around the boat, like dragging
+    if (!e.ctrlKey && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      if (!wheelEnd) wheelFocus = !!focusKey;
+      userCam(); focusKey = null; INR.va = INR.vp = 0; orbit(e.deltaX * k * 3.4 / W, 0);
+      clearTimeout(wheelEnd); wheelEnd = setTimeout(() => { wheelEnd = 0; release(0, 0, wheelFocus); }, 180); return;
+    }
     const notch = e.deltaMode === 1 || (e.deltaX === 0 && Math.abs(e.deltaY) >= 50 && Number.isInteger(e.deltaY));
-    if (notch) { const n = Math.max(1, Math.round(Math.abs(e.deltaMode === 1 ? e.deltaY / 3 : e.deltaY / 100))); zoomAt(e.clientX, e.clientY, Math.pow(1.08, -Math.sign(e.deltaY) * n)); return; }
-    if (e.ctrlKey || e.metaKey) zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
-    else { userCam(); focusKey = null; INR.vx = INR.vz = 0; const k = (e.deltaMode === 1 ? 20 : 1) * CAM.d / FOC; PT.x += e.deltaX * k; PT.z += e.deltaY * k / CAM.sp; }
+    if (notch) { const n = Math.max(1, Math.round(Math.abs(e.deltaMode === 1 ? e.deltaY / 3 : e.deltaY / 100))); zoomBy(Math.pow(1.1, -Math.sign(e.deltaY) * n)); return; }
+    zoomBy(Math.exp(-e.deltaY * k * (e.ctrlKey || e.metaKey ? 0.01 : 0.004)));
   }, { passive: false });
-  Object.defineProperty(CAM, "sp", { get() { return Math.max(0.3, Math.sin(this.p)); } });
 
-  // Dragging the water sails the camera, glued to the spot you grabbed; it glides on after you let go.
-  // Dragging a panel by its header moves it across the water.
+  // Dragging the water turns you around the boat (up and down tilts the view); it glides on after you let go.
+  // The bar under a tab picks it up: drag it to move the tab across the water.
   const pointers = new Map(); let drag = null, pinch = null;
   vp.addEventListener("pointerdown", e => {
+    if (drag && drag.type === "move") return; // carrying a tab: other fingers wait
     if (e.target.closest(".float")) return;
-    const panel = e.target.closest(".panel");
-    if (panel) {
-      if (e.target.closest("[data-drag]") && !e.target.closest("button")) {
-        drag = { type: "panel", el: panel, sx: e.clientX, sy: e.clientY, ox: panel._wx, oz: panel._wz, s: panel._s || 1 };
-        panel.classList.add("lifted"); vp.setPointerCapture(e.pointerId);
-      }
-      return;
+    const grab = e.target.closest("[data-grab]");
+    if (grab) {
+      if (pointers.size) return;
+      const wrap = grab.closest(".tabw"), el = wrap && open[wrap.dataset.key]; if (!isTab(el)) return;
+      const hit = rayAt(basis(CAM), e.clientX, e.clientY, H0); if (!hit) return;
+      e.preventDefault(); drag = { type: "move", id: e.pointerId, el, ox: el._wx - hit.x, oz: el._wz - hit.z };
+      wrap.classList.add("lifted"); grab.setPointerCapture(e.pointerId); hideHint(); return;
     }
+    if (e.target.closest(".tabw")) return;
     if (birdHit(e.clientX, e.clientY)) { birdPoke(); return; }
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    vp.setPointerCapture(e.pointerId); userCam(); ZT = null; INR.vx = INR.vz = 0; PT.x = PT.z = 0; hideHint();
-    if (pointers.size === 1) { const b = basis(CAM); drag = { type: "pan", b, cx: CAM.x, cz: CAM.z, g: waterAt(b, e.clientX, e.clientY), hist: [[performance.now(), CAM.x, CAM.z]] }; vp.classList.add("panning"); }
-    else if (pointers.size === 2) { const [a, c] = [...pointers.values()]; pinch = { d: Math.hypot(a.x - c.x, a.y - c.y) }; drag = null; }
+    vp.setPointerCapture(e.pointerId); hideHint();
+    if (pointers.size === 1) { drag = { type: "orbit", x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, moved: false, fromFocus: !!focusKey, hist: [[performance.now(), CAM.a, CAM.p]] }; vp.classList.add("panning"); }
+    else if (pointers.size === 2) { const [a, c] = [...pointers.values()]; pinch = { d: Math.hypot(a.x - c.x, a.y - c.y) || 1 }; drag = null; }
   });
   vp.addEventListener("pointermove", e => {
     if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pinch && pointers.size === 2) {
-      const [a, c] = [...pointers.values()], d = Math.hypot(a.x - c.x, a.y - c.y);
-      zoomNow((a.x + c.x) / 2, (a.y + c.y) / 2, clampD(CAM.d * pinch.d / d)); pinch.d = d; return;
+      const [a, c] = [...pointers.values()], d = Math.hypot(a.x - c.x, a.y - c.y) || 1;
+      userCam(); CAM.d = clampD(CAM.d * pinch.d / d); pinch.d = d; if (CAM.d > homeView().d * 0.72) focusKey = null; return;
     }
     if (!drag) return;
-    if (drag.type === "pan") {
-      const g = waterAt(drag.b, e.clientX, e.clientY); if (!g || !drag.g) return;
-      focusKey = null; CAM.x = drag.cx - (g.x - drag.g.x); CAM.z = drag.cz - (g.z - drag.g.z);
-      drag.hist.push([performance.now(), CAM.x, CAM.z]); if (drag.hist.length > 8) drag.hist.shift();
-    } else { drag.el._wx = drag.ox + (e.clientX - drag.sx) / drag.s; drag.el._wz = drag.oz + (e.clientY - drag.sy) / (drag.s * CAM.sp); }
+    if (drag.type === "orbit") {
+      // a few pixels of give before it counts as a swipe, so a tap on the water doesn't nudge the view
+      if (!drag.moved) { if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 4) return; drag.moved = true; userCam(); ZD = null; INR.va = INR.vp = 0; focusKey = null; drag.x = e.clientX; drag.y = e.clientY; }
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
+      orbit(-dx * 3.4 / W, dy * 1.6 / H);
+      drag.hist.push([performance.now(), CAM.a, CAM.p]); if (drag.hist.length > 8) drag.hist.shift();
+    } else if (drag.type === "move" && e.pointerId === drag.id) {
+      const hit = rayAt(basis(CAM), e.clientX, e.clientY, H0); if (!hit) return;
+      const el = drag.el, x = hit.x + drag.ox - el._px, z = hit.z + drag.oz - el._pz, r = Math.hypot(x, z), r1 = Math.max(minR(el), Math.min(3200, r)) / (r || 1);
+      el._wx = el._px + x * r1; el._wz = el._pz + z * r1;
+    }
   });
   const endPointer = e => {
-    if (drag && drag.type === "panel") drag.el.classList.remove("lifted");
-    if (drag && drag.type === "pan" && pointers.size === 1) { const t = performance.now(), h = drag.hist, o = h.find(s => t - s[0] < 100) || h[h.length - 1], dt = (t - o[0]) / 1000;
-      if (dt > 0.008 && t - h[h.length - 1][0] < 80) { INR.vx = (CAM.x - o[1]) / dt; INR.vz = (CAM.z - o[2]) / dt; } }
+    if (drag && drag.type === "move") {
+      if (e.pointerId !== drag.id) return;
+      const el = drag.el, key = el.dataset.key; el._wrap.classList.remove("lifted"); drag = null;
+      if (open[key] === el) { PLACED[key] = { x: Math.round(el._wx), z: Math.round(el._wz) }; savePlaced(); if (focusKey === key) focusOn(el); }
+      return;
+    }
+    if (drag && drag.type === "orbit" && pointers.size === 1 && drag.moved) {
+      const t = performance.now(), h = drag.hist, o = h.find(s => t - s[0] < 100) || h[h.length - 1], dt = (t - o[0]) / 1000;
+      let va = 0, vpp = 0; if (dt > 0.008 && t - h[h.length - 1][0] < 80) { va = (CAM.a - o[1]) / dt; vpp = (CAM.p - o[2]) / dt; }
+      release(Math.max(-6, Math.min(6, va)), Math.max(-2, Math.min(2, vpp)), drag.fromFocus);
+    }
     pointers.delete(e.pointerId); if (pointers.size < 2) pinch = null; if (!pointers.size) { drag = null; vp.classList.remove("panning"); }
   };
   vp.addEventListener("pointerup", endPointer);
   vp.addEventListener("pointercancel", endPointer);
-  vp.addEventListener("dblclick", e => { if (!e.target.closest(".panel,.float")) { if (busy) stopTalking(); run("home"); } });
+  vp.addEventListener("dblclick", e => { if (!e.target.closest(".tabw,.float")) { if (busy) stopTalking(); run("home"); } });
   vp.addEventListener("scroll", () => { vp.scrollTop = 0; vp.scrollLeft = 0; });
+  // Clicking a tab you're not facing turns you to it first (its close button still just closes it).
+  world.addEventListener("click", e => {
+    const wrap = e.target.closest(".tabw"); if (!wrap || e.target.closest("[data-grab],[data-close]")) return;
+    const key = wrap.dataset.key; if (key === focusKey || !open[key]) return;
+    e.stopPropagation(); e.preventDefault(); dropSheet(); birdTo(key, focusView(open[key]));
+  }, true);
+  // Tabbing into a tab you're not facing turns you to it, as clicking it would.
+  world.addEventListener("focusin", e => {
+    const wrap = e.target.closest(".tabw"), key = wrap && wrap.dataset.key;
+    if (!key || key === focusKey || !open[key] || !e.target.matches(":focus-visible")) return;
+    dropSheet(); birdTo(key, focusView(open[key]));
+  });
+  // The grab bar from the keyboard: left and right carry the tab around the boat, up and down move it out and in.
+  world.addEventListener("keydown", e => {
+    const g = e.target.closest("[data-grab]"); if (!g || !/^Arrow(Left|Right|Up|Down)$/.test(e.key)) return;
+    const el = open[g.closest(".tabw").dataset.key]; if (!isTab(el)) return;
+    e.preventDefault(); e.stopPropagation();
+    let a = tabAngle(el), r = Math.hypot(el._wx - el._px, el._wz - el._pz);
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") a += (e.key === "ArrowRight" ? 1 : -1) * 0.1; else r = Math.max(minR(el), Math.min(3200, r + (e.key === "ArrowUp" ? -40 : 40)));
+    el._wx = el._px + Math.sin(a) * r; el._wz = el._pz + Math.cos(a) * r;
+    PLACED[el.dataset.key] = { x: Math.round(el._wx), z: Math.round(el._wz) }; savePlaced();
+    if (focusKey === el.dataset.key) focusOn(el);
+  });
   let hinted = false; function hideHint() { if (!hinted) { hinted = true; $("#hint").style.opacity = 0; } }
 
-  // Put every panel and floating button where the camera sees it. Nearer things sit in front.
+  // Each tab is a flat card in 3D: its corners go through the camera and the page draws it with a perspective
+  // transform, so tabs turn as you circle them and show a blank back from behind. Face on at full size it's a plain
+  // translate, so text stays sharp. Nearer things sit in front.
+  let BOATBOX = null;
   function put(el, b) {
-    const p = project(b, el._wx, H0, el._wz), vis = !!p && p.x + el._w * p.s / 2 > -200 && p.x - el._w * p.s / 2 < W + 200 && p.y > -200 && p.y - el._h * p.s < H + 200;
-    if (vis !== el._vis) { el._vis = vis; el.style.visibility = vis ? "" : "hidden"; }
+    const wrap = el._wrap, f = tabFrame(el, b), k = TAB_K, w = el._w, h = el._h;
+    const O = [el._wx - f.r[0] * k * w / 2 + f.u[0] * k * h, H0 + f.u[1] * k * h, el._wz - f.r[2] * k * w / 2 + f.u[2] * k * h];
+    const rel = [O[0] - b.cx, O[1] - b.cy, O[2] - b.cz], Du = f.r.map(v => v * k), Dv = f.u.map(v => -v * k);
+    const X0 = dot3(rel, b.R), Y0 = dot3(rel, b.U), Z0 = -dot3(rel, b.B);
+    const Xu = dot3(Du, b.R), Yu = dot3(Du, b.U), Zu = -dot3(Du, b.B), Xv = dot3(Dv, b.R), Yv = dot3(Dv, b.U), Zv = -dot3(Dv, b.B);
+    // depth and screen position of the four corners; hide the tab if any corner is behind the camera or it's all off screen
+    const cs = [[0, 0], [w, 0], [0, h], [w, h]].map(([u, v]) => { const z = Z0 + Zu * u + Zv * v; return [W / 2 + FOC * (X0 + Xu * u + Xv * v) / z, H / 2 - FOC * (Y0 + Yu * u + Yv * v) / z, z]; });
+    const minZ = Math.min(...cs.map(c => c[2])), xs = cs.map(c => c[0]), ys = cs.map(c => c[1]);
+    const box = { x: Math.min(...xs), y: Math.min(...ys) }; box.w = Math.max(...xs) - box.x; box.h = Math.max(...ys) - box.y;
+    const vis = minZ > 20 && box.x < W + 100 && box.x + box.w > -100 && box.y < H + 100 && box.y + box.h > -100;
+    if (vis !== el._vis) { el._vis = vis; wrap.style.visibility = vis ? "" : "hidden"; }
     if (!vis) return;
-    el._sx = p.x; el._sy = p.y; el._s = p.s;
-    const near = Math.abs(p.s - 1) < 0.004, s = near ? 1 : p.s, tx = Math.round(p.x - el._w / 2), ty = Math.round(p.y - el._h);
-    const tf = `translate(${tx}px,${ty}px) scale(${s.toFixed(4)})`;
-    if (tf !== el._tf) { el._tf = tf; el.style.transform = tf; }
-    const z = String(Math.max(1, Math.round(200000 / p.zc))); if (z !== el._z) { el._z = z; el.style.zIndex = z; }
-    // a tab right in front of the camera would cover everything: it fades away until you move back from it
-    const close = p.s > 1.35 && el.dataset.key !== focusKey, fade = close ? Math.max(0, 1 - (p.s - 1.35) / 0.5).toFixed(2) : "";
-    if (fade !== el._fade) { el._fade = fade; el.style.opacity = fade; el.style.pointerEvents = close && +fade < 0.5 ? "none" : ""; }
+    const base = project(b, el._wx, H0, el._wz) || { x: box.x + box.w / 2, y: box.y + box.h, s: 1, zc: minZ };
+    el._sx = base.x; el._sy = base.y; el._s = base.s * k;
+    // which side you're seeing, and how square on
+    const ctr = [el._wx + f.u[0] * k * h / 2 - b.cx, H0 + f.u[1] * k * h / 2 - b.cy, el._wz + f.u[2] * k * h / 2 - b.cz], dist = Math.hypot(...ctr) || 1;
+    const facing = -dot3(ctr, f.n) / dist, back = facing < 0;
+    if (back !== el._back) { el._back = back; wrap.classList.toggle("back", back); }
+    // the transform: page pixels (u, v) → screen, as a projective matrix
+    const a1 = W / 2 * Zu + FOC * Xu, a2 = W / 2 * Zv + FOC * Xv, a4 = W / 2 * Z0 + FOC * X0;
+    const b1 = H / 2 * Zu - FOC * Yu, b2 = H / 2 * Zv - FOC * Yv, b4 = H / 2 * Z0 - FOC * Y0;
+    const flat = !back && Math.abs(Zu) * w + Math.abs(Zv) * h < 0.002 * Z0 && Math.abs(a1 / Z0 - 1) < 0.004 && Math.abs(b2 / Z0 - 1) < 0.004 && Math.abs(a2 / Z0) * h < 0.5 && Math.abs(b1 / Z0) * w < 0.5;
+    const tf = flat ? `translate(${Math.round(a4 / Z0)}px,${Math.round(b4 / Z0)}px)`
+      : "matrix3d(" + [a1, b1, 0, Zu, a2, b2, 0, Zv, 0, 0, 1, 0, a4, b4, 0, Z0].map(v => +(v / Z0).toPrecision(9)).join(",") + ")";
+    if (tf !== el._tf) { el._tf = tf; wrap.style.transform = tf; }
+    const z = String(Math.max(1, Math.min(3900, Math.round(200000 / (Z0 + Zu * w / 2 + Zv * h / 2))))); if (z !== el._z) { el._z = z; wrap.style.zIndex = z; }
+    // fading: edge-on tabs thin out; one right in front of the camera fades away; out at home a tab standing between
+    // you and the boat goes see-through so the boat still shows
+    const key = el.dataset.key, edge = smooth(0.03, 0.2, Math.abs(facing));
+    let op = back ? 0.5 * edge : edge;
+    if (key !== focusKey && el._s > 1.3) op = Math.min(op, Math.max(0, 1 - (el._s - 1.3) / 0.5));
+    const hit = !back && op >= 0.5; // only the back, edge-on and too-close fades stop clicks
+    if (!focusKey && !back && BOATBOX && HERE === "life" && CAM.d > homeView().d * 0.72 && Z0 < BOATBOX.zc && overlapsBox(box, BOATBOX)) op = Math.min(op, 0.42);
+    // far-off tabs at another place shrink to nothing rather than cluttering the view
+    if (el._s < 0.07) op = 0;
+    const o = op > 0.995 ? "" : op.toFixed(2);
+    if (o !== el._op) { el._op = o; wrap.style.opacity = o; }
+    if (hit !== el._hit) { el._hit = hit; wrap.style.pointerEvents = hit ? "" : "none"; }
   }
-  const FLOATS = [["today", "today"], ["mail", "mail"], ["calendar", "calendar"], ["todo", "to-do"], ["time", "timer"], ["calories", "calories"], ["businesses", "business"], ["finances", "money"], ["jobs", "3d jobs"], ["settings", "settings"]];
+  // how close to its place a tab may stand: clear of the boat, or off the island
+  const minR = el => el._place === "studio" ? 600 : 330;
+  const overlapsBox = (a, c) => a.x < c.x + c.w && a.x + a.w > c.x && a.y < c.y + c.h && a.y + a.h > c.y;
+  function boatBox(b) {
+    const p = project(b, 0, 30, 0); if (!p) return null;
+    const r = 250 * p.s; return { x: p.x - r, y: p.y - r * 0.55, w: 2 * r, h: r * 0.95, zc: p.zc };
+  }
+  const FLOATS = [["today", "today"], ["mail", "mail"], ["calendar", "calendar"], ["todo", "to-do"], ["calories", "calories"], ["editing", "video editing"], ["influencer", "ai influencer"], ["time", "clock"], ["finances", "money"], ["jobs", "3d jobs"]];
   floats.innerHTML = FLOATS.map(([k, n]) => `<button type="button" class="float" data-cmd="${k}" style="--c:${PANELS[k].c}" aria-label="${PANELS[k].title}"><i>${icon(PANELS[k].ic)}</i><span>${n}</span></button>`).join("");
   const FL = $$(".float", floats).map((el, i) => {
-    const a = -Math.PI / 2 + (i + 0.5) / FLOATS.length * 6.283, r = 1 + (i % 2) * 0.12;
-    return Object.assign(el, { _ax: Math.cos(a) * r * 420, _az: Math.sin(a) * r * 300, _ph: i * 1.7, _bob: 0 });
+    const P = placeOf(el.dataset.cmd), a = ringAngle(el.dataset.cmd);
+    return Object.assign(el, { _ax: P.x + Math.sin(a) * P.ring, _az: P.z + Math.cos(a) * P.ring, _ph: i * 1.7, _bob: 0 });
   });
   function floatState() { FL.forEach(b => b.classList.toggle("on", !!open[b.dataset.cmd])); }
+  // The workbench: in build mode the camera sits close over the desk, and its top is a mat where widgets live. Widgets
+  // are small add-ons in renderer/widgets/ (see the README there); each registers itself and gets a card on the mat.
+  const benchEl = $("#bench"); let benchBuilt = false;
+  function showBench() {
+    benchEl.hidden = false; benchEl.classList.remove("away");
+    if (benchBuilt) return; benchBuilt = true;
+    const ws = (window.AllieWidgets && AllieWidgets.list) || [], grid = $(".bm-grid", benchEl);
+    $(".bm-empty", benchEl).hidden = ws.length > 0;
+    for (const w of ws) {
+      const card = document.createElement("section"); card.className = "bm-card";
+      card.innerHTML = `<h3>${esc(w.title || w.id)}</h3><div class="bm-body"></div>`; grid.appendChild(card);
+      try { w.mount && w.mount($(".bm-body", card), { data: S, save: () => changed(...(w.uses || [])), say: t => sayLive(String(t)) }); }
+      catch (err) { console.error("widget " + w.id, err); $(".bm-body", card).textContent = "This widget hit an error: " + err.message; }
+    }
+  }
+  function hideBench() { if (!benchEl.hidden) { benchEl.classList.add("away"); setTimeout(() => { if (benchEl.classList.contains("away")) benchEl.hidden = true; }, 300); } }
+  $(".bm-done", benchEl).addEventListener("click", () => travel("studio"));
+  // The mat lies flat on the desk top: page pixels (u, v) map onto the desk, far edge at the top of the page.
+  function placeBench(b) {
+    if (benchEl.hidden) return;
+    const P = PLACES.craft, B = AllieSea.BENCH, w = benchEl.offsetWidth || 760, h = benchEl.offsetHeight || 400, k = (B.w - 10) / w;
+    const ax = [Math.cos(P.yaw), 0, -Math.sin(P.yaw)], az = [Math.sin(P.yaw), 0, Math.cos(P.yaw)];
+    const O = [P.x - ax[0] * k * w / 2 - az[0] * k * h / 2, P.y + B.top + 0.6, P.z - ax[2] * k * w / 2 - az[2] * k * h / 2];
+    const rel = [O[0] - b.cx, O[1] - b.cy, O[2] - b.cz], Du = ax.map(v => v * k), Dv = az.map(v => v * k);
+    const X0 = dot3(rel, b.R), Y0 = dot3(rel, b.U), Z0 = -dot3(rel, b.B), Xu = dot3(Du, b.R), Yu = dot3(Du, b.U), Zu = -dot3(Du, b.B), Xv = dot3(Dv, b.R), Yv = dot3(Dv, b.U), Zv = -dot3(Dv, b.B);
+    const minZ = Math.min(Z0, Z0 + Zu * w, Z0 + Zv * h, Z0 + Zu * w + Zv * h);
+    if (minZ < 10) { benchEl.style.visibility = "hidden"; return; } benchEl.style.visibility = "";
+    const a1 = W / 2 * Zu + FOC * Xu, a2 = W / 2 * Zv + FOC * Xv, a4 = W / 2 * Z0 + FOC * X0, b1 = H / 2 * Zu - FOC * Yu, b2 = H / 2 * Zv - FOC * Yv, b4 = H / 2 * Z0 - FOC * Y0;
+    const tf = "matrix3d(" + [a1, b1, 0, Zu, a2, b2, 0, Zv, 0, 0, 1, 0, a4, b4, 0, Z0].map(v => +(v / Z0).toPrecision(9)).join(",") + ")";
+    if (tf !== benchEl._tf) { benchEl._tf = tf; benchEl.style.transform = tf; }
+  }
+
+  // Labels over each place: click one to go there. The one you're at hides.
+  const placesEl = $("#places");
+  placesEl.innerHTML = ["life", "studio", "journal", "craft"].map(k => `<button type="button" class="place" data-place="${k}" aria-label="Go to ${PLACES[k].label}"><span>${PLACES[k].label}</span></button>`).join("");
+  const LABELS = $$(".place", placesEl);
+  placesEl.addEventListener("click", e => { const b = e.target.closest(".place"); if (!b) return; hideHint(); if (busy) stopTalking(); travel(b.dataset.place); });
+  function labelAt(k) {
+    if (k === "life") return [0, 230, 0];
+    if (k === "craft") { const P = PLACES.craft; return [P.x, P.y + AllieSea.BENCH.top + 70, P.z]; }
+    if (k === "studio") { const P = PLACES.studio; return [P.x, (SEA ? SEA.props.islandTop + SEA.props.lighthouse : 700) + 90, P.z]; }
+    const b = bottlePos(); return [b[0], 130, b[2]];
+  }
+  function placeLabels(b) {
+    for (const el of LABELS) {
+      if (el.hidden) continue;
+      const p = project(b, ...labelAt(el.dataset.place)), vis = !!p && p.x > -80 && p.x < W + 80 && p.y > 20 && p.y < H + 20;
+      if (vis !== el._vis) { el._vis = vis; el.style.visibility = vis ? "" : "hidden"; }
+      if (!vis) continue;
+      const w = el._bw || (el._bw = el.offsetWidth), h = el._bh || (el._bh = el.offsetHeight);
+      const tf = `translate(${(p.x - w / 2).toFixed(1)}px,${(p.y - h).toFixed(1)}px)`; if (tf !== el._tf) { el._tf = tf; el.style.transform = tf; }
+    }
+  }
   function placeFloats(b) {
     for (const el of FL) {
       const bob = el._bob = reduce ? 0 : Math.sin(T * 1.2 + el._ph) * 4, p = project(b, el._ax, 16 + bob, el._az);
-      const vis = !!p && p.x > -100 && p.x < W + 100 && p.y > -60 && p.y < H + 60 && p.s > 0.18;
+      const vis = !!p && p.x > -100 && p.x < W + 100 && p.y > -60 && p.y < H + 60 && p.s > 0.18 && HERE !== "home" && HERE !== "craft";
       if (vis !== el._vis) { el._vis = vis; el.style.visibility = vis ? "" : "hidden"; }
       if (!vis) continue;
-      const w = el._bw || (el._bw = el.offsetWidth), h = el._bh || (el._bh = el.offsetHeight), s = Math.max(0.6, Math.min(1.3, p.s));
+      const w = el._bw || (el._bw = el.offsetWidth), h = el._bh || (el._bh = el.offsetHeight);
+      let s = Math.max(0.5, Math.min(1.25, p.s * 0.78));
+      // with its tab standing over it, the button stays below the tab's grab bar
+      const t = open[el.dataset.cmd];
+      if (isTab(t) && Math.hypot(t._wx - el._ax, t._wz - el._az) < 60) { const q = project(b, t._wx, H0 - 40 * TAB_K, t._wz); if (q) s = Math.min(s, Math.max(0.35, (p.y - q.y - 4) / h)); }
       const tf = `translate(${(p.x - w / 2).toFixed(1)}px,${(p.y - h).toFixed(1)}px) scale(${s.toFixed(3)})`;
       if (tf !== el._tf) { el._tf = tf; el.style.transform = tf; }
       const op = Math.min(1, (p.s - 0.18) * 4).toFixed(2); if (op !== el._op) { el._op = op; el.style.opacity = op; }
-      const z = String(Math.max(1, Math.round(200000 / p.zc))); if (z !== el._z) { el._z = z; el.style.zIndex = z; }
+      const z = String(Math.max(1, Math.min(3900, Math.round(200000 / p.zc)))); if (z !== el._z) { el._z = z; el.style.zIndex = z; }
     }
   }
 
@@ -1080,7 +1425,7 @@ textarea.draft:focus{border-color:var(--blue)}
   let SEA = null; try { SEA = window.AllieSea && AllieSea.create(sea, bc); } catch (err) { console.error("sea", err); }
   if (!SEA) root.classList.add("nogl");
   // Character cells in screen pixels: small, so the boat's planks and the ripples keep their detail.
-  const CELL = { dot: 5, glyph: [5, 8] }, BOAT_SCALE = 210;
+  const CELL = [4, 7], BOAT_SCALE = 210;
   let dprS = 1, MONO = "";
   function sizeScene() {
     dprS = Math.min(2, devicePixelRatio || 1);
@@ -1090,47 +1435,71 @@ textarea.draft:focus{border-color:var(--blue)}
   (async () => {
     if (!SEA) return;
     try {
-      const bytes = ON_PC && allie.readAsset ? await allie.readAsset("boat.glb") : new Uint8Array(await (await fetch("models/boat.glb")).arrayBuffer());
+      const xhr = u => new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open("GET", u); x.responseType = "arraybuffer"; x.onload = () => x.response ? ok(new Uint8Array(x.response)) : no(new Error("empty")); x.onerror = () => no(new Error("can't read " + u)); x.send(); });
+      const bytes = ON_PC && allie.readAsset ? await allie.readAsset("boat.glb") : location.protocol === "file:" ? await xhr("models/boat.glb") : new Uint8Array(await (await fetch("models/boat.glb")).arrayBuffer());
       await SEA.loadBoat(bytes);
     } catch (err) { console.error("boat", err); }
   })();
   // The boat rides the swell: sitting stern-down and half full of water, with a slow heave, pitch and roll.
   const BP = { R: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], pos: [0, 0, 0] };
   function boatPose(t) {
-    const k = reduce ? 0 : 1, yaw = 0.52, pitch = -0.085 + k * 0.018 * Math.sin(t * 0.7), roll = -0.05 + k * 0.03 * Math.sin(t * 0.83 + 1), heave = 13 + k * 2.5 * Math.sin(t * 0.9);
+    const k = reduce ? 0 : 1, yaw = 0.34, pitch = -0.2 + k * 0.016 * Math.sin(t * 0.7), roll = -0.28 + k * 0.03 * Math.sin(t * 0.83 + 1), heave = 6 + k * 2.5 * Math.sin(t * 0.9);
     const cy = Math.cos(yaw), sy = Math.sin(yaw), cz = Math.cos(pitch), sz = Math.sin(pitch), cx = Math.cos(roll), sx = Math.sin(roll);
     const Rz = [[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]], Rx = [[1, 0, 0], [0, cx, -sx], [0, sx, cx]], Ry = [[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]];
     const mul = (A, B) => A.map(r => [0, 1, 2].map(j => r[0] * B[0][j] + r[1] * B[1][j] + r[2] * B[2][j]));
     BP.R = mul(mul(Ry, Rz), Rx); BP.pos = [0, heave, 0];
   }
+  // The bottle drifts near the island, lying in the water, bobbing and rolling a little.
+  const M4p = (m, p) => AllieSea.M4.point(m, p);
+  const bottlePos = () => [PLACES.journal.x, -5 + (reduce ? 0 : Math.sin(T * 1.1) * 3), PLACES.journal.z];
+  function bottleMat() {
+    const M = AllieSea.M4, p = bottlePos(), k = reduce ? 0 : 1;
+    return M.chain(M.T(p[0], p[1], p[2]), M.Y(0.6 + k * 0.05 * Math.sin(T * 0.3)), M.Z(-Math.PI / 2 + 0.14 + k * 0.04 * Math.sin(T * 0.9)), M.X(k * 0.12 * Math.sin(T * 0.7 + 1)), M.T(0, -60, 0));
+  }
+  const benchMat = () => { const P = PLACES.craft, M = AllieSea.M4; return M.chain(M.T(P.x, P.y, P.z), M.Y(P.yaw)); };
+  function propList() {
+    if (!SEA) return [];
+    const M = AllieSea.M4, S0 = PLACES.studio, top = SEA.props.islandTop;
+    return [{ mesh: "island", M: M.T(S0.x, 0, S0.z) }, { mesh: "lighthouse", M: M.T(S0.x, top - 6, S0.z) }, { mesh: "bench", M: benchMat() }, { mesh: "bottle", M: bottleMat() }, { mesh: "post", M: M.T(POST[0], 0, POST[2]) }];
+  }
   const boatPoint = p => { const R = BP.R, q = p.map(v => v * BOAT_SCALE); return [0, 1, 2].map(i => R[i][0] * q[0] + R[i][1] * q[1] + R[i][2] * q[2] + BP.pos[i]); };
 
   /* ---------------- Allie: a pink gull ---------------- */
-  // She perches on the bow, flies to whichever tab she opens and lands on its top edge, and the camera follows her
-  // there. She sleeps with her head tucked into her back, perks up when she hears you, tilts her head while she
+  // She perches on the bow, flies to whichever tab she opens and lands on its top edge. She sleeps with her head tucked into her back, perks up when she hears you, tilts her head while she
   // thinks, and her beak moves as she talks. Her body is drawn by renderer/sea.js; this is how she behaves.
-  const BIRD = { x: 0, y: 0, z: 0, yaw: 2.6, pitch: 0, roll: 0, perch: "boat", fly: null, flyW: 0, flap: 0, wake: 0, blink: 0, nextBlink: 3, hop: 0, sleepW: 0, sx: 0, sy: 0, sc: 1, scale: 1 };
+  const BIRD = { x: 0, y: 0, z: 0, yaw: 2.6, pitch: 0, roll: 0, perch: "home", fly: null, flyW: 0, flap: 0, wake: 0, blink: 0, nextBlink: 3, hop: 0, sleepW: 0, sx: 0, sy: 0, sc: 1, scale: 1 };
   function perchPoint() {
-    const el = BIRD.perch !== "boat" && (open[BIRD.perch] || null);
-    // panels face the camera, so their top edge is "up" along the camera's up direction, not straight up
-    if (el && el._w) { const sp = Math.sin(CAM.p), cp = Math.cos(CAM.p); return [el._wx - el._w / 2 + 74, H0 + el._h * cp, el._wz - el._h * sp]; }
+    const pr = BIRD.perch;
+    // at a place: the top of the post on the beach, the boat's bow, the lighthouse railing, or riding the bottle
+    if (pr === "home") return [POST[0], (SEA ? SEA.props.postTop : 70) - 1, POST[2]];
+    if (pr === "studio") { const P = PLACES.studio, a = P.a0 + 0.45, y = (SEA ? SEA.props.islandTop : 150) - 6 + 471; return [P.x + Math.sin(a) * 76, y, P.z + Math.cos(a) * 76]; }
+    if (pr === "journal") return M4p(bottleMat(), [-19, 62, 0]);
+    if (pr === "craft") { const B = AllieSea.BENCH; return M4p(benchMat(), [-B.w / 2 + 16, B.top, -B.d / 2 + 12]); }
+    const el = !PLACES[pr] && (open[pr] || null);
+    // on a tab: near the left end of its top edge, which leans back with the tab
+    if (isTab(el)) { const f = tabFrame(el, basis(CAM)), k = TAB_K, s = -el._w * k / 2 + 74 * k, t = el._h * k; return [el._wx + f.r[0] * s + f.u[0] * t, H0 + f.u[1] * t, el._wz + f.r[2] * s + f.u[2] * t]; }
     const t = SEA && SEA.bowTip || [-1, 0.13, 0], p = boatPoint([t[0] + 0.05, t[1], t[2]]);
     return [p[0], p[1] - 1, p[2]];
   }
   // Which way she faces when she lands: out over the bow on the boat, along the tab's top edge on a tab; turned a little toward you.
   function perchYaw() {
-    if (BIRD.perch !== "boat" && open[BIRD.perch]) return Math.atan2(-0.55, 1);
+    const pr = BIRD.perch, el = !PLACES[pr] && open[pr];
+    if (isTab(el)) { const f = tabFrame(el, basis(CAM)), fx = -f.r[0] * 0.8 + f.o[0] * 0.6, fz = -f.r[2] * 0.8 + f.o[2] * 0.6; return Math.atan2(-fz, fx); } // along the edge, turned out toward you
+    if (pr === "home") return -Math.PI / 2 + 0.45; // on her post, turned to face you
+    if (pr === "craft") return PLACES.craft.yaw - Math.PI / 2 + 0.5; // on the bench, facing you
+    if (pr === "studio") return PLACES.studio.a0 + 0.45 - Math.PI / 2; // along the railing
+    if (pr === "journal") return 0.6;
     return Math.atan2(-0.25, -1); // in profile, looking out to the left past the bow
   }
   const angTo = (a, b) => { let d = (b - a) % (2 * Math.PI); if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI; return d; };
-  // cam: where the camera should end up when she lands (a tab's close-up, or home); while she flies the camera follows her.
+  // cam: where the camera goes at the same time (a tab's close-up, or home); it doesn't wait for her.
   function birdTo(perch, cam) {
     if (BIRD.perch === perch && !BIRD.fly) { if (cam) flyCam(cam); return; }
     BIRD.perch = perch;
     const [x, y, z] = perchPoint(), d = Math.hypot(x - BIRD.x, y - BIRD.y, z - BIRD.z);
     if (reduce || d < 4) { BIRD.fly = null; [BIRD.x, BIRD.y, BIRD.z] = [x, y, z]; BIRD.yaw = perchYaw(); if (cam) flyCam(cam); return; }
-    BIRD.fly = { t: 0, from: [BIRD.x, BIRD.y, BIRD.z], dur: Math.max(1.5, Math.min(3.2, 1.1 + d / 900)), arc: 90 + d * 0.22, side: (Math.random() < 0.5 ? -1 : 1) * d * 0.12,
-      cam: cam ? { from: { x: CAM.x, y: CAM.y, z: CAM.z, d: CAM.d, p: CAM.p }, to: cam } : null, last: [BIRD.x, BIRD.y, BIRD.z] };
+    if (cam) flyCam(cam);
+    BIRD.fly = { t: 0, from: [BIRD.x, BIRD.y, BIRD.z], dur: Math.max(0.9, Math.min(3, 0.7 + d / 1500)), arc: Math.min(320, 60 + d * 0.15), side: (Math.random() < 0.5 ? -1 : 1) * d * 0.1, last: [BIRD.x, BIRD.y, BIRD.z] };
   }
   function birdHit(x, y) { return Math.hypot(x - BIRD.sx, y - BIRD.sy) < 40 * BIRD.sc; }
   function birdPoke() { if (busy) { stopTalking(); return; } BIRD.hop = 1; BIRD.wake = Math.max(BIRD.wake, 0.7); }
@@ -1151,14 +1520,7 @@ textarea.draft:focus{border-color:var(--blue)}
       // beat hard on take-off, glide through the middle, flare to land
       BIRD.amp = 0.9 - 0.65 * smooth(0.15, 0.35, u) + 0.5 * smooth(0.8, 0.95, u) * (1 - smooth(0.97, 1, u));
       BIRD.flap += dt * (15 - 6 * arc);
-      // the camera keeps her in view: it follows her mid-flight, then settles on where she's going
-      if (f.cam) {
-        const fol = { x: nx, y: Math.max(0, ny - 70), z: nz, d: Math.max(f.cam.from.d, f.cam.to.d) * 1.12, p: (f.cam.from.p + f.cam.to.p) / 2 + 0.06 };
-        const a = smooth(0, 0.3, u), c = smooth(0.55, 1, u), t = {};
-        for (const k of ["x", "y", "z", "d", "p"]) t[k] = f.cam.from[k] + (fol[k] - f.cam.from[k]) * a, t[k] += (f.cam.to[k] - t[k]) * c;
-        if (!camAnim) { CV.x = INR.vx; CV.z = INR.vz; } camAnim = { t };
-      }
-      if (u >= 1) { BIRD.fly = null; BIRD.wake = Math.max(BIRD.wake, 0.4); if (f.cam) flyCam(f.cam.to); }
+      if (u >= 1) { BIRD.fly = null; BIRD.wake = Math.max(BIRD.wake, 0.4); }
     } else {
       [BIRD.x, BIRD.y, BIRD.z] = [tx, ty, tz];
       BIRD.yaw += angTo(BIRD.yaw, perchYaw()) * Math.min(1, dt * 4); BIRD.pitch *= Math.max(0, 1 - dt * 6); BIRD.roll *= Math.max(0, 1 - dt * 6);
@@ -1172,7 +1534,7 @@ textarea.draft:focus{border-color:var(--blue)}
   function gullPose(b, amp) {
     const p = project(b, BIRD.x, BIRD.y + 24, BIRD.z); if (!p) return null;
     // she stays a readable size: never a speck when you're far away, never huge up close
-    const s = p.s; BIRD.scale = s < 0.55 ? 0.55 / s : s > 1.7 ? 1.7 / s : 1;
+    const s = p.s; BIRD.scale = 0.8 * (s < 0.6 ? 0.6 / s : s > 1.8 ? 1.8 / s : 1);
     BIRD.sx = p.x; BIRD.sy = p.y; BIRD.sc = s * BIRD.scale;
     const hop = Math.sin(BIRD.hop * Math.PI);
     return { x: BIRD.x, y: BIRD.y + hop * 10, z: BIRD.z, yaw: BIRD.yaw, pitch: BIRD.pitch, roll: BIRD.roll, scale: BIRD.scale,
@@ -1186,7 +1548,7 @@ textarea.draft:focus{border-color:var(--blue)}
     if (show) { zzz.style.opacity = ((BIRD.sleepW - 0.3) / 0.7).toFixed(2); zzz.style.transform = `translate(${(BIRD.sx + 4 * BIRD.sc).toFixed(1)}px,${(BIRD.sy - 30 * BIRD.sc).toFixed(1)}px) scale(${Math.max(0.6, Math.min(1.4, BIRD.sc)).toFixed(2)})`; }
   }
   // Reflection stand-ins for the floating buttons: a disc of each button's colour, where the icon sits.
-  const FLOAT_RGB = { today: [1, 0.31, 0.66], mail: [0.18, 0.55, 0.9], calendar: [1, 0.42, 0.37], todo: [0.96, 0.63, 0.29], time: [0.44, 0.83, 0.91], calories: [1, 0.42, 0.24], businesses: [0.94, 0.44, 0.59], finances: [0.27, 0.79, 0.56], jobs: [0.73, 0.55, 0.94], settings: [0.56, 0.66, 0.64] };
+  const FLOAT_RGB = { editing: [0.44, 0.83, 0.91], influencer: [0.94, 0.44, 0.59], today: [1, 0.31, 0.66], mail: [0.18, 0.55, 0.9], calendar: [1, 0.42, 0.37], todo: [0.96, 0.63, 0.29], time: [0.44, 0.83, 0.91], calories: [1, 0.42, 0.24], businesses: [0.94, 0.44, 0.59], finances: [0.27, 0.79, 0.56], jobs: [0.73, 0.55, 0.94], settings: [0.56, 0.66, 0.64] };
 
   let state = "idle"; const W8 = { listen: 0, think: 0, speak: 0, sleep: 0 }, thinkEl = $("#think"), SPIN = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏";
   function setState(s) { state = sleeping && s === "idle" ? "asleep" : s; thinkEl.hidden = state !== "thinking"; }
@@ -1205,13 +1567,19 @@ textarea.draft:focus{border-color:var(--blue)}
     boatPose(T); moveBird(dt);
     if (camAnim) camSpring(dt);
     const b = basis(CAM);
-    for (const k in open) put(open[k], b); for (const k in closing) put(closing[k], b);
-    placeFloats(b);
+    BOATBOX = boatBox(b);
+    for (const k in open) if (isTab(open[k])) put(open[k], b);
+    for (const k in closing) put(closing[k], b);
+    placeFloats(b); placeLabels(b);
     const pose = gullPose(b, amp);
     if (SEA) {
-      const panels = Object.values(open).filter(e => e._w).map(e => ({ x: e._wx, y: H0, z: e._wz, w: e._w, h: e._h }));
-      const fl = FL.map(e => ({ x: e._ax, y: 16 + e._bob + 41, z: e._az, r: 23, c: FLOAT_RGB[e.dataset.cmd].map(v => v * 0.55) }));
-      SEA.render({ T: reduce ? T * 0.2 : T, b, FOC, theme: root.dataset.theme === "light" ? "light" : "dark", dim: dimNow, boat: { R: BP.R, pos: BP.pos, scale: BOAT_SCALE }, panels, floats: fl, gull: pose });
+      const panels = Object.values(open).filter(isTab).map(e => { const f = tabFrame(e, b); return { x: e._wx, y: H0, z: e._wz, w: e._w * TAB_K, h: e._h * TAB_K, r: f.r, u: f.u, back: !!e._back }; });
+      const fl = FL.map(e => ({ x: e._ax, y: 16 + e._bob + 36, z: e._az, r: 18, c: FLOAT_RGB[e.dataset.cmd].map(v => v * 0.55), r3: b.R, u3: b.U }));
+      const S0 = PLACES.studio, J = PLACES.journal, aim = camAim();
+      SEA.render({ T: reduce ? T * 0.2 : T, b, FOC, theme: root.dataset.theme === "light" ? "light" : "dark", dim: dimNow, boat: { R: BP.R, pos: BP.pos, scale: BOAT_SCALE }, panels, floats: fl, gull: pose,
+        props: propList(), shore: SHORE, ripples: [[0, 0, 170, 1], [S0.x, S0.z, 500, 0.75], [J.x, J.z, 34, 0.7]],
+        shadowAt: { x: CAM.x, y: 0, z: CAM.z, r: HERE === "studio" ? 1150 : HERE === "home" ? 800 : HERE === "craft" ? 320 : 650 } });
+      placeBench(b);
     }
     placeZzz();
     if (!thinkEl.hidden) thinkEl.firstChild.textContent = SPIN[Math.floor(T * 12) % SPIN.length];
@@ -1270,6 +1638,14 @@ textarea.draft:focus{border-color:var(--blue)}
       const inc = Math.round(mo.filter(m => m.amt > 0).reduce((a, m) => a + m.amt, 0)), out = Math.round(-mo.filter(m => m.amt < 0).reduce((a, m) => a + m.amt, 0));
       return inc || out ? `This month, $${inc} in and $${out} out.` : "Nothing in or out this month yet.";
     }
+    if (key === "editing") {
+      const live = S.videos.filter(v => v.stage < 3), rev = live.filter(v => v.stage === 2).length;
+      return live.length ? `${plural(live.length, "edit")} on the go${rev ? `, ${rev} in review` : ""}.` : "No edits on the go.";
+    }
+    if (key === "influencer") {
+      const note = (S.notes || []).slice(-1)[0], c = (S.chars || []).length;
+      return note ? `Latest: ${note.text.replace(/[.!?]*$/, ".")}` : c ? `${plural(c, "character")} on the go.` : "Nothing logged on the influencer side yet.";
+    }
     if (key === "businesses") {
       const live = S.videos.filter(v => v.stage < 3), rev = live.filter(v => v.stage === 2).length, note = (S.notes || []).slice(-1)[0];
       const ed = live.length ? `${plural(live.length, "edit")} on the go${rev ? `, ${rev} in review` : ""}.` : "No edits on the go.";
@@ -1294,8 +1670,8 @@ textarea.draft:focus{border-color:var(--blue)}
   }
   const later = (fn, ms) => { const s0 = seq; setTimeout(() => { if (s0 === seq) fn(); }, ms); };
   function setBusy(b) { busy = b; }
-  function reveal(text, dur) {
-    clearInterval(typer);
+  function reveal(text, dur, keep = true) {
+    clearInterval(typer); logMsg("allie", text, keep);
     const words = text.split(" ");
     capA.innerHTML = words.map(w => `<span class="w">${esc(w)}</span>`).join(" ");
     const spans = [...capA.children], total = text.length + 1, t0 = performance.now(), ms = Math.max(400, dur * 920);
@@ -1303,6 +1679,27 @@ textarea.draft:focus{border-color:var(--blue)}
     let i = 0;
     typer = setInterval(() => { const f = (performance.now() - t0) / ms; while (i < spans.length && starts[i] <= f) spans[i++].classList.add("on"); if (i >= spans.length) clearInterval(typer); }, 30);
   }
+  // The chat on the beach keeps the conversation: what you asked and what Allie said.
+  const clList = $("#cl-list"); let chatLog = [];
+  function logMsg(who, text, keep = true) {
+    text = String(text || "").trim(); if (!text) return;
+    const last = chatLog[chatLog.length - 1]; if (last && last.who === who && last.text === text) return;
+    chatLog.push({ who, text, temp: !keep }); if (chatLog.length > 80) chatLog = chatLog.slice(-80);
+    const m = document.createElement("div"); m.className = "msg " + who; m.textContent = text; clList.appendChild(m);
+    while (clList.children.length > 80) clList.firstChild.remove();
+    clList.scrollTop = clList.scrollHeight;
+    if (keep) try { localStorage.setItem("allie.chat", JSON.stringify(chatLog.filter(m => !m.temp).slice(-40).map(({ who, text }) => ({ who, text })))); } catch (e) {}
+  }
+  function restoreChat() {
+    let old = []; try { old = JSON.parse(localStorage.getItem("allie.chat") || "[]") || []; } catch (e) {}
+    for (const m of old.slice(-30)) if (m && (m.who === "you" || m.who === "allie")) logMsg(m.who, m.text, false);
+    if (old.length) { const d = document.createElement("div"); d.className = "cl-sep"; d.textContent = "earlier"; clList.insertBefore(d, clList.firstChild); }
+  }
+  // At home the chat starts as a single line; it opens into the full conversation once you start chatting.
+  const chatEl = $("#chatlog"), chatOpen = on => { chatEl.classList.toggle("open", on); if (on) clList.scrollTop = clList.scrollHeight; };
+  $("#cl-ask").addEventListener("input", e => { if (e.target.value.trim()) chatOpen(true); });
+  $("#cl-min").addEventListener("click", () => chatOpen(false));
+  $("#cl-form").addEventListener("submit", e => { e.preventDefault(); const i = $("#cl-ask"), v = i.value; i.value = ""; if (v.trim()) chatOpen(true); ask(v); });
   const showAll = () => { clearInterval(typer); capA.querySelectorAll(".w").forEach(s => s.classList.add("on")); };
   function caption(key, done) {
     if (liveVoice()) return speakText(LINES[key] || CAPS[key], done);
@@ -1327,17 +1724,19 @@ textarea.draft:focus{border-color:var(--blue)}
   function goTo(el, key) {
     el.classList.add("glow"); setTimeout(() => el.classList.remove("glow"), 2200);
     requestAnimationFrame(() => {
-      birdTo(key, focusView(el));
+      const k = el.dataset.key;
+      if (k !== "settings") { dropSheet(); birdTo(k, focusView(el)); }
       later(() => { const fin = () => { setState("idle"); setBusy(false); }, sum = PANELS[key] && rundown(key); setState("speaking"); if (sum) speakText(sum, fin); else caption(key, fin); }, 650);
     });
   }
   function talk(key) { setBusy(true); setState("speaking"); caption(key, () => { setState("idle"); setBusy(false); }); }
   function show(key, line) { setBusy(true); setState("thinking"); later(() => goTo(openPanel(key), line || key), 550); }
   function run(cmd, extra) {
+    if (cmd === "place") { travel(extra); return; }
     if (cmd === "home" || cmd === "overview" || cmd === "clear") {
       if (cmd === "clear") Object.keys(open).forEach(closePanel);
-      if (cmd === "overview" && Object.keys(open).length) { overview(); talk("overview"); return; }
-      focusKey = null; birdTo("boat", homeView());
+      if (cmd === "overview" && Object.values(open).some(isTab)) { overview(); talk("overview"); return; }
+      if (cmd === "home") travel("home"); else { dropSheet(); focusKey = null; birdTo(HERE, homeView()); }
       talk(cmd === "clear" ? "clear" : "home"); return;
     }
     if (cmd === "sleep") return setSleep(true);
@@ -1368,8 +1767,15 @@ textarea.draft:focus{border-color:var(--blue)}
     if (/\btomorrow\b/i.test(t)) { due = dayOff(1); t = t.replace(/\s*\btomorrow\b/i, ""); } else t = t.replace(/\s*\btoday\b/i, "");
     return { t: cap1(t.replace(/[.!?]+$/, "").trim()) || "New task", due };
   }
+  // "take me to the studio", "go home", "open my journal": where to go, if anywhere.
+  const PLACE_WORDS = [[/\b(craft|crafting|workbench|work bench|workshop|build mode|bench)\b/, "craft"], [/\b(home|beach|shore|sand)\b/, "home"], [/\b(my life|life|boat)\b/, "life"], [/\b(studio|lighthouse|light house|island)\b/, "studio"], [/\b(journal|bottle|diary)\b/, "journal"]];
+  function placeFrom(s) {
+    const go = /\b(take me|bring me|go|head|fly|sail|let'?s go|get me|back to|show me|open|start|enter)\b/.test(s), bare = /^\W*(the |my )?(home|beach|my life|life|boat|studio|lighthouse|journal|bottle|diary|workbench|workshop|crafting)\W*$/.test(s);
+    if (!go && !bare) return null; const m = PLACE_WORDS.find(([re]) => re.test(s)); return m ? m[1] : null;
+  }
   function interpret(q) {
     const s = q.toLowerCase();
+    const where = placeFrom(s); if (where) return ["place", where];
     if (/\b(sleep|goodnight|good night|stop listening)\b/.test(s)) return ["sleep"];
     if (/\b(wake up|hey allie|hey allison)\b/.test(s) && sleeping) return ["wake"];
     if (/close|clear/.test(s) && /all|every|clear/.test(s)) return ["clear"];
@@ -1380,7 +1786,8 @@ textarea.draft:focus{border-color:var(--blue)}
     const food = foodFrom(s); if (food) return ["food", food];
     if (/remind me to |^add .+ to (my )?(to.?do|list|tasks)|^to.?do:?\s+\S| to (my |the )?(to.?do|tasks?)( list)?\W*$/.test(s)) return ["addTodo", todoFrom(q)];
     if (/mail|inbox|gmail/.test(s)) return ["mail"];
-    if (/business|influencer|comfy|clients?|videos? i'?m/.test(s)) return ["businesses"];
+    if (/influencer|comfy|character|lora|followers/.test(s)) return ["influencer"];
+    if (/business|edit|clients?|videos? i'?m/.test(s)) return ["editing"];
     if (/calor|food|eat|diet|macro|protein|hungry|weight/.test(s)) return ["calories"];
     if (/expens|money|spend|spent|income|earn|budget|financ|stripe|paypal/.test(s)) return ["finances"];
     if (/timer|time track|how long|hours|stopwatch|worked/.test(s)) return ["time"];
@@ -1396,7 +1803,7 @@ textarea.draft:focus{border-color:var(--blue)}
   }
   function ask(q) {
     q = q.trim(); if (!q) return; if (busy) stopTalking();
-    capU.textContent = q; capA.textContent = "";
+    capU.textContent = q; capA.textContent = ""; logMsg("you", q);
     const [cmd, extra] = interpret(q);
     if (sleeping && cmd !== "sleep" && cmd !== "wake") { sleeping = false; syncSleep(); }
     if (DESK && allie.hasKey() && cmd !== "sleep" && cmd !== "wake") think(q);
@@ -1450,7 +1857,7 @@ textarea.draft:focus{border-color:var(--blue)}
     const kcal = foodToday().reduce((a, f) => a + f.kcal, 0), w = S.weights[S.weights.length - 1];
     const p = S.timer && S.projects.find(x => x.id === S.timer.pid);
     return [`Now: ${now.toLocaleString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })} (today is ${TODAY})`,
-      `Asleep: ${sleeping}. Open panels: ${Object.keys(open).join(", ") || "none"}`,
+      `Asleep: ${sleeping}. Jack is at: ${PLACES[HERE].label}. Open panels: ${Object.keys(open).join(", ") || "none"}`,
       `Timer: ${p ? "running on " + p.name + " for " + clockOf(running()) : "off"}. Projects: ${S.projects.map(x => x.name).join(", ") || "none"}`,
       `Open to-dos: ${open_.join("; ") || "none"}`, `Upcoming events: ${evs.join("; ") || "none"}`,
       `Calories today: ${kcal} of ${S.goal}. Last weight: ${w ? (S.unit === "lb" ? (w.kg * LB).toFixed(1) + " lb" : w.kg.toFixed(1) + " kg") + " on " + w.d : "none"}`,
@@ -1461,13 +1868,14 @@ textarea.draft:focus{border-color:var(--blue)}
       `Connected: ${Object.entries(EXT.on).filter(([, v]) => v).map(([k]) => k).join(", ") || "nothing yet"}. Calendar and money from connected accounts show in the app; recent income this month: ${EXT.money.filter(m => m.amt > 0 && m.d.slice(0, 7) === TODAY.slice(0, 7)).reduce((a, m) => a + m.amt, 0).toFixed(0)}`].join("\n");
   }
   function showQuiet(key) {
-    if (["home", "overview", "clear"].includes(key)) { if (key === "clear") Object.keys(open).forEach(closePanel); if (key === "overview") overview(); else { focusKey = null; birdTo("boat", homeView()); } return; }
+    if (["home", "overview", "clear"].includes(key)) { if (key === "clear") Object.keys(open).forEach(closePanel); if (key === "overview") overview(); else if (key === "home") travel("home"); else { dropSheet(); focusKey = null; birdTo(HERE, homeView()); } return; }
     if (!PANELS[key]) return;
     const el = openPanel(key);
-    requestAnimationFrame(() => birdTo(key, focusView(el)));
+    if (key !== "settings") requestAnimationFrame(() => { dropSheet(); birdTo(key, focusView(el)); });
   }
   const ACT = {
     open_panel: i => { showQuiet(i.panel); return PANELS[i.panel] ? "Opened. What's in it: " + rundown(i.panel) : "done"; },
+    go_to: i => { if (!PLACES[i.place]) return "no such place"; travel(i.place); return "Now at " + PLACES[i.place].label; },
     add_task: i => { const dup = S.todos.find(t => !t.done && t.t.toLowerCase() === String(i.title).toLowerCase()); if (dup) return "already there"; addTodo(cap1(i.title), i.due || "", { myDay: i.due === TODAY ? TODAY : "", star: !!i.important }); const t = S.todos[S.todos.length - 1]; if (BIZ[i.business]) t.biz = i.business; changed("todos"); showQuiet("todo"); return "added #" + freshId; },
     complete_task: i => { const t = S.todos.find(x => x.id === +i.id); if (!t) return "no such task"; t.done = true; changed("todos"); },
     add_event: i => { S.events.push({ id: freshId = uid(), d: i.date, t: i.time || "12:00", what: cap1(i.what), biz: guessBiz(i.what) }); calSel = i.date; changed("events"); showQuiet("calendar"); },
@@ -1559,6 +1967,8 @@ textarea.draft:focus{border-color:var(--blue)}
   });
   /* ---------------- Sleep ---------------- */
   const sleepBtn = $("#sleep");
+  homeBtn.addEventListener("click", () => { hideHint(); if (busy) stopTalking(); capU.textContent = ""; travel("home"); });
+  setBtn.addEventListener("click", () => { hideHint(); if (open.settings) closeSheet(); else { if (busy) stopTalking(); capU.textContent = ""; openSheet(); } });
   function syncSleep() {
     sleepBtn.setAttribute("aria-pressed", sleeping); sleepBtn.setAttribute("aria-label", sleeping ? "Wake Allie" : "Put Allie to sleep");
     document.body.classList.toggle("asleep", sleeping); syncMic(); if (DESK) allie.micReset(); $$("[data-sleep]").forEach(s => s.setAttribute("aria-checked", sleeping));
@@ -1573,7 +1983,7 @@ textarea.draft:focus{border-color:var(--blue)}
   sleepBtn.addEventListener("click", () => { if (micErr && !sleeping) { micErr = false; startEars(); return; } setSleep(!sleeping); });
 
   /* ---------------- Inside the panels ---------------- */
-  world.addEventListener("click", e => {
+  function panelClick(e) {
     const t = e.target.closest("[data-del-char],[data-inbox],[data-disc],[data-url],[data-close],[data-voice],[data-sleep],[data-star],[data-del-todo],[data-view],[data-show-done],[data-cal],[data-day],[data-del-ev],[data-timer],[data-proj],[data-del-proj],[data-range],[data-sort],[data-quick],[data-del-food],[data-unit],[data-open],[data-theme-set],[data-brain],[data-reset],[data-biz],[data-stage],[data-vtime],[data-del-vid],[data-gstep],[data-del-goal],[data-del-money],[data-scan]");
     if (!t) return;
     const d = t.dataset;
@@ -1618,13 +2028,13 @@ textarea.draft:focus{border-color:var(--blue)}
       if (d.armed) { stopTimer(true); S = seed(); save(); Object.keys(open).forEach(refresh); island(); t.textContent = "Cleared"; }
       else { d.armed = "1"; t.textContent = "Tap again to clear everything"; setTimeout(() => { if (t.isConnected) { delete t.dataset.armed; t.textContent = "Clear"; } }, 3000); }
     }
-  });
-  world.addEventListener("change", e => {
+  }
+  function panelChange(e) {
     const t = e.target;
     if (t.dataset.todo) { const x = S.todos.find(y => y.id === +t.dataset.todo); if (x) { x.done = t.checked; setTimeout(() => changed("todos"), 280); } }
     else if (t.dataset.goal !== undefined) { S.goal = Math.max(1000, Math.min(6000, Math.round(+t.value || 2400))); changed("food"); }
-  });
-  world.addEventListener("submit", e => {
+  }
+  function panelSubmit(e) {
     const f = e.target.closest("form[data-form]"); if (!f) return; e.preventDefault();
     const kind = f.dataset.form, panel = f.closest(".panel").dataset.key, val = n => (f.elements[n] ? f.elements[n].value.trim() : "");
     let focus = null;
@@ -1663,7 +2073,8 @@ textarea.draft:focus{border-color:var(--blue)}
     }
     const inp = focus && open[panel] && open[panel].querySelector(`form[data-form="${kind}"] [name="${focus}"]`);
     if (inp) inp.focus({ preventScroll: true });
-  });
+  }
+  for (const host of [world, sheetHost]) { host.addEventListener("click", panelClick); host.addEventListener("change", panelChange); host.addEventListener("submit", panelSubmit); }
   function setVoice(on) {
     voiceState.on = on; $$("[data-voice]").forEach(s => s.setAttribute("aria-checked", on));
     if (!on && srcNode) { srcNode.onended = null; try { srcNode.stop(); } catch (e) {} srcNode = null; level = 0; }
@@ -1672,12 +2083,13 @@ textarea.draft:focus{border-color:var(--blue)}
   try { if (localStorage.getItem("allie.voice") === "0") setVoice(false); } catch (e) {}
 
   addEventListener("keydown", e => {
-    if (e.key === "Escape") { if (busy) { stopTalking(); return; } if (!bar.hidden) { openChat(false); return; } }
+    if (e.key === "Escape") { if (busy) { stopTalking(); return; } if (!bar.hidden) { openChat(false); return; } if (open.settings) { closeSheet(); return; } if (HERE === "craft") { travel("studio"); return; } }
     if (e.target.matches("input,textarea,select")) return;
-    if (e.key === "+" || e.key === "=") zoomAt(W / 2, H / 2, 1.1);
-    else if (e.key === "-") zoomAt(W / 2, H / 2, 1 / 1.1);
+    if (e.key === "+" || e.key === "=") zoomBy(1.1);
+    else if (e.key === "-") zoomBy(1 / 1.1);
+    else if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); stepTab(e.key === "ArrowRight" ? 1 : -1); }
     else if (e.key === "0") run("home");
-    else if (e.key === "/" || e.key === "Enter") { e.preventDefault(); openChat(true); }
+    else if (e.key === "/" || (e.key === "Enter" && !e.target.closest("button,a[href],[role=button],[role=switch],[contenteditable]"))) { e.preventDefault(); openChat(true); }
   });
 
   /* ---------------- Live bits: the timer pill, the clock, the "now" line ---------------- */
@@ -1738,9 +2150,9 @@ textarea.draft:focus{border-color:var(--blue)}
       else if (s.stage === "error") { chipS.hidden = false; chipS.textContent = s.what === "voice" ? "Voice download failed · restart to retry" : "Couldn't start listening"; chipS.title = s.detail || ""; }
     });
   }
-  sizeScene(); goHome(true); island(); syncSleep();
+  sizeScene(); setHere("home"); goHome(true); island(); syncSleep(); restoreChat();
   const hr = new Date().getHours();
-  reveal(`Good ${hr < 12 ? "morning" : hr < 18 ? "afternoon" : "evening"}, Jack. Just talk to me, or tap the chat button to type.`, 2.4);
+  reveal(`Good ${hr < 12 ? "morning" : hr < 18 ? "afternoon" : "evening"}, Jack. Just talk to me, or type below.`, 2.4, false);
   requestAnimationFrame(frame);
 })();
 </script>

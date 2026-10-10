@@ -43,3 +43,10 @@ test("Allie's poses give finite transforms: perched, flying, asleep, talking", (
     if (extra.wings) assert.ok(Math.hypot(tip[1] - 26, tip[2]) > 35, "spread"); else if (!extra.sleep) assert.ok(tip[0] < -20 && Math.abs(tip[2]) < 14, "folded");
   }
 });
+
+test("the workbench stands on a terrace on the island, inside the shore", () => {
+  const T = S.TERRACE, B = S.BENCH;
+  assert.ok(T && B, "TERRACE and BENCH are exported");
+  assert.ok(Math.hypot(T.x, T.z) + T.r < 470 * 0.66, "terrace sits on the island, not on its beach");
+  assert.ok(Math.hypot(T.x, T.z) - Math.hypot(B.w, B.d) / 2 > 104, "bench clears the lighthouse's plinth");
+});

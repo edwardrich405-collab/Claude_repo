@@ -6,20 +6,25 @@ const fs = require("fs"), path = require("path");
 const out = path.resolve(process.argv[2] || path.join(__dirname, "..", "shots"));
 app.setPath("userData", path.join(app.getPath("temp"), "allison-shots"));
 const wait = ms => new Promise(r => setTimeout(r, ms));
+const go = place => `document.querySelector('.place[data-place="${place}"]').click()`;
 const SHOTS = [
   { name: "home", w: 1440, h: 900, run: "" },
-  { name: "today", w: 1440, h: 900, run: `document.querySelector('[data-cmd="today"]').click()` },
-  { name: "todo", w: 1440, h: 900, run: `document.querySelector('[data-cmd="todo"]').click()` },
-  { name: "settings", w: 1440, h: 900, run: `document.querySelector('[data-cmd="settings"]').click()` },
-  { name: "overview", w: 1440, h: 900, run: `for (const k of ["calories","businesses","jobs"]) document.querySelector('[data-cmd="'+k+'"]').click()`, after: `document.querySelector('[data-cmd="today"]').click()` },
+  { name: "chat", w: 1440, h: 900, run: `document.querySelector("#cl-ask").value = "hey allie"; document.querySelector("#cl-form").requestSubmit()` },
+  { name: "life", w: 1440, h: 900, run: go("life") },
+  { name: "today", w: 1440, h: 900, run: go("life"), after: `document.querySelector('[data-cmd="today"]').click()` },
+  { name: "studio", w: 1440, h: 900, run: go("studio") },
+  { name: "editing", w: 1440, h: 900, run: go("studio"), after: `document.querySelector('[data-cmd="editing"]').click()` },
+  { name: "workbench", w: 1440, h: 900, run: go("craft") },
+  { name: "journal", w: 1440, h: 900, run: go("journal") },
+  { name: "settings", w: 1440, h: 900, run: `document.querySelector("#settings").click()` },
   { name: "asleep", w: 1440, h: 900, run: `document.querySelector("#sleep").click()` },
-  { name: "small-todo", w: 900, h: 600, run: `document.querySelector('[data-cmd="todo"]').click()` },
+  { name: "small-todo", w: 900, h: 600, run: go("life"), after: `document.querySelector('[data-cmd="todo"]').click()` },
 ];
 
 app.whenReady().then(async () => {
   fs.mkdirSync(out, { recursive: true });
   const win = new BrowserWindow({ width: 1440, height: 900, show: false, useContentSize: true,
-    webPreferences: { offscreen: true, backgroundThrottling: false } });
+    webPreferences: { offscreen: true, backgroundThrottling: false, webSecurity: false } });
   win.webContents.setFrameRate(60);
   for (const theme of ["dark", "light"]) for (const s of SHOTS) {
     win.setContentSize(s.w, s.h);
@@ -30,8 +35,8 @@ app.whenReady().then(async () => {
     await win.webContents.executeJavaScript(`document.documentElement.dataset.theme = ${JSON.stringify(theme)}; document.querySelector("#theme") && (document.documentElement.dataset.theme === "${theme}"); 0`);
     await wait(800);
     if (s.run) await win.webContents.executeJavaScript(s.run + "; 0");
-    await wait(2600);
-    if (s.after) { await win.webContents.executeJavaScript(s.after + "; 0"); await wait(2600); }
+    await wait(4500);
+    if (s.after) { await win.webContents.executeJavaScript(s.after + "; 0"); await wait(4000); }
     const img = await win.webContents.capturePage();
     fs.writeFileSync(path.join(out, `${s.name}-${theme}.png`), img.toPNG());
   }

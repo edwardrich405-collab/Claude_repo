@@ -34,18 +34,27 @@ test("design-pass fixes stay fixed", () => {
   assert.doesNotMatch(h, /panel\.entering|@keyframes pop\b/);
 });
 
-test("ocean redesign: only sleep, chat and thinking stay fixed; Allie is a pink gull", () => {
+test("the world: only sleep, settings, home, chat and thinking stay fixed; every tab has a place", () => {
   const h = fs.readFileSync(path.join(R, "index.html"), "utf8");
   const chrome = h.slice(h.indexOf('<div class="dragbar">'), h.indexOf('<script src="voices.js">'));
   const ids = [...chrome.matchAll(/<button[^>]*id="([^"]+)"/g)].map(m => m[1]).sort();
-  assert.deepStrictEqual(ids, ["chat", "send", "sleep"]);
+  assert.deepStrictEqual(ids, ["chat", "cl-min", "home", "send", "settings", "sleep"]); // cl-min shrinks the beach chat back to one line
   assert.match(chrome, /id="think"/);
   assert.doesNotMatch(h, /id="mic"|id="stop"|class="rail"/);
   // the sea, the boat and Allie's body live in sea.js, loaded before the page script
   assert.match(h, /<script src="sea.js"><\/script>/);
-  // every tab has a floating button (tools/screenshots.js clicks them by data-cmd)
+  // every tab has a floating button on the ring (tools/screenshots.js clicks them by data-cmd); settings is a fixed
+  // button next to the moon and opens as a sheet on the right
   const floats = h.match(/const FLOATS = (\[.*?\]);/)[1];
-  for (const k of ["today", "mail", "calendar", "todo", "time", "calories", "businesses", "finances", "jobs", "settings"]) assert.match(floats, new RegExp(`\\["${k}"`), k);
+  for (const k of ["today", "mail", "calendar", "todo", "time", "calories", "editing", "influencer", "finances", "jobs"]) assert.match(floats, new RegExp(`\\["${k}"`), k);
+  // My Life is the boat, the Studio the lighthouse; home is the beach, with the chat
+  assert.match(h, /life: +\{ label: "my life"[^}]*keys: \["today", "mail", "calendar", "todo", "calories"\]/);
+  assert.match(h, /studio: +\{ label: "studio"[^}]*keys: \["editing", "influencer", "time", "finances", "jobs"\]/);
+  assert.match(chrome, /id="chatlog"/);
+  assert.doesNotMatch(floats, /"settings"/);
+  assert.match(h, /if \(key === "settings"\) return openSheet\(\);/);
+  // tabs carry a grab bar for moving them around the water
+  assert.match(h, /class="grab" data-grab/);
   // floating buttons are app icons: an icon in a circle with the name under it
   assert.match(h, /class="float" data-cmd="\$\{k\}"[^`]*<i>\$\{icon\(PANELS\[k\]\.ic\)\}<\/i><span>/);
   // the sea is WebGL2 with a plain fallback
@@ -53,4 +62,18 @@ test("ocean redesign: only sleep, chat and thinking stay fixed; Allie is a pink 
   new vm.Script(sea);
   assert.match(sea, /getContext\("webgl2"/);
   assert.match(h, /\.nogl #viewport/);
+});
+
+test("the workbench: a place to travel to, its mat, and a widget registry that loads before the page", () => {
+  const h = fs.readFileSync(path.join(R, "index.html"), "utf8");
+  assert.match(h, /craft: +\{ label: "workbench"/);
+  assert.match(h, /id="bench" class="bench-mat"/);
+  const order = ["voices.js", "sea.js", "widgets/index.js"].map(f => h.indexOf(`<script src="${f}"></script>`));
+  assert.ok(order.every(i => i > 0) && order[0] < order[1] && order[1] < order[2], "scripts load in order");
+  const ctx = { window: {} }; vm.runInNewContext(fs.readFileSync(path.join(R, "widgets", "index.js"), "utf8"), ctx);
+  const W = ctx.window.AllieWidgets; W.register({ id: "a", title: "A" }); W.register({ id: "a", title: "dupe" }); W.register({ title: "no id" });
+  assert.strictEqual(W.list.length, 1);
+  // the beach chat starts as one line and opens when you start chatting
+  assert.match(h, /\.chatlog:not\(\.open\)/);
+  assert.match(h, /if \(e\.target\.value\.trim\(\)\) chatOpen\(true\)/);
 });

@@ -2,6 +2,18 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.9.0 (2026-10-10)
+- A little world instead of one screen. Home is a beach at the water's edge: waves roll in with white foam, Allie sits on a weathered post facing you, and the moon (night) or a warm sun (day) hangs over the sea. Out on the water are My Life (the boat), the Studio (a lighthouse on a rocky island), the journal (a bottle drifting by the island) and a workbench by the lighthouse.
+- Chat lives on the beach: a single line at the bottom that opens into the full conversation as soon as you start typing (the – button shrinks it again). Everything you and Allie say is kept there, between launches too.
+- Say or type "take me to my life / the studio / my journal / the workbench / home" and the camera sails there while Allie flies along. Or click the labels over each place, or the house button next to the moon. Allie can do it too (her new go_to action).
+- My Life (the boat): Today, Mail, Calendar, To-do, Calories. Studio (the lighthouse): Video editing and AI influencer (now two separate tabs instead of Businesses), Clock, Money, 3D jobs.
+- Tabs open standing above their button on a ring around their place, facing outward. Drag to circle round and see each one face on; a swipe settles on the nearest tab. Left and right arrows step between tabs. Each tab has a little bar underneath: drag it to put the tab somewhere else (it stays there). Tabs show a blank back from behind and fade when edge-on.
+- Settings is a gear button next to the moon. It opens as a sheet on the right while the camera backs off so you can see everything behind it, and closing it takes you back.
+- The workbench (build mode): click it at the Studio and the camera drops close over the desk. Widgets you make go in renderer/widgets and show up on its mat. Done (or Esc) goes back to the Studio.
+- The look is back to the first version's ASCII characters and darker colours, with the 3D boat model sitting low in the water, lit with a rim light. The night is darker, the day brighter and warmer. Reflections and moon/sun glitter are drawn in characters.
+- Allie's subtitles are smaller. Opening a tab is quicker: the camera goes straight there and Allie flies on her own.
+- Fixed: zooming while reading a tab made it see-through and unclickable; a tab's grab bar covered its button; double-clicking a grab bar sent you home; Allie landed on the boat instead of the tab after "log a banana"; the Settings sheet covered the chat bar; Enter on a button opened the chat instead of pressing it; and more from a full review of the new navigation.
+
 ## 0.8.0 (2026-10-10)
 - The sea is now a real lit 3D scene with the print look of the reference images on top: a fine grid of dots over a sharp picture, with small patches of ASCII characters drifting through the darker water.
 - Water: waves and wind lines, rings rippling out from the boat, the moon (dark mode) or the sun (light mode) glittering in a path across the water, a soft glow from the light at the top of the screen, and reflections of the boat, the tabs, the buttons and Allie herself.

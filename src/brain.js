@@ -4,7 +4,8 @@ const Anthropic = require("@anthropic-ai/sdk");
 const tool = (name, description, props = {}, required = []) => ({ name, description, input_schema: { type: "object", properties: props, required } });
 const str = d => ({ type: "string", description: d }), num = d => ({ type: "number", description: d });
 const TOOLS = [
-  tool("open_panel", "Open one of the app's panels so Jack can see it. Returns a short rundown of what's in it.", { panel: { type: "string", enum: ["today", "mail", "calendar", "todo", "time", "calories", "businesses", "finances", "jobs", "settings", "home", "overview", "clear"] } }, ["panel"]),
+  tool("open_panel", "Open one of the app's panels so Jack can see it. Returns a short rundown of what's in it. time is the work clock; editing is video editing; influencer is the AI influencer business.", { panel: { type: "string", enum: ["today", "mail", "calendar", "todo", "time", "calories", "editing", "influencer", "finances", "jobs", "settings", "overview", "clear"] } }, ["panel"]),
+  tool("go_to", "Take Jack to a place in the app: home (the beach, where you two chat), life (the boat, My Life: today, calendar, to-do, calories, mail), studio (the lighthouse: video editing, AI influencer, clock, money, 3D jobs) journal (the bottle by the island) or craft (the workbench by the lighthouse, build mode, where his widgets live).", { place: { type: "string", enum: ["home", "life", "studio", "journal", "craft"] } }, ["place"]),
   tool("add_task", "Add a to-do. due is YYYY-MM-DD or empty. business: ugc for the AI influencer business, edit for video editing, jobs for the job search, me for personal.", { title: str("Task text"), due: str("Due date YYYY-MM-DD, or empty"), important: { type: "boolean" }, business: { type: "string", enum: ["ugc", "edit", "jobs", "me"] } }, ["title"]),
   tool("complete_task", "Mark a to-do as done by its id.", { id: num("Task id") }, ["id"]),
   tool("add_event", "Add a calendar event.", { what: str("Event title"), date: str("YYYY-MM-DD"), time: str("HH:MM, 24h") }, ["what", "date"]),
@@ -24,6 +25,7 @@ const TOOLS = [
 ];
 
 const SYSTEM = `You are Allison ("Allie"), Jack's personal assistant, living in a desktop app on his Windows PC. Jack runs a video editing business and an AI influencer business, and he's looking for 3D animation work.
+The app is a little world at sea: home is a beach, where Jack chats with you; My Life is a boat; his Studio is a lighthouse on an island; his journal is a bottle floating near it; a workbench by the lighthouse is build mode, where widgets he makes with Claude live. When he says "take me to" a place, use go_to.
 You speak out loud, so talk like a chill, laid-back friend who happens to be on top of everything: relaxed, warm, a bit dry, never formal or salesy. Usually one or two short sentences, casual words and contractions ("yeah", "got it", "nice"), no lists, no markdown, no emoji, no URLs. Call him Jack only now and then.
 Jack built this app and knows every tab and feature. Never explain what a tab is, what it's for, or how a feature works, and don't offer tips or list what you can do, unless he asks.
 When you open a tab, the tool result tells you what's in it. Just give him the gist of what's there, the actual stuff (like "Two new ones, best is a Blender animator gig at Framestore"), or say it's quiet if there's nothing new. Don't announce that you opened it.

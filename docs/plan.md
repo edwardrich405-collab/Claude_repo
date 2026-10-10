@@ -1,6 +1,6 @@
 # Allison: plan and rules
 
-Jack's personal assistant. Allie is a pink gull perched on a half-sunk rowboat in an ASCII ocean (dark: teal night sea, light: green sunlit sea); tabs stand above the water around the boat and she flies to them. She talks with Kokoro's natural "Bella" voice (not Heart, which Jack's friend uses), laid-back and brief (never explains tabs or features, sums up what's in them instead), and calls him Jack.
+Jack's personal assistant, set in a small ASCII sea world (see docs/handoff.md). Home is a beach where Jack chats with Allie; My Life is a boat, the Studio a lighthouse island with a workbench (build mode), the journal a bottle. Allie is a pink 3D gull who flies between them. Dark mode is a dark teal night with a moon, light mode a warm green day with a sun. She talks with Kokoro's natural "Bella" voice (not Heart, which Jack's friend uses), laid-back and brief (never explains tabs or features, sums up what's in them instead), and calls him Jack.
 
 ## How Claude works on this project
 - Claude edits the real files in this folder. Every update is one git commit with a clear message, so any update can be undone (`git revert <id>`).
@@ -17,8 +17,9 @@ Jack's personal assistant. Allie is a pink gull perched on a half-sunk rowboat i
 
 ## Layout
 - src/main.js: window, voice, inbox, file watching. src/brain.js: Claude and the actions it can take. src/connectors.js + hub.js: Gmail, calendars, Stripe, PayPal, job boards. src/voice.js + models.js: offline speech (sherpa-onnx), models download on first run.
-- renderer/index.html: the whole screen: camera, panels, floating app-icon buttons, how Allie behaves. Fixed controls are only sleep (top left), chat and the thinking indicator.
-- renderer/sea.js: the 3D scene in WebGL2 (lit water with reflections, the boat model with shadows, Allie's gull body) and the halftone/ASCII look on top. renderer/models/boat.glb is made from assets/boat-source.glb by tools/pack-boat.py (credits in docs/credits.md). renderer/voices.js: her recorded lines.
+- renderer/index.html: the whole screen: places and travel, the orbit camera, tabs as 3D cards, floating buttons, the beach chat, the settings sheet, the workbench mat, how Allie behaves. Fixed controls: sleep, settings and home (top left), chat and the thinking indicator.
+- renderer/sea.js: the 3D scene in WebGL2 (water, beach, sky, reflections, the boat model, the island, lighthouse, workbench, bottle and post, Allie's gull body) and the ASCII look on top. renderer/models/boat.glb is made from assets/boat-source.glb by tools/pack-boat.py (credits in docs/credits.md). renderer/voices.js: her recorded lines.
+- renderer/widgets/: add-ons that show up on the workbench. index.js explains how to make one.
 - tests/: offline tests. Run `npm test` (it lists the test files explicitly).
 
 ## Later
