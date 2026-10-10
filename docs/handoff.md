@@ -181,6 +181,11 @@ palette.
   `allie.jdraft`. The arrows flip through logged pages (read-only). Done or Esc closes it. Allie never replies there.
 - Still to do: brain tools `journal_add` and `journal_search` so Allie can write in it or recall from it when asked.
 
+## A GPU gotcha (fixed in 0.11.1)
+On Jack's Windows GPU, `pow()` of a tiny negative number returns NaN, and the bloom blur spreads one NaN pixel into big
+dark circles. Always clamp `pow` bases (`pow(max(x,0.),k)`). `BLUR_FS` and `FINAL_FS` also drop NaN pixels as a backstop.
+SwiftShader (the screenshot tool) doesn't show this, so check on the real PC.
+
 ## A bug fixed in 0.10.0
 Clicking a place label did nothing: the swipe handler on the viewport (`vp` pointerdown) captured the pointer, so the
 click never reached the label. Labels (`.place`), floats and the journal page are now skipped by that handler. Any new

@@ -581,7 +581,7 @@ float beam(vec3 C,vec3 d,float tMax){
     if(abs(den)<1e-6) continue;
     float t=clamp((Bq*E-D)/den,0.,tMax), s=clamp((A*E-Bq*D)/den,0.,2600.);
     float dist=length(w0+t*d-s*bd), r=7.+s*.09;
-    b+=exp(-dist*dist/(r*r))*pow(1.-s/2600.,1.6)*(.4+.6*exp(-s/500.));
+    b+=exp(-dist*dist/(r*r))*pow(max(1.-s/2600.,0.),1.6)*(.4+.6*exp(-s/500.));
   }
   return b*uBeam;
 }
@@ -656,7 +656,8 @@ void main(){
 }`;
   // The glow: the bright parts of the ASCII picture, blurred at quarter size and laid back over it.
   const BLUR_FS = F3 + `uniform sampler2D uImg;uniform vec2 uDst,uStep;uniform float uThr;out vec4 o;
-vec3 tap(vec2 uv){ vec3 c=texture(uImg,uv).rgb; return max(c-uThr,0.); }
+// a NaN pixel would smear into big dark circles through the blur, so drop any
+vec3 tap(vec2 uv){ vec3 c=texture(uImg,uv).rgb; if(any(isnan(c))||!(c.r+c.g+c.b<1e5)) return vec3(0.); return max(c-uThr,0.); }
 void main(){ vec2 uv=gl_FragCoord.xy/uDst, d=uStep/uDst;
   vec3 c=tap(uv)*.2270;
   c+=(tap(uv+d*1.3846)+tap(uv-d*1.3846))*.3162; c+=(tap(uv+d*3.2308)+tap(uv-d*3.2308))*.0703;
@@ -664,6 +665,7 @@ void main(){ vec2 uv=gl_FragCoord.xy/uDst, d=uStep/uDst;
   // the last step: the ASCII picture plus its glow, to the screen
   const FINAL_FS = F3 + `uniform sampler2D uImg,uBloom,uBloom2;uniform vec2 uRes;uniform float uBloomAmt;out vec4 o;
 void main(){ vec2 uv=gl_FragCoord.xy/uRes; vec3 c=texture(uImg,uv).rgb+texture(uBloom,uv).rgb*uBloomAmt+texture(uBloom2,uv).rgb*uBloomAmt*.6;
+  if(any(isnan(c))||!(c.r+c.g+c.b<1e5)) c=texture(uImg,uv).rgb; if(any(isnan(c))) c=vec3(0.);
   c=c/(1.+max(c-1.,0.)*.5); o=vec4(pow(clamp(c,0.,1.),vec3(1./2.2)),1.); }`;
 
   /* ---------------- GL plumbing ---------------- */

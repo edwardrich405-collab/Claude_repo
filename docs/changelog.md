@@ -2,6 +2,9 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.11.1 (2026-10-10)
+- Fixed: big dark circles that wiped out the sea and followed the lighthouse beam on some PCs. The beam's maths could hand the graphics card a "not a number" at its far end, and the glow pass smeared it into circles. The beam is fixed and the glow and final passes now skip any such pixel.
+
 ## 0.11.0 (2026-10-10)
 - Talk over Allie and she stops and listens, then answers what you said. She ignores her own voice coming back through the speakers (if most of what the mic hears is words she's saying right now). "Stop" on its own still just stops her.
 - A stop button sits next to the chat button (beside the chat line at home) while Allie is talking or thinking. Click it to cut her off.
