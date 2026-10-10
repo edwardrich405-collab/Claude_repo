@@ -2,6 +2,15 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.8.0 (2026-10-10)
+- The sea is now a real lit 3D scene with the print look of the reference images on top: a fine grid of dots over a sharp picture, with small patches of ASCII characters drifting through the darker water.
+- Water: waves and wind lines, rings rippling out from the boat, the moon (dark mode) or the sun (light mode) glittering in a path across the water, a soft glow from the light at the top of the screen, and reflections of the boat, the tabs, the buttons and Allie herself.
+- The boat is the "Wooden Boat" model by lpfeffer (credited in Settings), weathered to pale grey, sitting stern-down and half full of water, rocking on the swell, casting shadows on itself and the water, its sunk end seen through the water. The model was repacked from 37 MB to 2.7 MB so it loads fast.
+- Allie is a 3D pink gull lit by the same moon or sun: she stands on the bow in profile, folds her black-tipped wings over her back, beats them to fly, tucks her head into her back to sleep, lifts it when she hears you, tilts it while thinking and opens her beak as she talks.
+- When she flies to a tab the camera follows her across the water, so she stays on screen the whole way, then settles on the tab as she lands.
+- Tabs open closer to the boat. A tab right in front of the camera fades out so it doesn't cover the one you're looking at.
+- The floating buttons are little app icons: the tab's icon in a glass circle with its name underneath. The timer one pulses and shows the time while it runs.
+
 ## 0.7.0 (2026-10-10)
 - New look: the home screen is an ASCII ocean with slow rippling rings and a wooden rowboat half sunk in the middle, bobbing on the swell. Dark mode is the teal night sea, light mode the green sunlit one.
 - Allie is now a pink gull (pink in both modes). She perches on the boat's bow post, flies over to each tab you open and lands on its top edge, and flies home when it closes. Asleep she tucks her head in with little z's floating up, and the sea dims. She perks up when she hears you, tilts her head while thinking and opens her beak as she talks. Tap her to stop her talking.

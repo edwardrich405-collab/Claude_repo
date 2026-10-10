@@ -17,7 +17,8 @@ Jack's personal assistant. Allie is a pink gull perched on a half-sunk rowboat i
 
 ## Layout
 - src/main.js: window, voice, inbox, file watching. src/brain.js: Claude and the actions it can take. src/connectors.js + hub.js: Gmail, calendars, Stripe, PayPal, job boards. src/voice.js + models.js: offline speech (sherpa-onnx), models download on first run.
-- renderer/index.html: the whole screen (WebGL ASCII ocean and boat, Allie the gull, floating ASCII buttons, panels). Fixed controls are only sleep (top left), chat and the thinking indicator. renderer/voices.js: her recorded lines.
+- renderer/index.html: the whole screen: camera, panels, floating app-icon buttons, how Allie behaves. Fixed controls are only sleep (top left), chat and the thinking indicator.
+- renderer/sea.js: the 3D scene in WebGL2 (lit water with reflections, the boat model with shadows, Allie's gull body) and the halftone/ASCII look on top. renderer/models/boat.glb is made from assets/boat-source.glb by tools/pack-boat.py (credits in docs/credits.md). renderer/voices.js: her recorded lines.
 - tests/: offline tests. Run `npm test` (it lists the test files explicitly).
 
 ## Later

@@ -58,7 +58,6 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 #sea{pointer-events:none}
 #bird{pointer-events:none;z-index:4000}
 #world,#floats{position:absolute;left:0;top:0;width:0;height:0}
-#floats{z-index:1}
 .nogl #viewport{background:radial-gradient(70% 60% at 50% 48%,#0f3a3c,var(--bg))}
 :root[data-theme="light"].nogl #viewport{background:radial-gradient(70% 60% at 30% 20%,#7aa77f,var(--bg))}
 
@@ -176,19 +175,30 @@ textarea.draft{width:100%;min-height:180px;resize:vertical;border-radius:14px;bo
 textarea.draft:focus{border-color:var(--blue)}
 .note{font-size:12px;color:var(--label-3)}
 
-/* Floating ASCII buttons: they bob on the water around the boat and take you to a tab without asking Allie. */
-.float{position:absolute;left:0;top:0;transform-origin:50% 100%;border:0;background:none;padding:0;font:500 13px/1 var(--mono);letter-spacing:.02em;white-space:nowrap;
-  color:var(--mint);text-shadow:0 0 8px var(--sea-glow),0 0 2px var(--cap-shadow);cursor:pointer}
-.float span{display:inline-block;padding:6px 9px;border-radius:4px;background:color-mix(in srgb,var(--bg) 55%,transparent);transition:background .2s,color .2s,box-shadow .2s}
-.float span::before{content:"[ "}.float span::after{content:" ]"}
-.float:hover span,.float:focus-visible span{background:var(--mint);color:var(--bg);text-shadow:none;box-shadow:0 0 18px var(--sea-glow)}
-.float:active span{transform:scale(.95);transition-duration:.08s}
-.float.on span{color:var(--label);box-shadow:inset 0 0 0 1px var(--mint-dim)}
-.float.on span::before{content:"[•"}
+/* Floating buttons: little app icons bobbing on the water around the boat, each takes you to a tab without asking Allie. */
+.float{position:absolute;left:0;top:0;transform-origin:50% 100%;border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:var(--label)}
+.float i{position:relative;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:var(--c);
+  background:radial-gradient(120% 120% at 30% 20%,color-mix(in srgb,var(--c) 22%,var(--panel-a)),var(--panel-b));
+  border:1px solid color-mix(in srgb,var(--c) 30%,var(--panel-rim));
+  box-shadow:inset 0 1px 0 var(--panel-hi),0 8px 20px var(--shadow),0 0 22px color-mix(in srgb,var(--c) 22%,transparent);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:transform .35s var(--spring),box-shadow .3s}
+.float i svg{width:22px;height:22px;stroke-width:1.8;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--c) 55%,transparent))}
+.float span{font:500 10.5px/1 var(--mono);letter-spacing:.02em;white-space:nowrap;color:var(--label-2);text-shadow:0 1px 3px var(--cap-shadow),0 0 10px var(--cap-shadow)}
+.float:hover i,.float:focus-visible i{transform:translateY(-3px) scale(1.06);box-shadow:inset 0 1px 0 var(--panel-hi),0 12px 26px var(--shadow),0 0 30px color-mix(in srgb,var(--c) 45%,transparent)}
+.float:hover span{color:var(--label)}
+.float:active i{transform:scale(.94);transition-duration:.08s}
+.float.on i{border-color:var(--c);box-shadow:inset 0 1px 0 var(--panel-hi),0 0 0 2px color-mix(in srgb,var(--c) 35%,transparent),0 0 30px color-mix(in srgb,var(--c) 40%,transparent)}
 .float.live span{color:var(--pink)}
-:root[data-theme="light"] .float{color:#f4f2d6;text-shadow:0 1px 6px rgba(10,40,26,.55)}
-:root[data-theme="light"] .float span{background:rgba(18,60,42,.42)}
-:root[data-theme="light"] .float:hover span{background:#f4f2d6;color:#173a2b}
+.float.live i::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--pink);opacity:.7;animation:pulse 1.6s ease-out infinite}
+@keyframes pulse{from{transform:scale(.9);opacity:.8}to{transform:scale(1.25);opacity:0}}
+:root[data-theme="light"] .float span{color:#f7f5e3;text-shadow:0 1px 4px rgba(10,40,26,.7)}
+/* Allie asleep: little z's drifting up from her */
+#zzz{position:absolute;left:0;top:0;z-index:4001;pointer-events:none;font:700 14px var(--mono);color:#b6f0e2;text-shadow:0 0 8px rgba(120,230,205,.6)}
+:root[data-theme="light"] #zzz{color:#fbf8de;text-shadow:0 1px 4px rgba(10,40,26,.6)}
+#zzz b{position:absolute;left:0;top:0;opacity:0;animation:zz 3s ease-out infinite}
+#zzz b:nth-child(2){animation-delay:1s;font-size:17px}#zzz b:nth-child(3){animation-delay:2s;font-size:12px}
+@keyframes zz{0%{opacity:0;transform:translate(0,0)}20%{opacity:1}100%{opacity:0;transform:translate(26px,-58px)}}
+@media (prefers-reduced-motion:reduce){#zzz b{animation:none;opacity:1}#zzz b:nth-child(2){transform:translate(12px,-22px)}#zzz b:nth-child(3){transform:translate(22px,-40px)}.float.live i::after{animation:none}}
 
 /* Fixed chrome */
 .dragbar{position:fixed;top:0;left:0;right:0;height:40px;-webkit-app-region:drag;z-index:4500}
@@ -486,7 +496,7 @@ textarea.draft:focus{border-color:var(--blue)}
   <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fe6d4"/><stop offset="1" stop-color="#ef7fa3"/></linearGradient>
 </defs></svg>
 
-<div id="viewport"><canvas id="sea" aria-hidden="true"></canvas><div id="floats"></div><div id="world"></div><canvas id="bird" aria-hidden="true"></canvas></div>
+<div id="viewport"><canvas id="sea" aria-hidden="true"></canvas><div id="floats"></div><div id="world"></div><canvas id="bird" aria-hidden="true"></canvas><div id="zzz" hidden aria-hidden="true"><b>z</b><b>Z</b><b>z</b></div></div>
 
 
 <style>
@@ -529,6 +539,7 @@ textarea.draft:focus{border-color:var(--blue)}
 </div>
 
 <script src="voices.js"></script>
+<script src="sea.js"></script>
 <script>
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
@@ -794,7 +805,8 @@ textarea.draft:focus{border-color:var(--blue)}
         <div class="set"><div class="t">What the key does<small>Lets Allie understand anything you say, act on the app and search the web. Get one at console.anthropic.com. It's stored encrypted on this PC.</small></div></div>` : ""}
         <div class="sec" style="margin-top:14px">Connections</div>
         ${connForms()}
-        <div class="set"><div class="t">Your data<small>Everything you add is saved on this computer</small></div><button type="button" class="btn" data-reset>Clear</button></div>`;
+        <div class="set"><div class="t">Your data<small>Everything you add is saved on this computer</small></div><button type="button" class="btn" data-reset>Clear</button></div>
+        <div class="set"><div class="t">Credits<small>Boat: “Wooden Boat” by lpfeffer on Sketchfab, CC BY 4.0</small></div></div>`;
     }
     return "";
   }
@@ -825,17 +837,18 @@ textarea.draft:focus{border-color:var(--blue)}
   // z runs toward you. Panels are billboards standing H0 above the water, so they always face you and stay readable.
   const H0 = 34;
   const SLOT = {
-    today:      { x: -960,  z: -620 },
-    mail:       { x: 120,   z: -1180 },
-    calendar:   { x: -1620, z: -80 },
-    todo:       { x: 980,   z: -560 },
-    time:       { x: 1640,  z: 120 },
-    calories:   { x: -1080, z: 700 },
-    businesses: { x: -1180, z: -1700 },
-    finances:   { x: -2300, z: -980 },
-    jobs:       { x: 1500,  z: -1500 },
-    settings:   { x: 1000,  z: 880 }
+    today:      { x: -720,  z: -520 },
+    mail:       { x: 60,    z: -860 },
+    todo:       { x: 800,   z: -520 },
+    calendar:   { x: -1220, z: -40 },
+    time:       { x: 1240,  z: -20 },
+    calories:   { x: -840,  z: 500 },
+    settings:   { x: 860,   z: 540 },
+    businesses: { x: -560,  z: -1240 },
+    finances:   { x: -1560, z: -760 },
+    jobs:       { x: 700,   z: -1300 }
   };
+
   function openPanel(key) {
     if (open[key]) { refresh(key); return open[key]; }
     if (closing[key]) { const el = closing[key]; delete closing[key]; clearTimeout(el._rm); el.classList.remove("leaving"); open[key] = el; sizeRO.observe(el); refresh(key); showPanel(el); floatState(); return el; }
@@ -859,11 +872,11 @@ textarea.draft:focus{border-color:var(--blue)}
   }
   // Where a panel and the boat land on screen from a wide view of the whole bay: new panels go to their own spot
   // unless something already covers it, then spiral outward until they're clear.
-  const BAY = { x: 0, y: 0, z: -500, d: 3800, p: 0.62 };
+  const BAY = { x: 0, y: 0, z: -300, d: 3000, p: 0.62 };
   function rectAt(b, x, z, w, h) { const p = project(b, x, H0, z); return p && { x: p.x - w / 2 * p.s, y: p.y - h * p.s, w: w * p.s, h: h * p.s }; }
   function boatRect(b) {
     let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-    for (const [x, y, z] of [[-260, 0, -120], [260, 0, -120], [-260, 0, 120], [260, 0, 120], [-260, 150, 0], [260, 60, 0]]) { const p = project(b, x, y, z); if (!p) continue; x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
+    for (const [x, y, z] of [[-240, 0, -110], [240, 0, -110], [-240, 0, 110], [240, 0, 110], [-240, 110, 0], [240, 50, 0]]) { const p = project(b, x, y, z); if (!p) continue; x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
     return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
   }
   const overlaps = (a, b, g) => a.x < b.x + b.w + g && a.x + a.w + g > b.x && a.y < b.y + b.h + g && a.y + a.h + g > b.y;
@@ -894,8 +907,8 @@ textarea.draft:focus{border-color:var(--blue)}
       { duration: calm ? 140 : 340, easing: calm ? "ease-in" : PANEL_OUT, fill: "forwards" });
     el._rm = setTimeout(() => { if (closing[key] !== el) return; delete closing[key]; el.remove(); }, (calm ? 140 : 340) + 40);
     // Allie doesn't stay on a tab that sank; the camera heads home if that tab was the one in view.
-    if (BIRD.perch === key) birdTo("boat");
-    if (focusKey === key) { focusKey = null; goHome(); }
+    const wasFocus = focusKey === key; if (wasFocus) focusKey = null;
+    if (BIRD.perch === key) birdTo("boat", wasFocus ? homeView() : null); else if (wasFocus) goHome();
   }
 
   /* ---------------- Camera ---------------- */
@@ -929,16 +942,17 @@ textarea.draft:focus{border-color:var(--blue)}
     if (Math.hypot(t.x - CAM.x, t.y - CAM.y, t.z - CAM.z) * s < 0.3 && Math.abs(t.d - CAM.d) * s < 0.3 && Math.abs(t.p - CAM.p) < 0.0005 && Math.hypot(CV.x, CV.z) * s < 2) { Object.assign(CAM, t); for (const k in CV) CV[k] = 0; camAnim = null; }
   }
   // Home: the boat in the middle with the floating buttons around it.
-  const homeView = () => ({ x: 0, y: 30, z: 20, d: FOC / Math.max(0.5, Math.min(1.5, W / 1000, (H - 100) / 560)), p: 0.66 });
+  const homeView = () => ({ x: 0, y: 20, z: 60, d: FOC / Math.max(0.5, Math.min(1.45, W / 1000, (H - 120) / 560)), p: 0.86 });
   function goHome(now) { focusKey = null; const v = homeView(); if (now) { Object.assign(CAM, v); camAnim = null; } else flyCam(v); }
   // Focus on a panel: at its real size when it fits (so text stays sharp), with room for Allie on its top edge.
-  function focusOn(el) {
-    const w = el._w, h = el._h, top = 84, bottom = W < 700 ? 150 : 190, avail = H - top - bottom;
+  function focusView(el) {
+    const w = el._w, h = el._h, top = 96, bottom = W < 700 ? 150 : 190, avail = H - top - bottom;
     const s = Math.min(1, avail / (h + 30), (W - 80) / (w + 160)), d = FOC / s;
     const off = (top + avail / 2) - H / 2;
     focusKey = el.dataset.key;
-    flyCam({ x: el._wx, y: H0 + h / 2 + off / s, z: el._wz, d, p: 0.4 });
+    return { x: el._wx, y: H0 + h / 2 + off / s, z: el._wz, d, p: 0.4 };
   }
+  function focusOn(el) { flyCam(focusView(el)); }
   // Everything open at once: back the camera off until every panel and the boat fit.
   function overview() {
     const ps = Object.values(open); if (!ps.length) return goHome();
@@ -966,7 +980,9 @@ textarea.draft:focus{border-color:var(--blue)}
     // the bay is big, not endless
     const r = Math.hypot(CAM.x, CAM.z), R = 4200; if (r > R) { CAM.x *= R / r; CAM.z *= R / r; }
   }
-  function zoomAt(sx, sy, f) { camAnim = null; INR.vx = INR.vz = 0; focusKey = null; ZT = { sx, sy, d: clampD((ZT ? ZT.d : CAM.d) / f) }; }
+  // Taking the camera yourself always wins over it following Allie.
+  function userCam() { camAnim = null; if (BIRD.fly) BIRD.fly.cam = null; }
+  function zoomAt(sx, sy, f) { userCam(); INR.vx = INR.vz = 0; focusKey = null; ZT = { sx, sy, d: clampD((ZT ? ZT.d : CAM.d) / f) }; }
   addEventListener("resize", () => { W = innerWidth; H = innerHeight; FOC = H * 1.05; sizeScene(); if (focusKey && open[focusKey]) focusOn(open[focusKey]); else if (!camAnim) goHome(true); });
   vp.addEventListener("wheel", e => {
     // a panel with more to show scrolls itself; everywhere else the wheel moves the camera
@@ -976,7 +992,7 @@ textarea.draft:focus{border-color:var(--blue)}
     const notch = e.deltaMode === 1 || (e.deltaX === 0 && Math.abs(e.deltaY) >= 50 && Number.isInteger(e.deltaY));
     if (notch) { const n = Math.max(1, Math.round(Math.abs(e.deltaMode === 1 ? e.deltaY / 3 : e.deltaY / 100))); zoomAt(e.clientX, e.clientY, Math.pow(1.08, -Math.sign(e.deltaY) * n)); return; }
     if (e.ctrlKey || e.metaKey) zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
-    else { camAnim = null; focusKey = null; INR.vx = INR.vz = 0; const k = (e.deltaMode === 1 ? 20 : 1) * CAM.d / FOC; PT.x += e.deltaX * k; PT.z += e.deltaY * k / CAM.sp; }
+    else { userCam(); focusKey = null; INR.vx = INR.vz = 0; const k = (e.deltaMode === 1 ? 20 : 1) * CAM.d / FOC; PT.x += e.deltaX * k; PT.z += e.deltaY * k / CAM.sp; }
   }, { passive: false });
   Object.defineProperty(CAM, "sp", { get() { return Math.max(0.3, Math.sin(this.p)); } });
 
@@ -995,7 +1011,7 @@ textarea.draft:focus{border-color:var(--blue)}
     }
     if (birdHit(e.clientX, e.clientY)) { birdPoke(); return; }
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    vp.setPointerCapture(e.pointerId); camAnim = null; ZT = null; INR.vx = INR.vz = 0; PT.x = PT.z = 0; hideHint();
+    vp.setPointerCapture(e.pointerId); userCam(); ZT = null; INR.vx = INR.vz = 0; PT.x = PT.z = 0; hideHint();
     if (pointers.size === 1) { const b = basis(CAM); drag = { type: "pan", b, cx: CAM.x, cz: CAM.z, g: waterAt(b, e.clientX, e.clientY), hist: [[performance.now(), CAM.x, CAM.z]] }; vp.classList.add("panning"); }
     else if (pointers.size === 2) { const [a, c] = [...pointers.values()]; pinch = { d: Math.hypot(a.x - c.x, a.y - c.y) }; drag = null; }
   });
@@ -1034,334 +1050,143 @@ textarea.draft:focus{border-color:var(--blue)}
     const tf = `translate(${tx}px,${ty}px) scale(${s.toFixed(4)})`;
     if (tf !== el._tf) { el._tf = tf; el.style.transform = tf; }
     const z = String(Math.max(1, Math.round(200000 / p.zc))); if (z !== el._z) { el._z = z; el.style.zIndex = z; }
+    // a tab right in front of the camera would cover everything: it fades away until you move back from it
+    const close = p.s > 1.35 && el.dataset.key !== focusKey, fade = close ? Math.max(0, 1 - (p.s - 1.35) / 0.5).toFixed(2) : "";
+    if (fade !== el._fade) { el._fade = fade; el.style.opacity = fade; el.style.pointerEvents = close && +fade < 0.5 ? "none" : ""; }
   }
   const FLOATS = [["today", "today"], ["mail", "mail"], ["calendar", "calendar"], ["todo", "to-do"], ["time", "timer"], ["calories", "calories"], ["businesses", "business"], ["finances", "money"], ["jobs", "3d jobs"], ["settings", "settings"]];
-  floats.innerHTML = FLOATS.map(([k, n], i) => `<button type="button" class="float" data-cmd="${k}" aria-label="${PANELS[k].title}"><span>${n}</span></button>`).join("");
+  floats.innerHTML = FLOATS.map(([k, n]) => `<button type="button" class="float" data-cmd="${k}" style="--c:${PANELS[k].c}" aria-label="${PANELS[k].title}"><i>${icon(PANELS[k].ic)}</i><span>${n}</span></button>`).join("");
   const FL = $$(".float", floats).map((el, i) => {
-    const a = -Math.PI / 2 + (i + 0.5) / FLOATS.length * 6.283, r = 1 + (i % 2) * 0.14;
-    return Object.assign(el, { _ax: Math.cos(a) * r * 360, _az: Math.sin(a) * r * 270, _ph: i * 1.7 });
+    const a = -Math.PI / 2 + (i + 0.5) / FLOATS.length * 6.283, r = 1 + (i % 2) * 0.12;
+    return Object.assign(el, { _ax: Math.cos(a) * r * 420, _az: Math.sin(a) * r * 300, _ph: i * 1.7, _bob: 0 });
   });
   function floatState() { FL.forEach(b => b.classList.toggle("on", !!open[b.dataset.cmd])); }
   function placeFloats(b) {
     for (const el of FL) {
-      const bob = reduce ? 0 : Math.sin(T * 1.2 + el._ph) * 4, p = project(b, el._ax, 16 + bob, el._az);
+      const bob = el._bob = reduce ? 0 : Math.sin(T * 1.2 + el._ph) * 4, p = project(b, el._ax, 16 + bob, el._az);
       const vis = !!p && p.x > -100 && p.x < W + 100 && p.y > -60 && p.y < H + 60 && p.s > 0.18;
       if (vis !== el._vis) { el._vis = vis; el.style.visibility = vis ? "" : "hidden"; }
       if (!vis) continue;
       const w = el._bw || (el._bw = el.offsetWidth), h = el._bh || (el._bh = el.offsetHeight), s = Math.max(0.6, Math.min(1.3, p.s));
       const tf = `translate(${(p.x - w / 2).toFixed(1)}px,${(p.y - h).toFixed(1)}px) scale(${s.toFixed(3)})`;
       if (tf !== el._tf) { el._tf = tf; el.style.transform = tf; }
-      el.style.opacity = Math.min(1, (p.s - 0.18) * 4).toFixed(2);
+      const op = Math.min(1, (p.s - 0.18) * 4).toFixed(2); if (op !== el._op) { el._op = op; el.style.opacity = op; }
+      const z = String(Math.max(1, Math.round(200000 / p.zc))); if (z !== el._z) { el._z = z; el.style.zIndex = z; }
     }
   }
 
-  /* ---------------- The sea: ASCII ocean and a half-sunk rowboat (WebGL) ---------------- */
-  // Pass 1 draws the water and the boat into a tiny texture with one pixel per character cell (brightness, and how much
-  // of the cell is boat). Pass 2 turns each cell into a character picked by brightness, so everything reads as ASCII.
-  const sea = $("#sea"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const gl = sea.getContext("webgl", { antialias: false, alpha: false, depth: false, powerPreference: "low-power" });
-  if (!gl) root.classList.add("nogl");
-  const RAMP = " .·:-=+*o#%@", CELL = [5, 8];
-  let GW = 0, GH = 0, dprS = 1, SEA = null;
-  const WATER_FS = `precision highp float;
-uniform vec2 uGrid,uScr,uSC,uBoat; uniform vec3 uCam; uniform float uF,uT,uRefN; uniform vec4 uRef[16];
-float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
-float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);}
-float water(vec2 P,float dist){
-  vec2 q=P-uBoat; float r=length(q*vec2(1.,1.2));
-  float warp=(vn(P*.0021+uT*.02)-.5)*90.+(vn(P*.0065-uT*.03)-.5)*35.;
-  float ph=pow(max(r+warp,0.),.78)*.085-uT*.32;
-  float c=.5+.5*cos(ph), ring=(pow(c,26.)+.35*pow(.5+.5*cos(ph*2.+1.3),30.))*smoothstep(150.,330.,r)*(.35+.65*exp(-r/2600.));
-  ring*=.25+1.1*smoothstep(.2,.65,vn(P*vec2(.0035,.005)+7.));
-  float streak=smoothstep(.56,.92,vn(vec2(P.x*.0008+uT*.01,P.y*.015-uT*.1)))*.5;
-  float fine=vn(P*vec2(.018,.05)+vec2(uT*.35,0.));
-  float l=.13+.1*fine+streak*.8+ring*.85;
-  vec2 bq=q*vec2(1./290.,1./160.); l*=1.-.62*exp(-dot(bq,bq)*1.4);
-  for(int i=0;i<16;i++){ if(float(i)>=uRefN) break; vec4 R=uRef[i];
-    float dx=abs(P.x-R.x)/R.z, dz=P.y-R.y;
-    float colm=1.-smoothstep(.7,1.05,dx), down=smoothstep(-12.,20.,dz)*exp(-max(dz,0.)/R.w);
-    float wav=.5+.5*sin(dz*.1-uT*2.2+vn(P*.02)*4.);
-    l+=colm*down*(.2+.8*wav)*.5+exp(-(dx*dx*.8+dz*dz/(R.w*R.w*1.6)))*.1; }
-  return l*mix(1.,.3,smoothstep(2500.,9000.,dist));
-}
-void main(){
-  vec2 sp=gl_FragCoord.xy/uGrid*uScr-uScr*.5;
-  vec3 dir=vec3(sp.x,-uSC.x*uF+uSC.y*sp.y,-uSC.y*uF-uSC.x*sp.y);
-  float l=.03;
-  if(dir.y<-1e-4){ float t=-uCam.y/dir.y; vec2 P=uCam.xz+dir.xz*t; l=water(P,t*length(dir)); }
-  gl_FragColor=vec4(l,0.,0.,1.);
-}`;
-  const BOAT_VS = `attribute vec3 aP,aN; attribute vec2 aA; uniform mat3 uRot; uniform vec3 uPos,uCam; uniform vec2 uSC,uScr; uniform float uF;
-varying vec3 vN,vW; varying vec2 vA;
-void main(){ vec3 w=uRot*aP+uPos; vW=w; vN=uRot*aN; vA=aA; vec3 v=w-uCam;
-  float zc=-v.y*uSC.x-v.z*uSC.y, yc=v.y*uSC.y-v.z*uSC.x;
-  gl_Position=vec4(v.x*uF/(uScr.x*.5), yc*uF/(uScr.y*.5), ((zc-1.)/30000.*2.-1.)*zc, zc); }`;
-  const BOAT_FS = `precision highp float; varying vec3 vN,vW; varying vec2 vA; uniform vec3 uL;
-void main(){ vec3 n=normalize(vN); if(!gl_FrontFacing) n=-n; float m=vA.y, dif=max(dot(n,uL),0.);
-  float l=.3+.62*dif;
-  if(m>.5&&m<1.5) l=.16+.4*dif; else if(m>1.5&&m<2.5) l=.62+.4*dif; else if(m>2.5) l=.2+.55*dif;
-  float pk=fract(vA.x*5.); if(m<1.5) l*=.5+.5*smoothstep(0.,.12,pk)*smoothstep(1.,.9,pk);
-  if(m<.5) l*=.75+.35*vA.x;
-  float a=1.; if(vW.y<0.){ l*=.45; a=.6*exp(vW.y/40.); } else l*=.7+.3*smoothstep(0.,16.,vW.y);
-  gl_FragColor=vec4(l,1.,0.,a); }`;
-  const ASCII_FS = `precision highp float;
-uniform sampler2D uScene,uAtlas; uniform vec2 uGrid,uCellPx; uniform float uN,uLight,uDim;
-uniform vec3 cDeep,cBg,cLo,cHi,cBoatLo,cBoatHi;
-void main(){
-  vec2 fc=gl_FragCoord.xy, cell=floor(fc/uCellPx), inC=fract(fc/uCellPx), uv=(cell+.5)/uGrid;
-  vec4 s=texture2D(uScene,uv); float boat=s.g;
-  float vig=smoothstep(1.3,.35,length((uv-.5)*vec2(1.3,1.)));
-  float lum=s.r*mix(.5,1.,vig)*uDim;
-  if(uLight>.5) lum+=.2*smoothstep(1.,0.,length((uv-vec2(.12,1.05))*vec2(1.,1.3)))*(1.-boat*.5);
-  float h=fract(sin(dot(cell,vec2(12.9898,78.233)))*43758.5453);
-  float lv=clamp(lum,0.,1.), idx=clamp(floor(min(lv*1.05,.999)*uN+(h-.5)*.9),0.,uN-1.);
-  float cov=texture2D(uAtlas,vec2((idx+inC.x)/uN,1.-inC.y)).a;
-  vec3 bg=mix(cDeep,cBg,smoothstep(0.,.55,lv)), fg=mix(cLo,cHi,smoothstep(.1,.85,lv));
-  fg=mix(fg,mix(cBoatLo,cBoatHi,smoothstep(.05,.9,lv)),boat);
-  bg=mix(bg,mix(cBoatLo*.45,cBoatHi*.6,smoothstep(.1,.9,lv)),boat*.85);
-  gl_FragColor=vec4(mix(bg,fg,cov),1.);
-}`;
-  const QUAD_VS = `attribute vec2 aP; void main(){ gl_Position=vec4(aP,0.,1.); }`;
-  // Colours: dark is the teal night sea, light is the green sunlit one. The boat is grey-teal by night, white by day.
-  const SEA_COL = {
-    dark:  { cDeep: [.012, .05, .058], cBg: [.03, .1, .11], cLo: [.09, .27, .28], cHi: [.66, .95, .87], cBoatLo: [.16, .25, .26], cBoatHi: [.74, .84, .82] },
-    light: { cDeep: [.09, .27, .19], cBg: [.17, .41, .3], cLo: [.08, .24, .17], cHi: [.96, .95, .78], cBoatLo: [.36, .44, .4], cBoatHi: [.97, .97, .93] }
-  };
-  function shader(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
-  function program(vs, fs) {
-    const p = gl.createProgram(); gl.attachShader(p, shader(gl.VERTEX_SHADER, vs)); gl.attachShader(p, shader(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-    const u = {}, n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
-    for (let i = 0; i < n; i++) { const a = gl.getActiveUniform(p, i), k = a.name.replace(/\[0\]$/, ""); u[k] = gl.getUniformLocation(p, a.name); }
-    return { p, u };
-  }
-
-  // A clinker rowboat: pointed bow with a tall stem post, round bilge, flat transom, two thwarts. Built once as flat-shaded triangles
-  // (position, normal, plank coordinate, material: 0 hull, 1 inside, 2 rim and stem, 3 seats and transom).
-  const BOAT = { L: 350, stem: null };
-  function buildBoat() {
-    const L = BOAT.L, B = 92, S = 40, U = 12, out = [], sm = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-    const half = s => B * Math.pow(Math.max(0, 1 - Math.pow(1 - s, 2.2)), 0.75) * (1 - 0.32 * sm(0.55, 1, s));
-    const sheer = s => 60 + 56 * Math.pow(1 - s, 2.6) + 10 * s * s;
-    const keel = s => -36 + 70 * Math.pow(1 - sm(0, 0.3, s), 2) + 6 * sm(0.7, 1, s);
-    const pt = (s, u, side, ins) => { const k = keel(s) + ins * 1.4, w = Math.max(0, half(s) * Math.pow(Math.sin(u * Math.PI / 2), 0.5) - ins);
-      return [-L / 2 + s * L + (s === 0 ? ins * 1.5 : 0), k + (sheer(s) - k) * Math.pow(u, 1.1), side * w]; };
-    const tri = (a, b, c, ua, ub, uc, m) => {
-      const e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], e2 = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
-      let n = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]]; const l = Math.hypot(...n); if (l < 1e-6) return; n = n.map(v => v / l);
-      for (const [p, u] of [[a, ua], [b, ub], [c, uc]]) out.push(p[0], p[1], p[2], n[0], n[1], n[2], u, m);
-    };
-    const quad = (a, b, c, d, ua, ub, uc, ud, m) => { tri(a, b, c, ua, ub, uc, m); tri(a, c, d, ua, uc, ud, m); };
-    for (const side of [-1, 1]) for (let i = 0; i < S; i++) for (let j = 0; j < U; j++) {
-      const s0 = i / S, s1 = (i + 1) / S, u0 = j / U, u1 = (j + 1) / U;
-      quad(pt(s0, u0, side, 0), pt(s1, u0, side, 0), pt(s1, u1, side, 0), pt(s0, u1, side, 0), u0, u0, u1, u1, 0);
-      quad(pt(s0, u0, side, 6), pt(s1, u0, side, 6), pt(s1, u1, side, 6), pt(s0, u1, side, 6), u0, u0, u1, u1, 1);
-      if (j === U - 1) quad(pt(s0, 1, side, 0), pt(s1, 1, side, 0), pt(s1, 1, side, 6), pt(s0, 1, side, 6), 0.5, 0.5, 0.5, 0.5, 2);
-    }
-    for (let j = 0; j < U; j++) { const u0 = j / U, u1 = (j + 1) / U;
-      for (const ins of [0, 6]) quad(pt(1, u0, -1, ins), pt(1, u1, -1, ins), pt(1, u1, 1, ins), pt(1, u0, 1, ins), u0, u1, u1, u0, 3); }
-    const box = (c, h, m) => { const [x, y, z] = c, [a, b, d] = h, v = [[-a, -b, -d], [a, -b, -d], [a, b, -d], [-a, b, -d], [-a, -b, d], [a, -b, d], [a, b, d], [-a, b, d]].map(q => [x + q[0], y + q[1], z + q[2]]);
-      for (const f of [[0, 1, 2, 3], [5, 4, 7, 6], [4, 0, 3, 7], [1, 5, 6, 2], [3, 2, 6, 7], [4, 5, 1, 0]]) quad(v[f[0]], v[f[1]], v[f[2]], v[f[3]], 0.5, 0.5, 0.5, 0.5, m); };
-    // stem post, raked forward a touch
-    for (let k = 0; k < 8; k++) { const y0 = 22 + k * 15, y1 = y0 + 15, x = -L / 2 - 2 - k * 1.4; box([x, (y0 + y1) / 2, 0], [5, 7.6, 4.5], 2); }
-    BOAT.stem = [-L / 2 - 13, 142, 0];
-    for (const s of [0.4, 0.7]) box([-L / 2 + s * L, sheer(s) - 18, 0], [13, 2.5, half(s) - 8], 3);
-    return new Float32Array(out);
-  }
-  // The boat rides the swell: a slow heave, pitch and roll on top of sitting stern-down in the water.
-  const BP = { rot: new Float32Array(9), pos: [0, 0, 0] };
-  function boatPose(t) {
-    const yaw = 0.44, k = reduce ? 0 : 1;
-    const pitch = -0.15 + k * 0.022 * Math.sin(t * 0.7), roll = -0.2 + k * 0.04 * Math.sin(t * 0.83 + 1), heave = -22 + k * 3.5 * Math.sin(t * 0.9);
-    const cy = Math.cos(yaw), sy = Math.sin(yaw), cz = Math.cos(pitch), sz = Math.sin(pitch), cx = Math.cos(roll), sx = Math.sin(roll);
-    // R = Ry(yaw) * Rz(pitch) * Rx(roll), stored column-major
-    const Rz = [[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]], Rx = [[1, 0, 0], [0, cx, -sx], [0, sx, cx]], Ry = [[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]];
-    const mul = (A, Bm) => A.map((r, i) => [0, 1, 2].map(j => r[0] * Bm[0][j] + r[1] * Bm[1][j] + r[2] * Bm[2][j]));
-    const R = mul(mul(Ry, Rz), Rx);
-    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) BP.rot[j * 3 + i] = R[i][j];
-    BP.R = R; BP.pos = [0, heave, 0];
-  }
-  const boatPoint = p => { const R = BP.R; return [R[0][0] * p[0] + R[0][1] * p[1] + R[0][2] * p[2] + BP.pos[0], R[1][0] * p[0] + R[1][1] * p[1] + R[1][2] * p[2] + BP.pos[1], R[2][0] * p[0] + R[2][1] * p[1] + R[2][2] * p[2] + BP.pos[2]]; };
-
-  function initSea() {
-    if (!gl) return;
-    try {
-      const water = program(QUAD_VS, WATER_FS), boat = program(BOAT_VS, BOAT_FS), ascii = program(QUAD_VS, ASCII_FS);
-      const quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-      const mesh = buildBoat(), vb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vb); gl.bufferData(gl.ARRAY_BUFFER, mesh, gl.STATIC_DRAW);
-      const tex = () => { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v); return t; };
-      SEA = { water, boat, ascii, quad, vb, count: mesh.length / 8, scene: tex(), atlas: tex(), fb: gl.createFramebuffer(), depth: gl.createRenderbuffer() };
-    } catch (err) { console.error("sea", err); root.classList.add("nogl"); SEA = null; }
-  }
+  /* ---------------- The sea, the boat and Allie's body (renderer/sea.js) ---------------- */
+  const sea = $("#sea"), bc = $("#bird"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let SEA = null; try { SEA = window.AllieSea && AllieSea.create(sea, bc); } catch (err) { console.error("sea", err); }
+  if (!SEA) root.classList.add("nogl");
+  // Character cells in screen pixels: small, so the boat's planks and the ripples keep their detail.
+  const CELL = { dot: 5, glyph: [5, 8] }, BOAT_SCALE = 210;
+  let dprS = 1, MONO = "";
   function sizeScene() {
     dprS = Math.min(2, devicePixelRatio || 1);
-    sea.width = Math.round(W * dprS); sea.height = Math.round(H * dprS);
-    bc.width = sea.width; bc.height = sea.height;
-    if (!SEA) return;
-    const cw = Math.max(4, Math.round(CELL[0] * dprS)), ch = Math.max(6, Math.round(CELL[1] * dprS));
-    GW = Math.ceil(sea.width / cw); GH = Math.ceil(sea.height / ch); SEA.cell = [cw, ch];
-    gl.bindTexture(gl.TEXTURE_2D, SEA.scene); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, GW, GH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, SEA.depth); gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, GW, GH);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, SEA.fb);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, SEA.scene, 0);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, SEA.depth);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    // the character set, drawn at exactly one cell per character
-    const c = document.createElement("canvas"), g = c.getContext("2d"); c.width = cw * RAMP.length; c.height = ch;
-    g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = `600 ${Math.round(ch * 0.98)}px ${getComputedStyle(root).getPropertyValue("--mono")}`;
-    [...RAMP].forEach((s, i) => g.fillText(s, i * cw + cw / 2, ch / 2 + ch * 0.06));
-    gl.bindTexture(gl.TEXTURE_2D, SEA.atlas); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+    if (SEA) SEA.resize(W, H, dprS, CELL, MONO || (MONO = getComputedStyle(root).getPropertyValue("--mono").trim() || "monospace"));
   }
-  // Light pools under every panel and floating button, so they read as standing just above the surface.
-  const REF = new Float32Array(64);
-  function drawSea(b, dim) {
+  // The boat model loads in the background (from the app folder on the PC, or next to the page in a browser).
+  (async () => {
     if (!SEA) return;
-    let n = 0;
-    for (const k in open) { const e = open[k]; if (n < 16 && e._w) { REF.set([e._wx, e._wz, e._w / 2, 150], n * 4); n++; } }
-    for (const e of FL) if (n < 16) { REF.set([e._ax, e._az, 46, 46], n * 4); n++; }
-    const sc = [b.sp, b.cp], cam = [b.cx, b.cy, b.cz], scr = [W, H];
-    gl.bindFramebuffer(gl.FRAMEBUFFER, SEA.fb); gl.viewport(0, 0, GW, GH);
-    gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.depthMask(false);
-    let P = SEA.water; gl.useProgram(P.p);
-    gl.bindBuffer(gl.ARRAY_BUFFER, SEA.quad); let a = gl.getAttribLocation(P.p, "aP"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform2f(P.u.uGrid, GW, GH); gl.uniform2fv(P.u.uScr, scr); gl.uniform2fv(P.u.uSC, sc); gl.uniform2f(P.u.uBoat, 0, 0);
-    gl.uniform3fv(P.u.uCam, cam); gl.uniform1f(P.u.uF, FOC); gl.uniform1f(P.u.uT, T * (reduce ? 0.2 : 1)); gl.uniform1f(P.u.uRefN, n); gl.uniform4fv(P.u.uRef, REF);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    // the boat, depth-tested against itself and blended into the water below the waterline
-    gl.depthMask(true); gl.clear(gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LESS);
-    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    P = SEA.boat; gl.useProgram(P.p); gl.disableVertexAttribArray(a);
-    gl.bindBuffer(gl.ARRAY_BUFFER, SEA.vb);
-    const at = [["aP", 3, 0], ["aN", 3, 12], ["aA", 2, 24]].map(([nm, sz, off]) => { const l = gl.getAttribLocation(P.p, nm); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, sz, gl.FLOAT, false, 32, off); return l; });
-    gl.uniformMatrix3fv(P.u.uRot, false, BP.rot); gl.uniform3fv(P.u.uPos, BP.pos); gl.uniform3fv(P.u.uCam, cam); gl.uniform2fv(P.u.uSC, sc); gl.uniform2fv(P.u.uScr, scr); gl.uniform1f(P.u.uF, FOC);
-    gl.uniform3f(P.u.uL, -0.3, 0.55, 0.78);
-    gl.drawArrays(gl.TRIANGLES, 0, SEA.count);
-    at.forEach(l => gl.disableVertexAttribArray(l));
-    gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
-    // characters
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, sea.width, sea.height);
-    P = SEA.ascii; gl.useProgram(P.p);
-    gl.bindBuffer(gl.ARRAY_BUFFER, SEA.quad); a = gl.getAttribLocation(P.p, "aP"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, SEA.scene); gl.uniform1i(P.u.uScene, 0);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, SEA.atlas); gl.uniform1i(P.u.uAtlas, 1);
-    gl.uniform2f(P.u.uGrid, GW, GH); gl.uniform2fv(P.u.uCellPx, SEA.cell); gl.uniform1f(P.u.uN, RAMP.length);
-    const light = root.dataset.theme === "light", C = SEA_COL[light ? "light" : "dark"];
-    gl.uniform1f(P.u.uLight, light ? 1 : 0); gl.uniform1f(P.u.uDim, dim);
-    for (const k in C) gl.uniform3fv(P.u[k], C[k]);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    gl.disableVertexAttribArray(a);
+    try {
+      const bytes = ON_PC && allie.readAsset ? await allie.readAsset("boat.glb") : new Uint8Array(await (await fetch("models/boat.glb")).arrayBuffer());
+      await SEA.loadBoat(bytes);
+    } catch (err) { console.error("boat", err); }
+  })();
+  // The boat rides the swell: sitting stern-down and half full of water, with a slow heave, pitch and roll.
+  const BP = { R: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], pos: [0, 0, 0] };
+  function boatPose(t) {
+    const k = reduce ? 0 : 1, yaw = 0.52, pitch = -0.085 + k * 0.018 * Math.sin(t * 0.7), roll = -0.05 + k * 0.03 * Math.sin(t * 0.83 + 1), heave = 13 + k * 2.5 * Math.sin(t * 0.9);
+    const cy = Math.cos(yaw), sy = Math.sin(yaw), cz = Math.cos(pitch), sz = Math.sin(pitch), cx = Math.cos(roll), sx = Math.sin(roll);
+    const Rz = [[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]], Rx = [[1, 0, 0], [0, cx, -sx], [0, sx, cx]], Ry = [[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]];
+    const mul = (A, B) => A.map(r => [0, 1, 2].map(j => r[0] * B[0][j] + r[1] * B[1][j] + r[2] * B[2][j]));
+    BP.R = mul(mul(Ry, Rz), Rx); BP.pos = [0, heave, 0];
   }
+  const boatPoint = p => { const R = BP.R, q = p.map(v => v * BOAT_SCALE); return [0, 1, 2].map(i => R[i][0] * q[0] + R[i][1] * q[1] + R[i][2] * q[2] + BP.pos[i]); };
 
   /* ---------------- Allie: a pink gull ---------------- */
-  // She perches on the boat's stem post, flies to whichever tab she opens and lands on its top edge.
-  // She sleeps with her head tucked in, perks up when she hears you, tilts her head while thinking and opens her beak as she talks.
-  const bc = $("#bird"), bx = bc.getContext("2d");
-  const BIRD = { x: 0, y: 0, z: 0, sx: 0, sy: 0, sc: 1, face: -1, perch: "boat", fly: null, flyW: 0, flap: 0, wake: 0, blink: 0, nextBlink: 3, hop: 0, sleepW: 0 };
+  // She perches on the bow, flies to whichever tab she opens and lands on its top edge, and the camera follows her
+  // there. She sleeps with her head tucked into her back, perks up when she hears you, tilts her head while she
+  // thinks, and her beak moves as she talks. Her body is drawn by renderer/sea.js; this is how she behaves.
+  const BIRD = { x: 0, y: 0, z: 0, yaw: 2.6, pitch: 0, roll: 0, perch: "boat", fly: null, flyW: 0, flap: 0, wake: 0, blink: 0, nextBlink: 3, hop: 0, sleepW: 0, sx: 0, sy: 0, sc: 1, scale: 1 };
   function perchPoint() {
     const el = BIRD.perch !== "boat" && (open[BIRD.perch] || null);
     // panels face the camera, so their top edge is "up" along the camera's up direction, not straight up
-    if (el && el._w) { const sp = Math.sin(CAM.p), cp = Math.cos(CAM.p); return [el._wx - el._w / 2 + 70, H0 + el._h * cp, el._wz - el._h * sp]; }
-    return boatPoint(BOAT.stem);
+    if (el && el._w) { const sp = Math.sin(CAM.p), cp = Math.cos(CAM.p); return [el._wx - el._w / 2 + 74, H0 + el._h * cp, el._wz - el._h * sp]; }
+    const t = SEA && SEA.bowTip || [-1, 0.13, 0], p = boatPoint([t[0] + 0.05, t[1], t[2]]);
+    return [p[0], p[1] - 1, p[2]];
   }
-  function birdTo(perch) {
-    if (BIRD.perch === perch && !BIRD.fly) return;
+  // Which way she faces when she lands: out over the bow on the boat, along the tab's top edge on a tab; turned a little toward you.
+  function perchYaw() {
+    if (BIRD.perch !== "boat" && open[BIRD.perch]) return Math.atan2(-0.55, 1);
+    return Math.atan2(-0.25, -1); // in profile, looking out to the left past the bow
+  }
+  const angTo = (a, b) => { let d = (b - a) % (2 * Math.PI); if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI; return d; };
+  // cam: where the camera should end up when she lands (a tab's close-up, or home); while she flies the camera follows her.
+  function birdTo(perch, cam) {
+    if (BIRD.perch === perch && !BIRD.fly) { if (cam) flyCam(cam); return; }
     BIRD.perch = perch;
     const [x, y, z] = perchPoint(), d = Math.hypot(x - BIRD.x, y - BIRD.y, z - BIRD.z);
-    if (reduce || d < 4) { BIRD.fly = null; [BIRD.x, BIRD.y, BIRD.z] = [x, y, z]; return; }
-    BIRD.fly = { t: 0, from: [BIRD.x, BIRD.y, BIRD.z], dur: Math.max(0.9, Math.min(2.2, 0.7 + d / 1500)), arc: 70 + d * 0.16 };
+    if (reduce || d < 4) { BIRD.fly = null; [BIRD.x, BIRD.y, BIRD.z] = [x, y, z]; BIRD.yaw = perchYaw(); if (cam) flyCam(cam); return; }
+    BIRD.fly = { t: 0, from: [BIRD.x, BIRD.y, BIRD.z], dur: Math.max(1.5, Math.min(3.2, 1.1 + d / 900)), arc: 90 + d * 0.22, side: (Math.random() < 0.5 ? -1 : 1) * d * 0.12,
+      cam: cam ? { from: { x: CAM.x, y: CAM.y, z: CAM.z, d: CAM.d, p: CAM.p }, to: cam } : null, last: [BIRD.x, BIRD.y, BIRD.z] };
   }
-  function birdHit(x, y) { return Math.hypot(x - BIRD.sx, y - (BIRD.sy - 30 * BIRD.sc)) < 38 * BIRD.sc; }
-  function birdPoke() { if (busy) { stopTalking(); return; } BIRD.hop = 1; BIRD.wake = Math.max(BIRD.wake, 0.6); }
-  const easeIO = u => u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+  function birdHit(x, y) { return Math.hypot(x - BIRD.sx, y - BIRD.sy) < 40 * BIRD.sc; }
+  function birdPoke() { if (busy) { stopTalking(); return; } BIRD.hop = 1; BIRD.wake = Math.max(BIRD.wake, 0.7); }
+  const easeIO = u => u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2, smooth = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
   function moveBird(dt) {
     const [tx, ty, tz] = perchPoint();
     if (BIRD.fly) {
-      const f = BIRD.fly; f.t += dt; const u = Math.min(1, f.t / f.dur), e = easeIO(u);
-      const nx = f.from[0] + (tx - f.from[0]) * e, nz = f.from[2] + (tz - f.from[2]) * e;
-      const ny = f.from[1] + (ty - f.from[1]) * e + Math.sin(Math.PI * u) * f.arc;
-      const b = basis(CAM), p0 = project(b, BIRD.x, BIRD.y, BIRD.z), p1 = project(b, nx, ny, nz);
-      if (p0 && p1 && Math.abs(p1.x - p0.x) > 0.4) BIRD.face = p1.x > p0.x ? 1 : -1;
+      const f = BIRD.fly; f.t += dt; const u = Math.min(1, f.t / f.dur), e = easeIO(u), arc = Math.sin(Math.PI * u);
+      // a curved path: up and over, bowing a little to one side
+      const dx = tx - f.from[0], dz = tz - f.from[2], len = Math.hypot(dx, dz) || 1;
+      const nx = f.from[0] + dx * e - dz / len * f.side * arc, nz = f.from[2] + dz * e + dx / len * f.side * arc;
+      const ny = f.from[1] + (ty - f.from[1]) * e + arc * f.arc;
+      const vx = (nx - f.last[0]) / Math.max(dt, 1e-3), vy = (ny - f.last[1]) / Math.max(dt, 1e-3), vz = (nz - f.last[2]) / Math.max(dt, 1e-3); f.last = [nx, ny, nz];
       [BIRD.x, BIRD.y, BIRD.z] = [nx, ny, nz];
-      // flap hard on take-off, glide through the middle, flare to land
-      const glide = Math.sin(Math.PI * u);
-      BIRD.flap += dt * (16 - 9 * glide * glide);
-      if (u >= 1) { BIRD.fly = null; BIRD.wake = Math.max(BIRD.wake, 0.35); }
-    } else { [BIRD.x, BIRD.y, BIRD.z] = [tx, ty, tz]; BIRD.flap += dt * 18 * BIRD.wake; }
-    BIRD.flyW += ((BIRD.fly ? 1 : 0) - BIRD.flyW) * Math.min(1, dt * 9);
-    BIRD.wake = Math.max(0, BIRD.wake - dt * 0.9); BIRD.hop = Math.max(0, BIRD.hop - dt * 2.6);
-    BIRD.sleepW += ((sleeping ? 1 : 0) - BIRD.sleepW) * Math.min(1, dt * 2.5);
-    BIRD.blink -= dt; BIRD.nextBlink -= dt; if (BIRD.nextBlink < 0) { BIRD.blink = 0.14; BIRD.nextBlink = 2.5 + Math.random() * 4; }
-  }
-  const GULL = { body: "#ec6f96", hi: "#fbb0c6", belly: "#f7c1cf", shade: "#b4446c", wing: "#d25e87", wingD: "#a33c63", tip: "#2b1421", beak: "#f2c86a", spot: "#e1474f", leg: "#ea8aa0", eye: "#1a0b12" };
-  let DOTS = null, MONO = "";
-  function wing(g, near, up, span) {
-    const tipY = -up * span, C = GULL;
-    g.save(); if (!near) { g.translate(-5, -3); g.globalAlpha = 0.85; }
-    const gr = g.createLinearGradient(0, 0, -20, tipY); gr.addColorStop(0, near ? C.wing : C.wingD); gr.addColorStop(1, near ? C.wingD : C.shade);
-    g.fillStyle = gr; g.beginPath(); g.moveTo(10, -5); g.quadraticCurveTo(6, tipY * 0.5 - 4, -16, tipY); g.lineTo(-24, tipY + (up > 0 ? 8 : -8) * Math.min(1, span / 30));
-    g.quadraticCurveTo(-14, tipY * 0.4, -14, -2); g.closePath(); g.fill();
-    g.fillStyle = C.tip; g.beginPath(); g.moveTo(-12, tipY * 0.82); g.lineTo(-16, tipY); g.lineTo(-24, tipY + (up > 0 ? 8 : -8) * Math.min(1, span / 30)); g.lineTo(-17, tipY * 0.78); g.closePath(); g.fill();
-    g.restore();
-  }
-  function drawGull(g, P) {
-    const C = GULL, f = P.fly, s = P.sleep, wings = Math.max(f, P.wake);
-    g.lineJoin = g.lineCap = "round";
-    if (f < 0.98) { g.globalAlpha = 1 - f; g.strokeStyle = C.leg; g.lineWidth = 2.6;
-      g.beginPath(); g.moveTo(-4, -15 + s * 6); g.lineTo(-6, 0); g.moveTo(5, -15 + s * 6); g.lineTo(4, 0); g.stroke();
-      g.lineWidth = 2; g.beginPath(); g.moveTo(-12, 0); g.lineTo(0, 0); g.moveTo(-2, 0); g.lineTo(10, 0); g.stroke(); g.globalAlpha = 1; }
-    const by = -28 + s * 9 - f * 8 - P.hop * 10, tilt = -0.14 + f * 0.16 + s * 0.06;
-    g.save(); g.translate(-2, by); g.rotate(tilt);
-    const up = Math.sin(P.flap), span = 58 * wings;
-    if (wings > 0.02) wing(g, false, up, span);
-    g.fillStyle = C.wingD; g.beginPath(); g.moveTo(-18, -4); g.lineTo(-44, -2); g.lineTo(-42, 6); g.lineTo(-16, 7); g.closePath(); g.fill();
-    g.fillStyle = C.tip; g.beginPath(); g.moveTo(-35, -3); g.lineTo(-45, -2); g.lineTo(-43, 6); g.lineTo(-33, 6); g.closePath(); g.fill();
-    const gr = g.createLinearGradient(0, -15, 0, 15); gr.addColorStop(0, C.hi); gr.addColorStop(0.45, C.body); gr.addColorStop(1, C.shade);
-    g.fillStyle = gr; g.beginPath(); g.ellipse(0, 0, 25 + s * 2, 13 + s * 2.5, 0, 0, 6.283); g.fill();
-    g.globalAlpha = 0.5; g.fillStyle = C.belly; g.beginPath(); g.ellipse(7, 5, 15, 6, -0.1, 0, 6.283); g.fill(); g.globalAlpha = 1;
-    if (wings < 0.98) { g.globalAlpha = 1 - wings;
-      const wg = g.createLinearGradient(12, -10, -42, 4); wg.addColorStop(0, C.wing); wg.addColorStop(0.75, C.wingD);
-      g.fillStyle = wg; g.beginPath(); g.moveTo(13, -9); g.quadraticCurveTo(-6, -16, -30, -6); g.lineTo(-48, -3); g.quadraticCurveTo(-30, 5, -6, 5); g.quadraticCurveTo(9, 3, 13, -9); g.fill();
-      g.fillStyle = C.tip; g.beginPath(); g.moveTo(-27, -5); g.lineTo(-48, -3); g.lineTo(-29, 3); g.closePath(); g.fill();
-      g.fillStyle = "#fff"; g.beginPath(); g.arc(-41, -2, 1.3, 0, 6.283); g.arc(-35, -0.5, 1, 0, 6.283); g.fill(); g.globalAlpha = 1; }
-    g.restore();
-    // head: up and alert when listening, tucked into her back when asleep, tilting while she thinks
-    const hx = 17 - s * 15 + P.listen * 2 + f * 6, hy = -45 + s * 12 - P.listen * 5 - P.hop * 10 + f * 10 + P.nod, rot = P.tilt + s * 2.75;
-    g.fillStyle = C.body; g.beginPath(); g.moveTo(8, by - 12); g.quadraticCurveTo(hx - 4, hy + 4, hx - 2, hy - 6); g.lineTo(hx + 6, hy + 6); g.quadraticCurveTo(14, by - 2, 18, by + 2); g.closePath(); g.fill();
-    g.save(); g.translate(hx, hy); g.rotate(rot);
-    const hg = g.createRadialGradient(-2, -4, 1, 0, 0, 11); hg.addColorStop(0, C.hi); hg.addColorStop(1, C.body);
-    g.fillStyle = hg; g.beginPath(); g.arc(0, 0, 9.5, 0, 6.283); g.fill();
-    const open_ = P.beak * 0.55;
-    g.fillStyle = C.beak; g.save(); g.translate(7, 2); g.rotate(open_ * 0.6);
-    g.beginPath(); g.moveTo(0, 0); g.lineTo(11, 1.2); g.lineTo(0, 3.4); g.closePath(); g.fill(); g.fillStyle = C.spot; g.beginPath(); g.arc(8, 2.2, 1, 0, 6.283); g.fill(); g.restore();
-    g.fillStyle = C.beak; g.save(); g.translate(7, 1); g.rotate(-open_ * 0.4);
-    g.beginPath(); g.moveTo(0, -2.6); g.quadraticCurveTo(8, -2.4, 12.5, 1); g.lineTo(0, 1.6); g.closePath(); g.fill(); g.restore();
-    if (s > 0.5 || P.blink) { g.strokeStyle = C.eye; g.lineWidth = 1.3; g.beginPath(); g.arc(3, -1.5, 2.2, 0.2, Math.PI - 0.2); g.stroke(); }
-    else { g.fillStyle = C.eye; g.beginPath(); g.arc(3, -2, 1.9 + P.listen * 0.4, 0, 6.283); g.fill(); g.fillStyle = "#fff"; g.beginPath(); g.arc(3.6, -2.7, 0.6, 0, 6.283); g.fill(); }
-    g.restore();
-    if (wings > 0.02) { g.save(); g.translate(-2, by); g.rotate(tilt); wing(g, true, up, span); g.restore(); }
-  }
-  function drawBird(b, amp) {
-    bx.setTransform(1, 0, 0, 1, 0, 0); bx.clearRect(0, 0, bc.width, bc.height);
-    const p = project(b, BIRD.x, BIRD.y, BIRD.z); if (!p) return;
-    const sc = Math.max(0.4, Math.min(1.6, p.s)) * 0.86; BIRD.sx = p.x; BIRD.sy = p.y; BIRD.sc = sc;
-    if (p.x < -120 || p.x > W + 120 || p.y < -120 || p.y > H + 160) return;
-    const listen = W8.listen, think = W8.think;
-    const P = { fly: BIRD.flyW, flap: BIRD.flap, sleep: BIRD.sleepW, wake: BIRD.wake, hop: Math.sin(BIRD.hop * Math.PI) * 0.6, listen, blink: BIRD.blink > 0,
-      tilt: think * 0.22 * Math.sin(T * 2.1) - listen * 0.08, beak: W8.speak * amp * (1 - BIRD.sleepW), nod: W8.speak * amp * 2 + (reduce ? 0 : Math.sin(T * 1.7) * 0.5) };
-    bx.setTransform(dprS * sc * BIRD.face, 0, 0, dprS * sc, dprS * p.x, dprS * p.y);
-    drawGull(bx, P);
-    // a fine halftone over her, so she belongs to the same dithered world
-    if (!DOTS) { const c = document.createElement("canvas"); c.width = c.height = 3; const g = c.getContext("2d"); g.fillStyle = "rgba(70,10,40,.28)"; g.fillRect(0, 0, 1, 1); DOTS = bx.createPattern(c, "repeat"); }
-    bx.setTransform(1, 0, 0, 1, 0, 0); bx.globalCompositeOperation = "source-atop"; bx.fillStyle = DOTS; bx.fillRect(dprS * (p.x - 80 * sc), dprS * (p.y - 130 * sc), dprS * 160 * sc, dprS * 150 * sc); bx.globalCompositeOperation = "source-over";
-    // asleep: little z's drifting up
-    if (BIRD.sleepW > 0.3) {
-      bx.font = `600 ${Math.round(13 * sc * dprS)}px ${MONO || (MONO = getComputedStyle(root).getPropertyValue("--mono"))}`;
-      bx.fillStyle = root.dataset.theme === "light" ? "#f6f3d6" : "#a9ecdb";
-      for (let i = 0; i < 3; i++) { const u = ((T * 0.35 + i / 3) % 1), a = Math.sin(u * Math.PI) * (BIRD.sleepW - 0.3) / 0.7;
-        bx.globalAlpha = Math.max(0, a); bx.fillText(i % 2 ? "Z" : "z", dprS * (p.x + BIRD.face * (8 + u * 26) * sc), dprS * (p.y - (44 + u * 60) * sc)); }
-      bx.globalAlpha = 1;
+      const sp = Math.hypot(vx, vz);
+      if (sp > 20) { const want = Math.atan2(-vz, vx), d = angTo(BIRD.yaw, want); BIRD.yaw += d * Math.min(1, dt * 7); BIRD.roll += (-d * 1.2 - BIRD.roll) * Math.min(1, dt * 5); }
+      BIRD.pitch += (Math.max(-0.5, Math.min(0.5, Math.atan2(vy, sp + 1) * 0.7)) + (u > 0.85 ? 0.35 : 0) - BIRD.pitch) * Math.min(1, dt * 6);
+      // beat hard on take-off, glide through the middle, flare to land
+      BIRD.amp = 0.9 - 0.65 * smooth(0.15, 0.35, u) + 0.5 * smooth(0.8, 0.95, u) * (1 - smooth(0.97, 1, u));
+      BIRD.flap += dt * (15 - 6 * arc);
+      // the camera keeps her in view: it follows her mid-flight, then settles on where she's going
+      if (f.cam) {
+        const fol = { x: nx, y: Math.max(0, ny - 70), z: nz, d: Math.max(f.cam.from.d, f.cam.to.d) * 1.12, p: (f.cam.from.p + f.cam.to.p) / 2 + 0.06 };
+        const a = smooth(0, 0.3, u), c = smooth(0.55, 1, u), t = {};
+        for (const k of ["x", "y", "z", "d", "p"]) t[k] = f.cam.from[k] + (fol[k] - f.cam.from[k]) * a, t[k] += (f.cam.to[k] - t[k]) * c;
+        if (!camAnim) { CV.x = INR.vx; CV.z = INR.vz; } camAnim = { t };
+      }
+      if (u >= 1) { BIRD.fly = null; BIRD.wake = Math.max(BIRD.wake, 0.4); if (f.cam) flyCam(f.cam.to); }
+    } else {
+      [BIRD.x, BIRD.y, BIRD.z] = [tx, ty, tz];
+      BIRD.yaw += angTo(BIRD.yaw, perchYaw()) * Math.min(1, dt * 4); BIRD.pitch *= Math.max(0, 1 - dt * 6); BIRD.roll *= Math.max(0, 1 - dt * 6);
+      BIRD.flap += dt * 17; BIRD.amp = 0.75;
     }
+    BIRD.flyW += ((BIRD.fly && BIRD.fly.t / BIRD.fly.dur < 0.985 ? 1 : 0) - BIRD.flyW) * Math.min(1, dt * 9);
+    BIRD.wake = Math.max(0, BIRD.wake - dt * 0.8); BIRD.hop = Math.max(0, BIRD.hop - dt * 2.6);
+    BIRD.sleepW += ((sleeping ? 1 : 0) - BIRD.sleepW) * Math.min(1, dt * 2);
+    BIRD.blink = Math.max(0, BIRD.blink - dt * 7); BIRD.nextBlink -= dt; if (BIRD.nextBlink < 0) { BIRD.blink = 1; BIRD.nextBlink = 2.5 + Math.random() * 4; }
   }
+  function gullPose(b, amp) {
+    const p = project(b, BIRD.x, BIRD.y + 24, BIRD.z); if (!p) return null;
+    // she stays a readable size: never a speck when you're far away, never huge up close
+    const s = p.s; BIRD.scale = s < 0.55 ? 0.55 / s : s > 1.7 ? 1.7 / s : 1;
+    BIRD.sx = p.x; BIRD.sy = p.y; BIRD.sc = s * BIRD.scale;
+    const hop = Math.sin(BIRD.hop * Math.PI);
+    return { x: BIRD.x, y: BIRD.y + hop * 10, z: BIRD.z, yaw: BIRD.yaw, pitch: BIRD.pitch, roll: BIRD.roll, scale: BIRD.scale,
+      wings: Math.max(BIRD.flyW, BIRD.wake * 0.95), flap: BIRD.flap, amp: BIRD.fly ? BIRD.amp : 0.8 * BIRD.wake,
+      legs: 1 - BIRD.flyW, sleep: BIRD.sleepW, listen: W8.listen, tilt: W8.think * 0.28 * Math.sin(T * 2.1) - W8.listen * 0.05,
+      beak: Math.min(1, W8.speak * amp * 1.4) * (1 - BIRD.sleepW), blink: BIRD.blink, nod: W8.speak * amp * 6 + (reduce ? 0 : Math.sin(T * 1.7) * 1.2) };
+  }
+  const zzz = $("#zzz");
+  function placeZzz() {
+    const show = BIRD.sleepW > 0.3; if (zzz.hidden === show) zzz.hidden = !show;
+    if (show) { zzz.style.opacity = ((BIRD.sleepW - 0.3) / 0.7).toFixed(2); zzz.style.transform = `translate(${(BIRD.sx + 4 * BIRD.sc).toFixed(1)}px,${(BIRD.sy - 30 * BIRD.sc).toFixed(1)}px) scale(${Math.max(0.6, Math.min(1.4, BIRD.sc)).toFixed(2)})`; }
+  }
+  // Reflection stand-ins for the floating buttons: a disc of each button's colour, where the icon sits.
+  const FLOAT_RGB = { today: [1, 0.31, 0.66], mail: [0.18, 0.55, 0.9], calendar: [1, 0.42, 0.37], todo: [0.96, 0.63, 0.29], time: [0.44, 0.83, 0.91], calories: [1, 0.42, 0.24], businesses: [0.94, 0.44, 0.59], finances: [0.27, 0.79, 0.56], jobs: [0.73, 0.55, 0.94], settings: [0.56, 0.66, 0.64] };
 
   let state = "idle"; const W8 = { listen: 0, think: 0, speak: 0, sleep: 0 }, thinkEl = $("#think"), SPIN = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏";
   function setState(s) { state = sleeping && s === "idle" ? "asleep" : s; thinkEl.hidden = state !== "thinking"; }
@@ -1370,19 +1195,25 @@ void main(){
   let last = performance.now(), T = 0, dimNow = 1;
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000) || 0.016; last = now; T += dt; camStep(dt);
-    if (camAnim) camSpring(dt);
     for (const [k, v] of [["listen", "listening"], ["think", "thinking"], ["speak", "speaking"], ["sleep", "asleep"]]) W8[k] += ((state === v ? 1 : 0) - W8[k]) * Math.min(1, dt * 6);
     if (analyser && srcNode) {
       analyser.getFloatTimeDomainData(tdata); let sum = 0; for (let i = 0; i < tdata.length; i++) sum += tdata[i] * tdata[i];
       level += (Math.min(1, Math.sqrt(sum / tdata.length) * 5.5) - level) * 0.3;
     } else level *= 0.85;
     const amp = state === "speaking" ? (srcNode ? level : (0.5 + 0.5 * Math.sin(T * 13)) * (0.5 + 0.5 * Math.sin(T * 4.1 + 1))) : 0;
-    dimNow += ((sleeping ? 0.72 : 1) - dimNow) * Math.min(1, dt * 1.5);
-    const b = basis(CAM);
+    dimNow += ((sleeping ? 0.7 : 1) - dimNow) * Math.min(1, dt * 1.5);
     boatPose(T); moveBird(dt);
-    drawSea(b, dimNow);
+    if (camAnim) camSpring(dt);
+    const b = basis(CAM);
     for (const k in open) put(open[k], b); for (const k in closing) put(closing[k], b);
-    placeFloats(b); drawBird(b, amp);
+    placeFloats(b);
+    const pose = gullPose(b, amp);
+    if (SEA) {
+      const panels = Object.values(open).filter(e => e._w).map(e => ({ x: e._wx, y: H0, z: e._wz, w: e._w, h: e._h }));
+      const fl = FL.map(e => ({ x: e._ax, y: 16 + e._bob + 41, z: e._az, r: 23, c: FLOAT_RGB[e.dataset.cmd].map(v => v * 0.55) }));
+      SEA.render({ T: reduce ? T * 0.2 : T, b, FOC, theme: root.dataset.theme === "light" ? "light" : "dark", dim: dimNow, boat: { R: BP.R, pos: BP.pos, scale: BOAT_SCALE }, panels, floats: fl, gull: pose });
+    }
+    placeZzz();
     if (!thinkEl.hidden) thinkEl.firstChild.textContent = SPIN[Math.floor(T * 12) % SPIN.length];
     requestAnimationFrame(frame);
   }
@@ -1496,7 +1327,7 @@ void main(){
   function goTo(el, key) {
     el.classList.add("glow"); setTimeout(() => el.classList.remove("glow"), 2200);
     requestAnimationFrame(() => {
-      focusOn(el); birdTo(key);
+      birdTo(key, focusView(el));
       later(() => { const fin = () => { setState("idle"); setBusy(false); }, sum = PANELS[key] && rundown(key); setState("speaking"); if (sum) speakText(sum, fin); else caption(key, fin); }, 650);
     });
   }
@@ -1506,7 +1337,7 @@ void main(){
     if (cmd === "home" || cmd === "overview" || cmd === "clear") {
       if (cmd === "clear") Object.keys(open).forEach(closePanel);
       if (cmd === "overview" && Object.keys(open).length) { overview(); talk("overview"); return; }
-      birdTo("boat"); goHome();
+      focusKey = null; birdTo("boat", homeView());
       talk(cmd === "clear" ? "clear" : "home"); return;
     }
     if (cmd === "sleep") return setSleep(true);
@@ -1630,10 +1461,10 @@ void main(){
       `Connected: ${Object.entries(EXT.on).filter(([, v]) => v).map(([k]) => k).join(", ") || "nothing yet"}. Calendar and money from connected accounts show in the app; recent income this month: ${EXT.money.filter(m => m.amt > 0 && m.d.slice(0, 7) === TODAY.slice(0, 7)).reduce((a, m) => a + m.amt, 0).toFixed(0)}`].join("\n");
   }
   function showQuiet(key) {
-    if (["home", "overview", "clear"].includes(key)) { if (key === "clear") Object.keys(open).forEach(closePanel); if (key === "overview") overview(); else { birdTo("boat"); goHome(); } return; }
+    if (["home", "overview", "clear"].includes(key)) { if (key === "clear") Object.keys(open).forEach(closePanel); if (key === "overview") overview(); else { focusKey = null; birdTo("boat", homeView()); } return; }
     if (!PANELS[key]) return;
     const el = openPanel(key);
-    requestAnimationFrame(() => { focusOn(el); birdTo(key); });
+    requestAnimationFrame(() => birdTo(key, focusView(el)));
   }
   const ACT = {
     open_panel: i => { showQuiet(i.panel); return PANELS[i.panel] ? "Opened. What's in it: " + rundown(i.panel) : "done"; },
@@ -1907,7 +1738,7 @@ void main(){
       else if (s.stage === "error") { chipS.hidden = false; chipS.textContent = s.what === "voice" ? "Voice download failed · restart to retry" : "Couldn't start listening"; chipS.title = s.detail || ""; }
     });
   }
-  initSea(); sizeScene(); goHome(true); island(); syncSleep();
+  sizeScene(); goHome(true); island(); syncSleep();
   const hr = new Date().getHours();
   reveal(`Good ${hr < 12 ? "morning" : hr < 18 ? "afternoon" : "evening"}, Jack. Just talk to me, or tap the chat button to type.`, 2.4);
   requestAnimationFrame(frame);

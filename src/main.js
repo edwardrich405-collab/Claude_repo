@@ -66,6 +66,11 @@ ipcMain.on("tts:cancel", () => voice.cancel());
 ipcMain.on("tts:has", e => { e.returnValue = voice.hasTts(); });
 ipcMain.on("mic:pcm", (e, buf) => voice.hear(new Float32Array(buf), r => send("mic:heard", r)));
 ipcMain.on("mic:reset", () => voice.resetEars());
+// Models the screen needs (the boat), read from renderer/models. Only plain file names, nothing outside that folder.
+ipcMain.handle("asset:read", (e, name) => {
+  if (!/^[a-z0-9_-]+\.glb$/i.test(String(name))) throw new Error("bad asset name");
+  return fs.readFileSync(path.join(__dirname, "..", "renderer", "models", name));
+});
 ipcMain.on("open:url", (e, url) => { if (/^https:\/\//.test(url)) shell.openExternal(url); });
 ipcMain.on("theme", (e, t) => { if (win && process.platform === "win32") win.setTitleBarOverlay({ color: "#00000000", symbolColor: t === "light" ? "#1d1d1f" : "#f5f5f7", height: 40 }); });
 

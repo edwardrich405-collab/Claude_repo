@@ -41,14 +41,16 @@ test("ocean redesign: only sleep, chat and thinking stay fixed; Allie is a pink 
   assert.deepStrictEqual(ids, ["chat", "send", "sleep"]);
   assert.match(chrome, /id="think"/);
   assert.doesNotMatch(h, /id="mic"|id="stop"|class="rail"/);
-  // the gull is pink in both themes: her colours never depend on the theme
-  const gull = h.match(/const GULL = \{[^}]*\}/)[0];
-  assert.match(gull, /body: "#e[0-9a-f]{5}"/);
-  assert.doesNotMatch(gull, /theme|light/);
+  // the sea, the boat and Allie's body live in sea.js, loaded before the page script
+  assert.match(h, /<script src="sea.js"><\/script>/);
   // every tab has a floating button (tools/screenshots.js clicks them by data-cmd)
   const floats = h.match(/const FLOATS = (\[.*?\]);/)[1];
   for (const k of ["today", "mail", "calendar", "todo", "time", "calories", "businesses", "finances", "jobs", "settings"]) assert.match(floats, new RegExp(`\\["${k}"`), k);
-  // the sea is WebGL with a plain fallback
-  assert.match(h, /getContext\("webgl"/);
+  // floating buttons are app icons: an icon in a circle with the name under it
+  assert.match(h, /class="float" data-cmd="\$\{k\}"[^`]*<i>\$\{icon\(PANELS\[k\]\.ic\)\}<\/i><span>/);
+  // the sea is WebGL2 with a plain fallback
+  const sea = fs.readFileSync(path.join(R, "sea.js"), "utf8");
+  new vm.Script(sea);
+  assert.match(sea, /getContext\("webgl2"/);
   assert.match(h, /\.nogl #viewport/);
 });

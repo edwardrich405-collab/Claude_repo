@@ -28,4 +28,5 @@ contextBridge.exposeInMainWorld("allie", {
   restart: () => ipcRenderer.send("app:restart"),
   openUrl: url => ipcRenderer.send("open:url", url),
   theme: t => ipcRenderer.send("theme", t),
+  readAsset: name => ipcRenderer.invoke("asset:read", name),
 });
