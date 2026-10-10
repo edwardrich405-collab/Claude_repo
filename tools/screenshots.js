@@ -12,6 +12,7 @@ const SHOTS = [
   { name: "todo", w: 1440, h: 900, run: `document.querySelector('[data-cmd="todo"]').click()` },
   { name: "settings", w: 1440, h: 900, run: `document.querySelector('[data-cmd="settings"]').click()` },
   { name: "overview", w: 1440, h: 900, run: `for (const k of ["calories","businesses","jobs"]) document.querySelector('[data-cmd="'+k+'"]').click()`, after: `document.querySelector('[data-cmd="today"]').click()` },
+  { name: "asleep", w: 1440, h: 900, run: `document.querySelector("#sleep").click()` },
   { name: "small-todo", w: 900, h: 600, run: `document.querySelector('[data-cmd="todo"]').click()` },
 ];
 

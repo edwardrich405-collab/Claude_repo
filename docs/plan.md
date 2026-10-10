@@ -1,6 +1,6 @@
 # Allison: plan and rules
 
-Jack's personal assistant. Allie is a pink particle cloud on an infinite canvas, talks with Kokoro's natural "Bella" voice (not Heart, which Jack's friend uses), laid-back and brief (never explains tabs or features, sums up what's in them instead), and calls him Jack.
+Jack's personal assistant. Allie is a pink gull perched on a half-sunk rowboat in an ASCII ocean (dark: teal night sea, light: green sunlit sea); tabs stand above the water around the boat and she flies to them. She talks with Kokoro's natural "Bella" voice (not Heart, which Jack's friend uses), laid-back and brief (never explains tabs or features, sums up what's in them instead), and calls him Jack.
 
 ## How Claude works on this project
 - Claude edits the real files in this folder. Every update is one git commit with a clear message, so any update can be undone (`git revert <id>`).
@@ -17,7 +17,7 @@ Jack's personal assistant. Allie is a pink particle cloud on an infinite canvas,
 
 ## Layout
 - src/main.js: window, voice, inbox, file watching. src/brain.js: Claude and the actions it can take. src/connectors.js + hub.js: Gmail, calendars, Stripe, PayPal, job boards. src/voice.js + models.js: offline speech (sherpa-onnx), models download on first run.
-- renderer/index.html: the whole screen (canvas, Allie, panels). renderer/voices.js: her recorded lines.
+- renderer/index.html: the whole screen (WebGL ASCII ocean and boat, Allie the gull, floating ASCII buttons, panels). Fixed controls are only sleep (top left), chat and the thinking indicator. renderer/voices.js: her recorded lines.
 - tests/: offline tests. Run `npm test` (it lists the test files explicitly).
 
 ## Later

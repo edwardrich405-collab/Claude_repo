@@ -2,6 +2,14 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.7.0 (2026-10-10)
+- New look: the home screen is an ASCII ocean with slow rippling rings and a wooden rowboat half sunk in the middle, bobbing on the swell. Dark mode is the teal night sea, light mode the green sunlit one.
+- Allie is now a pink gull (pink in both modes). She perches on the boat's bow post, flies over to each tab you open and lands on its top edge, and flies home when it closes. Asleep she tucks her head in with little z's floating up, and the sea dims. She perks up when she hears you, tilts her head while thinking and opens her beak as she talks. Tap her to stop her talking.
+- Tabs open just above the water at their own spots around the boat, with light glowing on the water under them, and the camera sails over to them. They have the new calorie-card look: dark sea glass, mono headings, dotted rings and bars, outlined buttons.
+- Drag the water to sail around, scroll to zoom, drag a tab by its header to move it, double-click the water (or press 0) to go home. "Show everything" backs the camera off until every open tab fits.
+- The side rail is gone. Its buttons now float on the water around the boat as little ASCII buttons; the timer one shows the running time.
+- The only fixed controls left: the moon (sleep) top left, the chat button at the bottom, and a small "thinking" spinner while she works out a reply. The mic and stop buttons and the voice meter are gone (Esc still stops her talking). Light/dark lives in Settings, Appearance.
+
 ## 0.6.0 (2026-10-09)
 - Allie can think with a free local model on this PC (Qwen3 30B through Ollama) instead of Claude. Switch in Settings, Brain, Thinks with: Claude or Local. The choice is remembered.
 - The local brain uses the same personality and can do everything in the app (to-dos, timers, tabs, notes), but can't search the web.
