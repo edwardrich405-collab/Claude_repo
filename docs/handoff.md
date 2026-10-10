@@ -188,6 +188,8 @@ That wasn't the whole story (0.11.2): `beam()` worked on the raw, unnormalized v
 closest-approach maths cancelled out badly. It now normalizes the ray and caps its reach, returns 0 for any NaN/inf,
 and `WATER_FS` and `ASCII_FS` sanitize their inputs/outputs: a NaN brightness makes the ASCII pass print blank cells,
 which is what Jack saw. Keep ray maths on unit vectors.
+In 0.12.0 Jack had the beam removed altogether: index.html no longer passes `beam` to `render()` and `LOOKS.*.beam` is 0.
+The `beam()` code is still in `WATER_FS` (it returns 0) if he ever wants it back. Wave lines were turned down (`wave`).
 SwiftShader (the screenshot tool) doesn't show this, so check on the real PC.
 
 ## A bug fixed in 0.10.0

@@ -1660,7 +1660,7 @@ body.at-home .dock > :not(.controls){display:none}
       const fl = FL.map(e => ({ x: e._ax, y: 16 + e._bob + 36, z: e._az, r: 18, c: FLOAT_RGB[e.dataset.cmd].map(v => v * 0.55), r3: b.R, u3: b.U }));
       const S0 = PLACES.studio, J = PLACES.journal, aim = camAim();
       SEA.render({ T: reduce ? T * 0.2 : T, b, FOC, theme: root.dataset.theme === "light" ? "light" : "dark", dim: dimNow, boat: { R: BP.R, pos: BP.pos, scale: BOAT_SCALE }, panels, floats: fl, gull: pose,
-        props: propList(), isle: [ISLE[0], ISLE[1], AllieSea.ISLET.r], beam: { p: [S0.x, (SEA.props.islandTop - 6) + SEA.props.lamp, S0.z], a: T * 0.42 }, ripples: [[0, 0, 170, 0.55], [S0.x, S0.z, 500, 0.5], [J.x, J.z, 34, 0.7]],
+        props: propList(), isle: [ISLE[0], ISLE[1], AllieSea.ISLET.r], ripples: [[0, 0, 170, 0.55], [S0.x, S0.z, 500, 0.5], [J.x, J.z, 34, 0.7]],
         shadowAt: { x: CAM.x, y: 0, z: CAM.z, r: HERE === "studio" ? 1150 : HERE === "home" ? 800 : HERE === "craft" ? 320 : 650 } });
       placeBench(b);
     }

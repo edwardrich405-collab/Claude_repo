@@ -412,7 +412,7 @@
       cDeep: [0.0015, 0.006, 0.008], cBg: [0.004, 0.02, 0.024], cLo: [0.012, 0.1, 0.115], cHi: [0.55, 1.0, 0.95],
       kDeep: [0.0008, 0.003, 0.005], kBg: [0.002, 0.01, 0.013], kLo: [0.025, 0.12, 0.14], kHi: [0.7, 1.0, 0.97],
       discCol: [0.75, 0.98, 0.95], discBg: 0.3, foamCol: [0.7, 1.0, 0.96], foamBg: 0.08, boost: 0.7,
-      skyTop: 0.0, skyHor: 0.03, stars: 0.6, disc: 0.8, wave: 0.6, cloud: 0.85, beam: 0.55, lamp: 3.2, boatTint: [0.82, 1.0, 1.0], boatAscii: 0.8,
+      skyTop: 0.0, skyHor: 0.03, stars: 0.6, disc: 0.8, wave: 0.42, cloud: 0.85, beam: 0, lamp: 3.2, boatTint: [0.82, 1.0, 1.0], boatAscii: 0.8,
       bloom: 0.32, bloomThr: 0.5, glow: [0.5, 1.15], glowCol: [0.3, 0.8, 0.8], glowAmt: 0.0, wood: [1.1, 1.35, 1.4], panel: [0.03, 0.08, 0.09], rim: [0.2, 0.5, 0.5]
     },
     light: {
@@ -421,7 +421,7 @@
       cDeep: [0.1, 0.3, 0.2], cBg: [0.2, 0.45, 0.31], cLo: [0.1, 0.28, 0.18], cHi: [1.0, 0.96, 0.76],
       kDeep: [0.42, 0.56, 0.48], kBg: [0.66, 0.76, 0.63], kLo: [0.55, 0.7, 0.58], kHi: [1.0, 0.98, 0.86],
       discCol: [1.0, 1.0, 0.95], discBg: 1.0, foamCol: [1.0, 1.0, 0.97], foamBg: 0.75, boost: 0.25,
-      skyTop: 0.42, skyHor: 0.72, stars: 0, disc: 1.3, wave: 0.35, cloud: 0.7, beam: 0, lamp: 1.2, boatTint: [1.0, 0.98, 0.9], boatAscii: 0.55,
+      skyTop: 0.42, skyHor: 0.72, stars: 0, disc: 1.3, wave: 0.25, cloud: 0.7, beam: 0, lamp: 1.2, boatTint: [1.0, 0.98, 0.9], boatAscii: 0.55,
       bloom: 0.18, bloomThr: 0.85, glow: [0.02, 1.08], glowCol: [1.0, 0.84, 0.5], glowAmt: 0.7, wood: [1.0, 0.98, 0.93], panel: [0.7, 0.74, 0.62], rim: [1, 0.98, 0.88]
     }
   };
