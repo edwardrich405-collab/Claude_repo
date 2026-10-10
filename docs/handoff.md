@@ -89,6 +89,10 @@ All positions are in world units. The water is y = 0, x runs right, z runs towar
   longer.
 - Choosing a view: `placeView()`, `focusView(el)` (face a tab at pixel-sharp size), `overview()`, `sheetView()`.
 - Snapping: `release()` settles on the nearest tab after a swipe. `stepTab()` handles the arrow keys.
+- Zooming: `zoomBy(f, cx, cy)`. With a cursor point (the wheel), the look-at point slides toward the spot under the
+  cursor (`ZX`/`ZZ`, eased in `camStep`) so it stays put on screen, capped at 1600 from the place's centre. Keys pass no
+  point and zoom into the middle.
+- Allie's on-screen size is nearly constant while zooming (`gullPose`: `BIRD.scale`); Jack asked for that.
 
 **Tabs are 3D cards.** `put(el, b)` projects each tab's corners and draws it with a CSS `matrix3d`. When it's face on at
 full size it uses a plain `translate`, so text stays sharp.

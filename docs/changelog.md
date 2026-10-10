@@ -2,6 +2,10 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.13.0 (2026-10-10)
+- Scrolling zooms toward whatever is under the mouse instead of the middle of the screen, like a map. The + and - keys still zoom into the middle.
+- Allie keeps about the same size on screen as you zoom in and out (she only grows a little up close).
+
 ## 0.12.0 (2026-10-10)
 - The lighthouse no longer sweeps a beam across the sky (Jack's call after the beam glitches). Its lamp still glows.
 - Fewer, softer wave lines on the sea, day and night.

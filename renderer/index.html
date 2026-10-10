@@ -1145,7 +1145,7 @@ body.at-home .dock > :not(.controls){display:none}
     const tt = { x: t.x, y: t.y, z: t.z, d: clampD(t.d), p: clampP(t.p), a: CAM.a + wrapA(t.a - CAM.a) };
     if (!camAnim) { CV.a = INR.va; CV.p = INR.vp; CV.x = CV.y = CV.z = CV.d = 0; }
     // a long trip across the water takes longer than a turn to the next tab
-    INR.va = INR.vp = 0; ZD = null; camAnim = { t: tt, resp: Math.min(1.5, CAM_RESPONSE + Math.hypot(tt.x - CAM.x, tt.z - CAM.z) / 3600) };
+    INR.va = INR.vp = 0; ZD = ZX = ZZ = null; camAnim = { t: tt, resp: Math.min(1.5, CAM_RESPONSE + Math.hypot(tt.x - CAM.x, tt.z - CAM.z) / 3600) };
     if (calmMotion()) { Object.assign(CAM, tt); camAnim = null; for (const k in CV) CV[k] = 0; vp.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 240, easing: "ease-out" }); }
   }
   function camSpring(dt) {
@@ -1216,9 +1216,10 @@ body.at-home .dock > :not(.controls){display:none}
     if (dp) CAM.p = HERE === "home" ? Math.max(0.03, Math.min(0.5, CAM.p + dp)) : HERE === "craft" ? Math.max(0.5, Math.min(1.3, CAM.p + dp)) : clampP(CAM.p + dp);
   }
   // Zoom eases toward its target; a released swipe keeps turning and slows down.
-  let ZD = null; const INR = { va: 0, vp: 0 };
+  let ZD = null, ZX = null, ZZ = null; const INR = { va: 0, vp: 0 };
   function camStep(dt) {
     if (ZD !== null) { const k = 1 - Math.exp(-dt * 11); CAM.d += (ZD - CAM.d) * k; if (Math.abs(ZD - CAM.d) < 0.5) { CAM.d = ZD; ZD = null; } }
+    if (ZX !== null) { const k = 1 - Math.exp(-dt * 11); CAM.x += (ZX - CAM.x) * k; CAM.z += (ZZ - CAM.z) * k; if (Math.hypot(ZX - CAM.x, ZZ - CAM.z) < 0.5) { CAM.x = ZX; CAM.z = ZZ; ZX = ZZ = null; } }
     if (INR.va || INR.vp) {
       orbit(INR.va * dt, INR.vp * dt); const k = Math.exp(-dt * GLIDE); INR.va *= k; INR.vp *= k;
       if (Math.abs(INR.va) < 0.01 && Math.abs(INR.vp) < 0.01) INR.va = INR.vp = 0;
@@ -1226,7 +1227,19 @@ body.at-home .dock > :not(.controls){display:none}
   }
   const GLIDE = 3.2;
   function userCam() { camAnim = null; }
-  function zoomBy(f) { userCam(); INR.va = INR.vp = 0; ZD = clampD((ZD === null ? CAM.d : ZD) / f); if (ZD > homeView().d * 0.72) focusKey = null; }
+  // Zoom toward what's under the cursor (cx, cy): the look-at point slides so that spot stays put on screen, without
+  // straying more than 1600 from the place. Keys zoom into the middle.
+  function zoomBy(f, cx, cy) {
+    userCam(); INR.va = INR.vp = 0;
+    const d0 = ZD === null ? CAM.d : ZD; ZD = clampD(d0 / f);
+    const hit = cx === undefined || HERE === "craft" ? null : rayAt(basis(CAM), cx, cy, 0);
+    if (hit) {
+      const r = ZD / d0; let x = hit.x + ((ZX === null ? CAM.x : ZX) - hit.x) * r, z = hit.z + ((ZZ === null ? CAM.z : ZZ) - hit.z) * r;
+      const dx = x - PIV.x, dz = z - PIV.z, m = Math.hypot(dx, dz); if (m > 1600) { x = PIV.x + dx / m * 1600; z = PIV.z + dz / m * 1600; }
+      ZX = x; ZZ = z;
+    }
+    if (ZD > homeView().d * 0.72) focusKey = null;
+  }
   // After a swipe: if you were among the tabs, settle face on to the one nearest where the swipe was heading,
   // carrying the swipe's speed into the turn. Out at home it just glides to a stop.
   function release(va, vp_, fromFocus) {
@@ -1263,8 +1276,8 @@ body.at-home .dock > :not(.controls){display:none}
       clearTimeout(wheelEnd); wheelEnd = setTimeout(() => { wheelEnd = 0; release(0, 0, wheelFocus); }, 180); return;
     }
     const notch = e.deltaMode === 1 || (e.deltaX === 0 && Math.abs(e.deltaY) >= 50 && Number.isInteger(e.deltaY));
-    if (notch) { const n = Math.max(1, Math.round(Math.abs(e.deltaMode === 1 ? e.deltaY / 3 : e.deltaY / 100))); zoomBy(Math.pow(1.1, -Math.sign(e.deltaY) * n)); return; }
-    zoomBy(Math.exp(-e.deltaY * k * (e.ctrlKey || e.metaKey ? 0.01 : 0.004)));
+    if (notch) { const n = Math.max(1, Math.round(Math.abs(e.deltaMode === 1 ? e.deltaY / 3 : e.deltaY / 100))); zoomBy(Math.pow(1.1, -Math.sign(e.deltaY) * n), e.clientX, e.clientY); return; }
+    zoomBy(Math.exp(-e.deltaY * k * (e.ctrlKey || e.metaKey ? 0.01 : 0.004)), e.clientX, e.clientY);
   }, { passive: false });
 
   // Dragging the water turns you around the boat (up and down tilts the view); it glides on after you let go.
@@ -1298,7 +1311,7 @@ body.at-home .dock > :not(.controls){display:none}
     if (!drag) return;
     if (drag.type === "orbit") {
       // a few pixels of give before it counts as a swipe, so a tap on the water doesn't nudge the view
-      if (!drag.moved) { if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 4) return; drag.moved = true; userCam(); ZD = null; INR.va = INR.vp = 0; focusKey = null; drag.x = e.clientX; drag.y = e.clientY; }
+      if (!drag.moved) { if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 4) return; drag.moved = true; userCam(); ZD = ZX = ZZ = null; INR.va = INR.vp = 0; focusKey = null; drag.x = e.clientX; drag.y = e.clientY; }
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
       orbit(-dx * 3.4 / W, dy * 1.6 / H);
       drag.hist.push([performance.now(), CAM.a, CAM.p]); if (drag.hist.length > 8) drag.hist.shift();
@@ -1616,8 +1629,8 @@ body.at-home .dock > :not(.controls){display:none}
   }
   function gullPose(b, amp) {
     const p = project(b, BIRD.x, BIRD.y + 24, BIRD.z); if (!p) return null;
-    // she stays a readable size: never a speck when you're far away, never huge up close
-    const s = p.s; BIRD.scale = 0.8 * (s < 0.6 ? 0.6 / s : s > 1.8 ? 1.8 / s : 1);
+    // she keeps about the same size on screen as you zoom: never a speck far away, and only a little bigger up close
+    const s = p.s; BIRD.scale = 0.8 * (s < 0.6 ? 0.6 : Math.min(1.1, 0.6 * Math.pow(s / 0.6, 0.22))) / s;
     BIRD.sx = p.x; BIRD.sy = p.y; BIRD.sc = s * BIRD.scale;
     const hop = Math.sin(BIRD.hop * Math.PI);
     return { x: BIRD.x, y: BIRD.y + hop * 10, z: BIRD.z, yaw: BIRD.yaw, pitch: BIRD.pitch, roll: BIRD.roll, scale: BIRD.scale,
