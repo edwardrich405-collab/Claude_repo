@@ -21,6 +21,7 @@ const TOOLS = [
   tool("upsert_workflow", "Create or update a ComfyUI workflow or tool in the Businesses tab.", { name: str("Workflow name"), status: { type: "string", enum: ["working", "built", "retired"], description: "working = proven, built = made but untested, retired = no longer used" }, detail: str("One short line") }, ["name", "status"]),
   tool("add_milestone", "Add an AI influencer milestone to track.", { name: str("Milestone, like Followers"), current: num("Value now"), target: num("Goal") }, ["name", "target"]),
   tool("log_progress", "Save a one-line progress note on the AI influencer business, shown in its Businesses tab.", { text: str("The note") }, ["text"]),
+  tool("remove_food", "Remove food Jack logged. Give what to remove one item (matched by name), or leave it out to clear the whole day. date is YYYY-MM-DD; leave it out for today.", { what: str("Food name to remove, or empty to clear the day"), date: str("YYYY-MM-DD, or empty for today") }),
   tool("sleep", "Stop listening until Jack says 'Hey Allie'."),
 ];
 
@@ -29,7 +30,7 @@ The app is a little world at sea: home is a beach, where Jack chats with you; My
 You speak out loud, so talk like a chill, laid-back friend who happens to be on top of everything: relaxed, warm, a bit dry, never formal or salesy. Usually one or two short sentences, casual words and contractions ("yeah", "got it", "nice"), no lists, no markdown, no emoji, no URLs. Call him Jack only now and then.
 Jack built this app and knows every tab and feature. Never explain what a tab is, what it's for, or how a feature works, and don't offer tips or list what you can do, unless he asks.
 When you open a tab, the tool result tells you what's in it. Just give him the gist of what's there, the actual stuff (like "Two new ones, best is a Blender animator gig at Framestore"), or say it's quiet if there's nothing new. Don't announce that you opened it.
-Use the tools to act on the app whenever he asks for something the app can do, then confirm in a few words ("Done." "Added it."). Use web search for news, facts or anything current. When Jack drops in a text note (usually a summary of his ComfyUI work on the AI influencer business), read it and file it in the Businesses tab: upsert each character and workflow it mentions, add milestones for numbers worth tracking (like credits left), log one or two progress lines, and add a to-do (business ugc) for each thing it says is waiting on Jack. Don't repeat items that already exist. Then recap in one or two sentences without reading out details.
+Use the tools to act on the app whenever he asks for something the app can do, then confirm in a few words ("Done." "Added it."). Never say something is done unless a tool did it and its result says so; if no tool can do it, say you can't do that yet. Use web search for news, facts or anything current. When Jack drops in a text note (usually a summary of his ComfyUI work on the AI influencer business), read it and file it in the Businesses tab: upsert each character and workflow it mentions, add milestones for numbers worth tracking (like credits left), log one or two progress lines, and add a to-do (business ugc) for each thing it says is waiting on Jack. Don't repeat items that already exist. Then recap in one or two sentences without reading out details.
 If something isn't connected yet (Gmail, Google or Apple Calendar, Stripe, PayPal, job boards), just say it's not hooked up yet, without walking him through it.
 When he says goodnight or tells you to sleep, use the sleep tool and say nothing more than "Night."`;
 
@@ -90,7 +91,11 @@ async function thinkLocal(text, context, onAction, fetchFn = fetch) {
   while (history.length && history[0].role !== "user") history.shift();
   const msgs = [{ role: "system", content: SYSTEM + "\nAnswer general questions from what you know. You can't search the web right now, so only for live things (news, prices, weather, today's scores) say you can't check." }]
     .concat(history.slice(0, -1), { role: "user", content: `${text}\n\n<app_state>\n${context}\n</app_state>` });
-  const say = s => { s = String(s || "").replace(/^[\s\S]*<\/think>/, "").replace(/<think>[\s\S]*$/, "").trim() || "Done."; history.push({ role: "assistant", content: s }); return s; };
+  // Small models sometimes say "Done." without having done anything; with no tool used, that would be a lie.
+  let acted = false;
+  const say = s => { s = String(s || "").replace(/^[\s\S]*<\/think>/, "").replace(/<think>[\s\S]*$/, "").trim() || "Done.";
+    if (!acted && /^(all )?(done|added|cleared|wiped|moved|updated|sorted|removed|deleted|changed|fixed)\b/i.test(s)) s = "I can't do that one yet, Jack.";
+    history.push({ role: "assistant", content: s }); return s; };
   for (let turn = 0; turn < 6; turn++) {
     let res;
     try { res = await fetchFn(LOCAL.url + "/v1/chat/completions", { method: "POST", headers: { "content-type": "application/json" },
@@ -103,7 +108,7 @@ async function thinkLocal(text, context, onAction, fetchFn = fetch) {
     for (const [i, c] of calls.entries()) {
       const f = c.function || {}; let args = f.arguments || {}, out = "done";
       if (typeof args === "string") { try { args = JSON.parse(args); } catch (e) { args = {}; } }
-      try { out = (await onAction(f.name, args)) || "done"; } catch (e) { out = "failed: " + e.message; }
+      try { out = (await onAction(f.name, args)) || "done"; acted = true; } catch (e) { out = "failed: " + e.message; }
       msgs.push({ role: "tool", tool_call_id: c.id || "call_" + turn + "_" + i, name: f.name, content: String(out) });
     }
   }

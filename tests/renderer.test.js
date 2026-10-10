@@ -83,3 +83,13 @@ test("the workbench: a place to travel to, its mat, and a widget registry that l
   assert.match(h, /\.chatlog:not\(\.open\)/);
   assert.match(h, /if \(e\.target\.value\.trim\(\)\) chatOpen\(true\)/);
 });
+
+test("the day runs until 4am and rolls over while open", () => {
+  const h = fs.readFileSync(path.join(R, "index.html"), "utf8");
+  const m = h.match(/const DAY_START_HOUR = (\d+), dayOf = (t => \{[^\n]*?\});/);
+  assert.ok(m, "dayOf"); const dayOf = new Function("DAY_START_HOUR", "return " + m[2])(+m[1]);
+  assert.strictEqual(dayOf(new Date(2026, 9, 10, 1, 34).getTime()).getDate(), 9);
+  assert.strictEqual(dayOf(new Date(2026, 9, 10, 4, 1).getTime()).getDate(), 10);
+  assert.match(h, /dkey\(dayOf\(Date\.now\(\)\)\) !== TODAY\) location\.reload\(\)/);
+  assert.match(h, /remove_food: i =>/);
+});

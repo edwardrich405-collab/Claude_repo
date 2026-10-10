@@ -2,6 +2,12 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.14.1 (2026-10-10)
+- Jack's day now runs until 4am, so food logged at 1am counts for the day he was living, not the next one. Left open overnight, the screen moves to the new day by itself.
+- Allie can remove food: one item by name, or clear a whole day ("clear my calories").
+- She no longer says "Done" when nothing was done. If no tool can do it, she says she can't do that yet.
+- Her brain now sees what's logged today, not just the total.
+
 ## 0.14.0 (2026-10-10)
 - Allie's local brain is now Bonsai 2 27B instead of Qwen. It answers in about 2 to 3 seconds instead of about a minute, uses about 7 GB of graphics memory instead of 19 (so it's fine next to ComfyUI), and does the same tool calls (to-dos, tabs, travelling).
 - When Local is chosen, Allie starts the Bonsai server by herself if it isn't already running.

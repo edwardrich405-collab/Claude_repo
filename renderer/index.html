@@ -672,12 +672,16 @@ body.at-home .dock > :not(.controls){display:none}
   const BIZ = { ugc: ["UGC", "AI influencer UGC", "var(--ugc)"], edit: ["Editing", "Video editing", "var(--edit)"], jobs: ["3D jobs", "3D animation job search", "var(--jobs)"], me: ["Personal", "Personal", "var(--me)"] };
 
   /* ---------------- Jack's data: starts empty, saved in this browser ---------------- */
-  const D0 = new Date(); D0.setHours(0, 0, 0, 0);
+  // Jack's day runs until 4am: a late-night snack logged at 1am belongs to the day he was living, not tomorrow.
+  const DAY_START_HOUR = 4, dayOf = t => { const d = new Date(t - DAY_START_HOUR * 36e5); d.setHours(0, 0, 0, 0); return d; };
+  const D0 = dayOf(Date.now());
   const HR = 3600e3, MIN = 60e3;
   const dkey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const dayOff = n => { const d = new Date(D0); d.setDate(d.getDate() + n); return dkey(d); };
   const parseKey = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
   const TODAY = dkey(D0);
+  // Left open overnight, the screen moves to the new day at 4am (her data is saved on the way out).
+  setInterval(() => { if (dkey(dayOf(Date.now())) !== TODAY) location.reload(); }, 60000);
   const seed = () => ({ v: 2, next: 100, goal: 2400, unit: "lb", last: null, timer: null, todos: [], events: [], projects: [], food: {}, weights: [], money: [], videos: [],
     goals: [], jobPrefs: { what: "3D animator, character animator, Blender generalist", where: "Remote or Los Angeles", scan: true } });
   const ON_PC = !!(window.allie && allie.desktop); // in a plain browser, window.allie is the canvas with that id
@@ -1968,7 +1972,7 @@ body.at-home .dock > :not(.controls){display:none}
       `Asleep: ${sleeping}. Jack is at: ${PLACES[HERE].label}. Open panels: ${Object.keys(open).join(", ") || "none"}`,
       `Timer: ${p ? "running on " + p.name + " for " + clockOf(running()) : "off"}. Projects: ${S.projects.map(x => x.name).join(", ") || "none"}`,
       `Open to-dos: ${open_.join("; ") || "none"}`, `Upcoming events: ${evs.join("; ") || "none"}`,
-      `Calories today: ${kcal} of ${S.goal}. Last weight: ${w ? (S.unit === "lb" ? (w.kg * LB).toFixed(1) + " lb" : w.kg.toFixed(1) + " kg") + " on " + w.d : "none"}`,
+      `Calories today: ${kcal} of ${S.goal} (${foodToday().map(f => f.what + " " + f.kcal).join(", ") || "nothing logged"}). Last weight: ${w ? (S.unit === "lb" ? (w.kg * LB).toFixed(1) + " lb" : w.kg.toFixed(1) + " kg") + " on " + w.d : "none"}`,
       `Videos: ${S.videos.map(v => `#${v.id} ${v.title}${v.client ? " for " + v.client : ""} [${["Brief", "Editing", "Review", "Delivered"][v.stage]}]`).join("; ") || "none"}`,
       `Characters: ${(S.chars || []).map(c => c.name + " [" + ["Concept", "Dataset", "LoRA", "Producing"][c.stage] + "] " + c.detail).join("; ") || "none"}`, `Workflows: ${(S.flows || []).map(f => f.name + " (" + f.status + ")").join("; ") || "none"}`, `Recent influencer notes: ${(S.notes || []).slice(-5).map(n => n.d + " " + n.text).join("; ") || "none"}`, `AI influencer milestones: ${S.goals.map(g => `#${g.id} ${g.name} ${g.cur}/${g.target}`).join("; ") || "none"}`,
       `Unread mail (${EXT.mail.filter(m => m.unread).length}): ${EXT.mail.filter(m => m.unread).slice(0, 8).map(m => m.from + ": " + m.subject).join("; ") || "none"}`,
@@ -1989,6 +1993,9 @@ body.at-home .dock > :not(.controls){display:none}
     add_event: i => { S.events.push({ id: freshId = uid(), d: i.date, t: i.time || "12:00", what: cap1(i.what), biz: guessBiz(i.what) }); calSel = i.date; changed("events"); showQuiet("calendar"); },
     start_timer: i => { startTimer(projectNamed(i.project).id); showQuiet("time"); },
     stop_timer: () => { stopTimer(); showQuiet("time"); },
+    remove_food: i => { const day = i.date || TODAY, L = S.food[day] || [], w = String(i.what || "").toLowerCase().trim();
+      const keep = w ? L.filter(f => !f.what.toLowerCase().includes(w)) : []; const gone = L.length - keep.length;
+      if (!gone) return "nothing matched on " + day; S.food[day] = keep; changed("food"); showQuiet("calories"); return "removed " + gone + " item(s) from " + day; },
     log_food: i => { addFood(cap1(i.what), Math.round(i.kcal), i.protein != null ? [i.protein || 0, i.carbs || 0, i.fat || 0] : null); showQuiet("calories"); },
     log_weight: i => { addWeight(+i.weight); showQuiet("calories"); },
     add_video: i => { S.videos.push({ id: freshId = uid(), title: cap1(i.title), client: i.client || "", due: i.due || "", stage: 0 }); changed("biz"); showQuiet("businesses"); return "added #" + freshId; },

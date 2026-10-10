@@ -32,3 +32,14 @@ test("Allie can take Jack to every place, the workbench included", () => {
   assert.ok(m, "go_to tool");
   assert.deepStrictEqual(JSON.parse(m[1]), ["home", "life", "studio", "journal", "craft"]);
 });
+
+test("Allie can remove food, and never claims a change no tool made", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "src", "brain.js"), "utf8");
+  assert.match(src, /tool\("remove_food"/);
+  assert.match(src, /Never say something is done unless a tool did it/);
+});
+
+test("local brain won't say done when no tool ran", async () => {
+  const fake = async () => ({ ok: true, json: async () => ({ choices: [{ message: { content: "Done." } }] }) });
+  assert.match(await brain._thinkLocal("move my calendar to Tuesday", "", async () => "done", fake), /can't do that one yet/);
+});
