@@ -9,7 +9,8 @@
    The only fixed controls: sleep (top left), chat and the thinking indicator (bottom). Dark by default with a light mode. */
 :root{
   color-scheme: dark;
-  --bg:#051416; --sea-glow:rgba(120,230,205,.10);
+  --bg:#020a0c; --sea-glow:rgba(120,230,205,.10);
+  --tag-bg:rgba(3,14,17,.76); --tag-rim:rgba(120,190,190,.3); --tag-fg:#e4f3f1; --tag-sub:rgba(165,200,196,.62); --tag-icon:#d3e9e6; --dot:#3cc6f4; --send:#3cc4f2;
   --mat:rgba(14,38,42,.78); --mat-strong:rgba(12,32,36,.94);
   --panel-a:rgba(24,56,60,.80); --panel-b:rgba(8,26,30,.88); --panel-rim:rgba(165,235,220,.17); --panel-hi:rgba(210,255,245,.10);
   --hair:rgba(170,230,218,.11); --hair-strong:rgba(170,230,218,.22);
@@ -29,6 +30,7 @@
 :root[data-theme="light"]{
   color-scheme: light;
   --bg:#2c6a50; --sea-glow:rgba(255,250,215,.16);
+  --tag-bg:rgba(247,246,232,.84); --tag-rim:rgba(20,62,46,.24); --tag-fg:#173a2b; --tag-sub:rgba(20,52,40,.6); --tag-icon:#244c3b; --dot:#1b9ed6; --send:#1fa3d9;
   --mat:rgba(244,246,232,.80); --mat-strong:rgba(246,247,236,.96);
   --panel-a:rgba(250,251,240,.86); --panel-b:rgba(234,240,226,.90); --panel-rim:rgba(255,255,255,.75); --panel-hi:rgba(255,255,255,.85);
   --hair:rgba(20,62,46,.11); --hair-strong:rgba(20,62,46,.2);
@@ -56,7 +58,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 #viewport.panning{cursor:grabbing}
 #sea,#bird{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 #sea{pointer-events:none}
-#bird{pointer-events:none;z-index:4000}
+#bird{pointer-events:none;z-index:4000;filter:drop-shadow(0 0 3px rgba(255,150,200,.55)) drop-shadow(0 0 12px rgba(255,120,185,.3))}
 #world,#floats{position:absolute;left:0;top:0;width:0;height:0}
 .nogl #viewport{background:radial-gradient(70% 60% at 50% 48%,#0f3a3c,var(--bg))}
 :root[data-theme="light"].nogl #viewport{background:radial-gradient(70% 60% at 30% 20%,#7aa77f,var(--bg))}
@@ -173,26 +175,8 @@ textarea.draft{width:100%;min-height:180px;resize:vertical;border-radius:14px;bo
 textarea.draft:focus{border-color:var(--blue)}
 .note{font-size:12px;color:var(--label-3)}
 
-/* Floating buttons: little app icons bobbing on the water around the boat, each takes you to a tab without asking Allie. */
-.float{position:absolute;left:0;top:0;transform-origin:50% 100%;border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:var(--label)}
-.float i{position:relative;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:var(--c);
-  background:radial-gradient(120% 120% at 30% 20%,color-mix(in srgb,var(--c) 22%,var(--panel-a)),var(--panel-b));
-  border:1px solid color-mix(in srgb,var(--c) 30%,var(--panel-rim));
-  box-shadow:inset 0 1px 0 var(--panel-hi),0 8px 20px var(--shadow),0 0 22px color-mix(in srgb,var(--c) 22%,transparent);
-  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:transform .35s var(--spring),box-shadow .3s}
-.float i svg{width:22px;height:22px;stroke-width:1.8;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--c) 55%,transparent))}
-.float span{font:500 11px/1 var(--mono);letter-spacing:.02em;white-space:nowrap;color:var(--mint);padding:4px 7px;border-radius:4px;
-  background:color-mix(in srgb,var(--bg) 72%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--mint) 22%,transparent);text-shadow:0 0 8px var(--sea-glow)}
-.float span::before{content:"[ "}.float span::after{content:" ]"}
-.float:hover i,.float:focus-visible i{transform:translateY(-3px) scale(1.06);box-shadow:inset 0 1px 0 var(--panel-hi),0 12px 26px var(--shadow),0 0 30px color-mix(in srgb,var(--c) 45%,transparent)}
-.float:hover span{background:var(--mint);color:var(--bg);text-shadow:none}
-.float:active i{transform:scale(.94);transition-duration:.08s}
-.float.on i{border-color:var(--c);box-shadow:inset 0 1px 0 var(--panel-hi),0 0 0 2px color-mix(in srgb,var(--c) 35%,transparent),0 0 30px color-mix(in srgb,var(--c) 40%,transparent)}
-.float.live span{color:var(--pink)}
-.float.live i::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--pink);opacity:.7;animation:pulse 1.6s ease-out infinite}
-@keyframes pulse{from{transform:scale(.9);opacity:.8}to{transform:scale(1.25);opacity:0}}
-:root[data-theme="light"] .float span{color:#f7f5e3;background:rgba(18,60,42,.55);box-shadow:inset 0 0 0 1px rgba(247,245,227,.25);text-shadow:none}
-:root[data-theme="light"] .float:hover span{background:#f7f5e3;color:#173a2b}
+/* Floating buttons: tags on a ring around each place (see .tag); the timer one pulses pink while it runs. */
+.float{position:absolute}
 /* A tab out on the water: a wrapper carries its 3D placement, the panel inside animates on its own. */
 .tabw{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;align-items:center;gap:12px}
 .tabw > .panel{position:relative;left:auto;top:auto}
@@ -225,14 +209,48 @@ body.sheet-open .dock{left:calc((100vw - 472px)/2);width:min(640px,calc(100vw - 
 .bm-card h3{margin:0 0 8px;font:600 14px var(--mono)}
 .bm-empty{margin:60px auto 0;max-width:440px;text-align:center;font:14px/1.6 var(--mono);opacity:.75}
 .bm-empty code{font:inherit;padding:1px 6px;border-radius:4px;background:rgba(127,127,127,.18)}
+/* Tags: places and tab buttons. A glowing dot on the thing, a thin line up and to the right, a small card. */
+.tag{position:absolute;left:0;top:0;width:0;height:0;border:0;padding:0;background:none;cursor:pointer;color:var(--tag-fg);transform-origin:0 0}
+.tag-dot{position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;background:var(--dot);box-shadow:0 0 6px var(--dot),0 0 16px color-mix(in srgb,var(--dot) 60%,transparent)}
+.tag-lead{position:absolute;left:0;top:0;width:38px;height:1px;transform-origin:0 50%;transform:rotate(-51.3deg);background:linear-gradient(90deg,var(--dot),color-mix(in srgb,var(--tag-rim) 100%,transparent));opacity:.85}
+.tag-card{position:absolute;left:18px;bottom:30px;display:flex;align-items:center;gap:12px;padding:9px 18px 9px 13px;border-radius:12px;white-space:nowrap;
+  background:var(--tag-bg);border:1px solid var(--tag-rim);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  box-shadow:inset 0 1px 0 rgba(200,255,250,.05),0 10px 30px rgba(0,0,0,.35),0 0 22px color-mix(in srgb,var(--dot) 8%,transparent);transition:border-color .25s,box-shadow .25s,transform .35s var(--spring)}
+.tag-card .i{width:21px;height:21px;stroke-width:1.5;color:var(--tag-icon);flex:none}
+.tag-t{display:flex;flex-direction:column;gap:3px;text-align:left}
+.tag-t b{font:500 13px/1.1 var(--mono);letter-spacing:.01em;color:var(--tag-fg)}
+.tag-t small{font:400 10.5px/1.1 var(--mono);letter-spacing:.05em;color:var(--tag-sub);min-height:1.1em}
+.tag:hover .tag-card,.tag:focus-visible .tag-card{border-color:color-mix(in srgb,var(--dot) 70%,transparent);box-shadow:0 10px 30px rgba(0,0,0,.35),0 0 26px color-mix(in srgb,var(--dot) 28%,transparent);transform:translateY(-2px)}
+.tag:active .tag-card{transform:scale(.97);transition-duration:.08s}
+.tag.on .tag-card{border-color:color-mix(in srgb,var(--dot) 80%,transparent)}
+.tag.on .tag-dot{animation:dotpulse 2s ease-in-out infinite}
+@keyframes dotpulse{50%{box-shadow:0 0 10px var(--dot),0 0 26px var(--dot)}}
+.tag.live small{color:var(--pink)}
+.tag.live .tag-dot{background:var(--pink);box-shadow:0 0 8px var(--pink)}
+@media (prefers-reduced-motion:reduce){.tag.on .tag-dot{animation:none}}
+/* The clock in the top right, under the window buttons. */
+.clock{position:fixed;top:calc(env(safe-area-inset-top,0px) + 46px);right:34px;z-index:4600;pointer-events:none;text-align:right;color:var(--tag-fg);text-shadow:0 1px 4px rgba(0,0,0,.55),0 0 18px color-mix(in srgb,var(--dot) 22%,transparent)}
+/* The journal: a page unrolled out of the bottle */
+.paper{position:fixed;left:50%;top:50%;z-index:4550;width:min(520px,calc(100vw - 40px));height:min(560px,calc(100vh - 220px));display:flex;flex-direction:column;gap:10px;padding:22px 26px 18px;border-radius:6px;
+  background:repeating-linear-gradient(180deg,transparent 0 27px,rgba(90,120,140,.18) 27px 28px),linear-gradient(180deg,#f3ecd9,#e8dfc6);color:#2b2a24;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.4) inset;
+  transform:translate(-50%,-50%) scaleY(.04);transform-origin:50% 100%;opacity:0;transition:transform .5s cubic-bezier(.2,.9,.25,1.05),opacity .25s}
+.paper.open{transform:translate(-50%,-50%) scaleY(1);opacity:1}
+.pp-head{display:flex;align-items:center;justify-content:space-between;font:500 13px var(--mono);letter-spacing:.08em;text-transform:lowercase;color:#5d5747}
+.pp-nav{background:none;border:0;font:400 24px/1 var(--mono);color:#7a7260;cursor:pointer;padding:0 8px}
+.pp-nav:hover{color:#2b2a24}
+.pp-text{flex:1;resize:none;border:0;outline:0;background:none;font:400 15px/28px "Segoe Print","Bradley Hand","Comic Sans MS",cursive;color:#2b2a24}
+.pp-text[readonly]{color:#4a463b}
+.pp-foot{display:flex;align-items:center;gap:10px}
+.paper .btn{background:#2f4a48;color:#f3ecd9;border:0;box-shadow:none}
+.paper .btn.ghost{background:none;color:#5d5747;box-shadow:inset 0 0 0 1px rgba(60,55,40,.35)}
+.pp-n{flex:1;font:400 11px var(--mono);letter-spacing:.06em;color:#7a7260}
+.ck-hm{font:300 44px/1 var(--mono);letter-spacing:.08em}
+.ck-ap{font:400 15px var(--mono);letter-spacing:.1em;margin-left:10px}
+.ck-d{margin-top:9px;font:500 13px var(--mono);letter-spacing:.2em}
+@media (max-width:760px){.clock{display:none}}
 /* Labels over the places you can go: click one to sail there. */
 #places{position:absolute;left:0;top:0;width:0;height:0;z-index:3950}
-.place{position:absolute;left:0;top:0;border:0;background:none;padding:0;cursor:pointer;font:600 12.5px/1 var(--mono);letter-spacing:.04em;color:var(--mint);white-space:nowrap}
-.place span{display:inline-block;padding:6px 10px;border-radius:5px;background:color-mix(in srgb,var(--bg) 70%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--mint) 30%,transparent),0 0 22px var(--sea-glow);transition:background .2s,color .2s}
-.place span::before{content:"[ "}.place span::after{content:" ]"}
-.place:hover span,.place:focus-visible span{background:var(--mint);color:var(--bg)}
-:root[data-theme="light"] .place{color:#f7f5e3}
-:root[data-theme="light"] .place span{background:rgba(18,60,42,.55);box-shadow:inset 0 0 0 1px rgba(247,245,227,.3)}
+.place{position:absolute}
 #home[aria-pressed="true"]{color:var(--mint)}
 /* The chat on the beach: the conversation with Allie, out only at home. */
 .chatlog{position:fixed;right:16px;top:calc(env(safe-area-inset-top,0px) + 66px);bottom:24px;width:min(400px,calc(100vw - 32px));z-index:4560;display:none;flex-direction:column;border-radius:16px;
@@ -243,6 +261,9 @@ body.at-home .chatlog{display:flex}
 .chatlog:not(.open){top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);right:auto;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));border-radius:999px;animation:none}
 .chatlog:not(.open) .cl-h,.chatlog:not(.open) .cl-list,.chatlog:not(.open) .cl-min{display:none}
 .chatlog:not(.open) .cl-in{border-top:0;padding:6px 6px 6px 18px}
+.chatlog:not(.open){background:var(--tag-bg);border-color:var(--tag-rim);box-shadow:0 14px 40px rgba(0,0,0,.4),0 0 26px color-mix(in srgb,var(--dot) 8%,transparent)}
+.cl-spark{width:18px;height:18px;flex:none;color:var(--tag-icon);stroke-width:1.5}
+.chatlog .send{width:38px;height:38px;border-radius:50%;background:var(--send);color:#032a36;box-shadow:0 0 18px color-mix(in srgb,var(--send) 55%,transparent)}
 .chatlog.open{animation:rise .35s var(--spring)}
 .cl-min{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:0;background:none;color:var(--label-3);font:600 18px/1 var(--font);display:grid;place-items:center}
 .cl-min:hover{background:var(--fill);color:var(--label)}
@@ -273,7 +294,7 @@ body.at-home .dock{display:none}
 /* Fixed chrome */
 .dragbar{position:fixed;top:0;left:0;right:0;height:40px;-webkit-app-region:drag;z-index:4500}
 .top{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);left:14px;display:flex;align-items:center;gap:10px;z-index:4600;-webkit-app-region:no-drag}
-.fx{width:44px;height:44px;border-radius:50%;border:1px solid var(--panel-rim);display:grid;place-items:center;flex:none;color:var(--label-2);
+.fx{width:46px;height:46px;border-radius:50%;border:1px solid var(--tag-rim);display:grid;place-items:center;flex:none;color:var(--tag-icon);
   background:var(--mat);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 var(--panel-hi),0 8px 24px var(--shadow);
   transition:color .2s,box-shadow .3s,background .3s}
 .fx:hover{color:var(--label)}
@@ -283,7 +304,7 @@ body.at-home .dock{display:none}
 #sleep[aria-pressed="true"] .i{fill:currentColor}
 .chip.setup{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:999px;background:var(--mat);border:1px solid var(--panel-rim);font:12px var(--mono);color:var(--label-2);white-space:nowrap}
 .link{background:none;border:0;padding:0;color:var(--pink);font:inherit;font-size:12px;cursor:pointer}
-.hint{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);z-index:4600;font:12px var(--mono);color:var(--label-3);pointer-events:none;white-space:normal;text-align:center;max-width:calc(100vw - 280px);transition:opacity .8s;text-shadow:0 0 6px var(--cap-shadow)}
+.hint{display:none!important;position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);z-index:4600;font:12px var(--mono);color:var(--label-3);pointer-events:none;white-space:normal;text-align:center;max-width:calc(100vw - 280px);transition:opacity .8s;text-shadow:0 0 6px var(--cap-shadow)}
 
 .scrim{position:fixed;left:0;right:0;bottom:0;height:260px;z-index:4100;pointer-events:none;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg) 70%,transparent))}
 .dock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);width:min(640px,calc(100% - 32px));z-index:4600;display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none}
@@ -553,6 +574,9 @@ body.at-home .dock{display:none}
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5M6.5 10v9h11v-9M10 19v-5h4v5"/></symbol>
   <symbol id="i-film" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M8 5v14M16 5v14M3.5 9.5H8M3.5 14.5H8M16 9.5h4.5M16 14.5h4.5"/></symbol>
   <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5c.6 4.2 2.3 5.9 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.6 5.9-2.3 6.5-6.5z"/><path d="M18.5 15.5c.3 1.7 1 2.4 2.5 2.7-1.5.3-2.2 1-2.5 2.7-.3-1.7-1-2.4-2.5-2.7 1.5-.3 2.2-1 2.5-2.7z"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 19.5s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7.1a4.2 4.2 0 0 1 7.5 2.4c0 5.6-7.5 10-7.5 10z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2l1.8 2H19a1.5 1.5 0 0 1 1.5 1.5V17A1.5 1.5 0 0 1 19 18.5H5A1.5 1.5 0 0 1 3.5 17z"/><path d="M3.5 10.5h17"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><rect x="5.5" y="3.5" width="13" height="17" rx="2"/><path d="M9 8h6M9 11.5h6M9 15h4M5.5 7H4M5.5 12H4M5.5 17H4"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></symbol>
 
   <symbol id="i-today" viewBox="0 0 24 24"><path d="M4 18h16M7 18a5 5 0 0 1 10 0M12 6v3M5.6 9.6l1.8 1.8M18.4 9.6l-1.8 1.8"/></symbol>
@@ -601,13 +625,15 @@ body.at-home .dock{display:none}
   <button class="fx" id="home" type="button" aria-pressed="true" aria-label="Back to the beach" title="Home"><svg class="i"><use href="#i-home"/></svg></button>
 </header>
 <div id="sheet"></div>
+<div class="paper" id="paper" hidden><div class="pp-head"><button class="pp-nav" data-pp="prev" aria-label="Older page">&lsaquo;</button><span class="pp-date"></span><button class="pp-nav" data-pp="next" aria-label="Newer page">&rsaquo;</button></div><textarea class="pp-text" placeholder="Write here. Allie won't read over your shoulder."></textarea><div class="pp-foot"><span class="pp-n"></span><button class="btn" data-pp="log">Log it</button><button class="btn ghost" data-pp="done">Done</button></div></div>
+<div class="clock" id="clock" aria-hidden="true"><div class="ck-t"><span class="ck-hm"></span><span class="ck-ap"></span></div><div class="ck-d"></div></div>
 <div class="hint" id="hint">drag to look around · scroll to zoom · ← → between tabs · say “take me to my life”</div>
 
 <section class="chatlog" id="chatlog" aria-label="Chat with Allie">
   <div class="cl-h"><b>Allie</b><small>on the shore</small></div>
   <div class="cl-list" id="cl-list" aria-live="polite"></div>
   <button type="button" class="cl-min" id="cl-min" aria-label="Shrink the chat" title="Shrink">–</button>
-  <form class="cl-in" id="cl-form" autocomplete="off"><input id="cl-ask" type="text" placeholder="Ask me anything, or say take me to my life" aria-label="Message Allie"><button class="round send" type="submit" aria-label="Send"><svg class="i"><use href="#i-up"/></svg></button></form>
+  <form class="cl-in" id="cl-form" autocomplete="off"><svg class="i cl-spark" aria-hidden="true"><use href="#i-spark"/></svg><input id="cl-ask" type="text" placeholder="Ask me anything, or say take me to my life" aria-label="Message Allie"><button class="round send" type="submit" aria-label="Send"><svg class="i"><use href="#i-up"/></svg></button></form>
 </section>
 <div class="scrim" aria-hidden="true"></div>
 <div class="dock">
@@ -660,6 +686,28 @@ body.at-home .dock{display:none}
   if (!S || S.v !== 2) S = seed();
   for (const k of ["videos", "goals", "weights", "money"]) if (!S[k]) S[k] = [];
   const save = () => { clearTimeout(save.t); save.t = setTimeout(() => { const j = JSON.stringify(S); if (ON_PC) allie.saveData(j); else try { localStorage.setItem("allie.data", j); } catch (e) {} }, 150); };
+  // The journal: a page that unrolls out of the bottle. Jack writes and logs it, and flips back through older pages.
+  // Allie never replies here. Entries live in data.json under journal: [{ id, d, text }]; the unlogged draft in localStorage.
+  const paper = $("#paper"), ppText = $(".pp-text", paper);
+  let ppAt = -1; // -1 is a fresh page, otherwise the index of a logged one
+  const journal = () => (S.journal = Array.isArray(S.journal) ? S.journal : []);
+  function ppShow() {
+    const J = journal(), e = J[ppAt];
+    if (e) { ppText.value = e.text; ppText.readOnly = true; } else { try { ppText.value = localStorage.getItem("allie.jdraft") || ""; } catch (x) { ppText.value = ""; } ppText.readOnly = false; }
+    $(".pp-date", paper).textContent = new Date(e ? e.d : Date.now()).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    $(".pp-n", paper).textContent = e ? `page ${ppAt + 1} of ${J.length}` : J.length ? `new page, ${J.length} logged` : "new page";
+    $('[data-pp="log"]', paper).hidden = !!e;
+  }
+  function openPaper() { ppAt = -1; ppShow(); paper.hidden = false; requestAnimationFrame(() => requestAnimationFrame(() => paper.classList.add("open"))); setTimeout(() => ppText.focus(), 450); }
+  function closePaper() { if (paper.hidden) return; paper.classList.remove("open"); setTimeout(() => { if (!paper.classList.contains("open")) paper.hidden = true; }, 500); }
+  ppText.addEventListener("input", () => { if (ppAt < 0) try { localStorage.setItem("allie.jdraft", ppText.value); } catch (x) {} });
+  paper.addEventListener("click", e => {
+    const b = e.target.closest("[data-pp]"); if (!b) return; const J = journal(), k = b.dataset.pp;
+    if (k === "log") { const t = ppText.value.trim(); if (!t) return; J.push({ id: Date.now().toString(36), d: Date.now(), text: t }); save(); try { localStorage.removeItem("allie.jdraft"); } catch (x) {} ppShow(); $(".pp-n", paper).textContent = `logged, ${J.length} pages`; }
+    else if (k === "prev") { ppAt = ppAt < 0 ? J.length - 1 : Math.max(0, ppAt - 1); ppShow(); }
+    else if (k === "next") { ppAt = ppAt < 0 || ppAt >= J.length - 1 ? -1 : ppAt + 1; ppShow(); }
+    else if (k === "done") closePaper();
+  });
   addEventListener("beforeunload", () => { if (ON_PC) allie.saveData(JSON.stringify(S)); });
   const uid = () => ++S.next;
   let freshId = 0;
@@ -930,16 +978,17 @@ body.at-home .dock{display:none}
   /* ---------------- Places: the beach, the boat, the lighthouse and the bottle ---------------- */
   // The water is y = 0. Home is the beach: the camera stands on the sand looking out to sea, with the boat (My Life)
   // ahead, the lighthouse island (Studio) off to the left and a bottle (the journal) drifting near it.
-  const SHORE = 2300;
+  const SHORE = 1800;
   const PLACES = {
-    home:    { label: "home", x: 0, z: SHORE - 450 },
+    home:    { label: "home", x: -600, z: SHORE - 520 },
     life:    { label: "my life", x: 0, z: 0, ring: 450, keys: ["today", "mail", "calendar", "todo", "calories"] },
-    studio:  { label: "studio", x: -1750, z: -1500, ring: 760, keys: ["editing", "influencer", "time", "finances", "jobs"] },
-    journal: { label: "journal", x: -1180, z: -860 },
+    studio:  { label: "studio", x: -1750, z: -1050, ring: 760, keys: ["editing", "influencer", "time", "finances", "jobs"] },
+    journal: { label: "journal", x: -720, z: -480 },
     // the workbench on its terrace by the lighthouse, facing out from the island
-    craft:   { label: "workbench", x: -1750 + AllieSea.TERRACE.x, z: -1500 + AllieSea.TERRACE.z, y: AllieSea.TERRACE.h, yaw: Math.atan2(AllieSea.TERRACE.x, AllieSea.TERRACE.z) }
+    craft:   { label: "workbench", x: -1750 + AllieSea.TERRACE.x, z: -1050 + AllieSea.TERRACE.z, y: AllieSea.TERRACE.h, yaw: Math.atan2(AllieSea.TERRACE.x, AllieSea.TERRACE.z) }
   };
-  const POST = [-170, 0, SHORE + 60];
+  // the little sandy islet at home, and the post on it where Allie sits
+  const ISLE = [-760, SHORE + 300], POST = [ISLE[0] - 30, AllieSea.isletHeight(-30, 15) - 2, ISLE[1] + 15];
   const TABPLACE = {}; for (const p in PLACES) for (const k of PLACES[p].keys || []) TABPLACE[k] = p;
   // the first tab of a ring faces the beach, so it's the one you see as you arrive from home
   for (const p in PLACES) PLACES[p].a0 = p === "life" ? 0 : Math.atan2(PLACES.home.x - PLACES[p].x, PLACES.home.z - PLACES[p].z);
@@ -1106,7 +1155,7 @@ body.at-home .dock{display:none}
   function placeView(name, keep) {
     const P = PLACES[name], c = camAim(), bc = basis(c);
     const a = keep && HERE === name ? c.a : Math.atan2(bc.cx - P.x, bc.cz - P.z);
-    if (name === "home") return { x: P.x, y: 70, z: P.z, d: 1000, a: keep && HERE === "home" ? c.a : 0, p: 0.15 };
+    if (name === "home") return { x: P.x, y: 80, z: P.z, d: 1400, a: keep && HERE === "home" ? c.a : 0, p: 0.055 };
     if (name === "journal") { const b = bottlePos(), ai = Math.atan2(b[0] - PLACES.studio.x, b[2] - PLACES.studio.z) + 0.3; return { x: b[0], y: 28, z: b[2], d: 560, a: keep && HERE === name ? c.a : ai, p: 0.26 }; }
     if (name === "craft") { const t = P.y + AllieSea.BENCH.top, k = Math.min(W * 0.72, 920) / 760; return { x: P.x, y: t, z: P.z, d: 150 * FOC / (k * 760) * 1.02, a: keep && HERE === name ? c.a : P.yaw, p: 0.92 }; }
     if (name === "studio") return { x: P.x, y: 210, z: P.z, d: ringFit() * 1.38, a, p: 0.42 };
@@ -1116,6 +1165,8 @@ body.at-home .dock{display:none}
   // Where you are decides what swiping turns around, which labels show and whether the beach chat is out.
   function setHere(name) {
     if (!PLACES[name]) return; HERE = name; PIV = PLACES[name];
+    if (name !== "home") { VISITS[name] = Date.now(); try { localStorage.setItem("allie.visits", JSON.stringify(VISITS)); } catch (e) {} }
+    for (const el of LABELS) { const sub = $("small", el), t = visitText(el.dataset.place); if (sub.textContent !== t) sub.textContent = t; }
     document.body.classList.toggle("at-home", name === "home"); homeBtn.setAttribute("aria-pressed", String(name === "home"));
     for (const el of LABELS) el.hidden = el.dataset.place === name || (el.dataset.place === "craft" && name !== "studio");
     document.body.classList.toggle("at-craft", name === "craft"); if (name === "craft") showBench(); else hideBench();
@@ -1124,6 +1175,7 @@ body.at-home .dock{display:none}
   function travel(name) {
     if (!PLACES[name]) return;
     const v = placeView(name); dropSheet(); focusKey = null; setHere(name); birdTo(name, v);
+    if (name === "journal") setTimeout(() => { if (HERE === "journal") openPaper(); }, 1100); else closePaper();
   }
   function goHome(now) { focusKey = null; const v = homeView(); if (now) { Object.assign(CAM, v); camAnim = null; } else flyCam(v); }
   // Face a tab: straight on, at its real pixel size when it fits (so text is sharp), with room for Allie on its top edge.
@@ -1213,7 +1265,7 @@ body.at-home .dock{display:none}
   const pointers = new Map(); let drag = null, pinch = null;
   vp.addEventListener("pointerdown", e => {
     if (drag && drag.type === "move") return; // carrying a tab: other fingers wait
-    if (e.target.closest(".float")) return;
+    if (e.target.closest(".float, .place, .paper")) return;
     const grab = e.target.closest("[data-grab]");
     if (grab) {
       if (pointers.size) return;
@@ -1224,6 +1276,7 @@ body.at-home .dock{display:none}
     }
     if (e.target.closest(".tabw")) return;
     if (birdHit(e.clientX, e.clientY)) { birdPoke(); return; }
+    { const q = project(basis(CAM), ...bottlePos()); if (q && Math.hypot(e.clientX - q.x, e.clientY - q.y) < 46) { if (HERE === "journal") openPaper(); else travel("journal"); return; } }
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     vp.setPointerCapture(e.pointerId); hideHint();
     if (pointers.size === 1) { drag = { type: "orbit", x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, moved: false, fromFocus: !!focusKey, hist: [[performance.now(), CAM.a, CAM.p]] }; vp.classList.add("panning"); }
@@ -1343,12 +1396,31 @@ body.at-home .dock{display:none}
     const r = 250 * p.s; return { x: p.x - r, y: p.y - r * 0.55, w: 2 * r, h: r * 0.95, zc: p.zc };
   }
   const FLOATS = [["today", "today"], ["mail", "mail"], ["calendar", "calendar"], ["todo", "to-do"], ["calories", "calories"], ["editing", "video editing"], ["influencer", "ai influencer"], ["time", "clock"], ["finances", "money"], ["jobs", "3d jobs"]];
-  floats.innerHTML = FLOATS.map(([k, n]) => `<button type="button" class="float" data-cmd="${k}" style="--c:${PANELS[k].c}" aria-label="${PANELS[k].title}"><i>${icon(PANELS[k].ic)}</i><span>${n}</span></button>`).join("");
+  // A tag: a glowing dot on the thing itself, a thin line up to a small card with an icon, a name and a status line.
+  const tagHTML = (cls, attr, label, ic, name, sub) => `<button type="button" class="${cls} tag" ${attr} aria-label="${label}"><b class="tag-dot"></b><i class="tag-lead"></i><span class="tag-card">${icon(ic)}<span class="tag-t"><b>${name}</b><small>${sub}</small></span></span></button>`;
+  floats.innerHTML = FLOATS.map(([k, n]) => tagHTML("float", `data-cmd="${k}" style="--c:${PANELS[k].c}"`, PANELS[k].title, PANELS[k].ic, n, "")).join("");
   const FL = $$(".float", floats).map((el, i) => {
     const P = placeOf(el.dataset.cmd), a = ringAngle(el.dataset.cmd);
     return Object.assign(el, { _ax: P.x + Math.sin(a) * P.ring, _az: P.z + Math.cos(a) * P.ring, _ph: i * 1.7, _bob: 0 });
   });
   function floatState() { FL.forEach(b => b.classList.toggle("on", !!open[b.dataset.cmd])); }
+  // What each button's status line says: the gist of its tab, in a few characters.
+  function floatStatus(k) {
+    try {
+      if (k === "today") { const n = S.todos.filter(t => !t.done && inMyDay(t)).length; return n ? plural(n, "to-do") : "clear"; }
+      if (k === "mail") return EXT.on.gmail ? plural(EXT.mail.filter(m => m.unread).length, "unread", "unread") : "not linked";
+      if (k === "calendar") { const now = new Date().toTimeString().slice(0, 5), e = EV().filter(x => x.d > TODAY || (x.d === TODAY && (x.t || "") >= now)).sort((a, b) => (a.d + a.t).localeCompare(b.d + b.t))[0]; return e ? (e.d === TODAY ? fmtT(e.t || "12:00") : dueLabel(e.d)) : "nothing soon"; }
+      if (k === "todo") { const n = S.todos.filter(t => !t.done).length; return n ? n + " open" : "all done"; }
+      if (k === "calories") return foodToday().reduce((a, f) => a + f.kcal, 0).toLocaleString() + " kcal";
+      if (k === "editing") { const n = S.videos.filter(v => v.stage < 3).length; return n ? n + " on the go" : "quiet"; }
+      if (k === "influencer") { const n = (S.chars || []).length; return n ? plural(n, "character") : "start here"; }
+      if (k === "time") return S.timer ? "● " + clockOf(running()) : hm(dayTotal(TODAY)) + " today";
+      if (k === "finances") { const mk = TODAY.slice(0, 7), inc = S.money.concat(EXT.money).filter(m => m.d.slice(0, 7) === mk && m.amt > 0).reduce((a, m) => a + m.amt, 0); return "+$" + Math.round(inc).toLocaleString() + " this month"; }
+      if (k === "jobs") { const n = EXT.jobs.filter(j => j.isNew).length; return n ? n + " new" : "no new ones"; }
+    } catch (e) {}
+    return "";
+  }
+  function floatStatuses() { for (const el of FL) { const t = floatStatus(el.dataset.cmd), sm_ = el._sub || (el._sub = $("small", el)); if (sm_.textContent !== t) sm_.textContent = t; } }
   // The workbench: in build mode the camera sits close over the desk, and its top is a mat where widgets live. Widgets
   // are small add-ons in renderer/widgets/ (see the README there); each registers itself and gets a card on the mat.
   const benchEl = $("#bench"); let benchBuilt = false;
@@ -1383,14 +1455,19 @@ body.at-home .dock{display:none}
 
   // Labels over each place: click one to go there. The one you're at hides.
   const placesEl = $("#places");
-  placesEl.innerHTML = ["life", "studio", "journal", "craft"].map(k => `<button type="button" class="place" data-place="${k}" aria-label="Go to ${PLACES[k].label}"><span>${PLACES[k].label}</span></button>`).join("");
+  // Each place's card: its name and when you were last there.
+  const PLACE_TAG = { life: ["heart", "My Life", "your day"], studio: ["folder", "Studio", "work"], journal: ["note", "Journal", "write"], craft: ["brief", "Workbench", "build mode"] };
+  let VISITS = {}; try { VISITS = JSON.parse(localStorage.getItem("allie.visits") || "{}") || {}; } catch (e) {}
+  const visitText = k => { const t = VISITS[k]; if (!t) return PLACE_TAG[k][2]; const d = new Date(t); return dkey(d) === TODAY ? timeOf(t) : d.toLocaleDateString("en-US", { weekday: "short" }) + " " + timeOf(t); };
+  placesEl.innerHTML = ["life", "studio", "journal", "craft"].map(k => tagHTML("place", `data-place="${k}"`, "Go to " + PLACE_TAG[k][1], PLACE_TAG[k][0], PLACE_TAG[k][1], visitText(k))).join("");
   const LABELS = $$(".place", placesEl);
   placesEl.addEventListener("click", e => { const b = e.target.closest(".place"); if (!b) return; hideHint(); if (busy) stopTalking(); travel(b.dataset.place); });
+  // where each place's dot sits: on the boat, the lighthouse lamp, the bottle, the workbench
   function labelAt(k) {
-    if (k === "life") return [0, 230, 0];
-    if (k === "craft") { const P = PLACES.craft; return [P.x, P.y + AllieSea.BENCH.top + 70, P.z]; }
-    if (k === "studio") { const P = PLACES.studio; return [P.x, (SEA ? SEA.props.islandTop + SEA.props.lighthouse : 700) + 90, P.z]; }
-    const b = bottlePos(); return [b[0], 130, b[2]];
+    if (k === "life") return [0, 40, 0];
+    if (k === "craft") { const P = PLACES.craft; return [P.x, P.y + AllieSea.BENCH.top + 6, P.z]; }
+    if (k === "studio") { const P = PLACES.studio; return [P.x, (SEA ? SEA.props.islandTop - 6 + SEA.props.lamp : 600), P.z]; }
+    const b = bottlePos(); return [b[0], 14, b[2]];
   }
   function placeLabels(b) {
     for (const el of LABELS) {
@@ -1398,22 +1475,21 @@ body.at-home .dock{display:none}
       const p = project(b, ...labelAt(el.dataset.place)), vis = !!p && p.x > -80 && p.x < W + 80 && p.y > 20 && p.y < H + 20;
       if (vis !== el._vis) { el._vis = vis; el.style.visibility = vis ? "" : "hidden"; }
       if (!vis) continue;
-      const w = el._bw || (el._bw = el.offsetWidth), h = el._bh || (el._bh = el.offsetHeight);
-      const tf = `translate(${(p.x - w / 2).toFixed(1)}px,${(p.y - h).toFixed(1)}px)`; if (tf !== el._tf) { el._tf = tf; el.style.transform = tf; }
+      const tf = `translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px)`; if (tf !== el._tf) { el._tf = tf; el.style.transform = tf; }
     }
   }
   function placeFloats(b) {
     for (const el of FL) {
       const bob = el._bob = reduce ? 0 : Math.sin(T * 1.2 + el._ph) * 4, p = project(b, el._ax, 16 + bob, el._az);
-      const vis = !!p && p.x > -100 && p.x < W + 100 && p.y > -60 && p.y < H + 60 && p.s > 0.18 && HERE !== "home" && HERE !== "craft";
+      // only the buttons of the place you're at
+      const vis = !!p && p.x > -100 && p.x < W + 100 && p.y > -60 && p.y < H + 60 && p.s > 0.18 && (TABPLACE[el.dataset.cmd] || "life") === HERE;
       if (vis !== el._vis) { el._vis = vis; el.style.visibility = vis ? "" : "hidden"; }
       if (!vis) continue;
-      const w = el._bw || (el._bw = el.offsetWidth), h = el._bh || (el._bh = el.offsetHeight);
-      let s = Math.max(0.5, Math.min(1.25, p.s * 0.78));
-      // with its tab standing over it, the button stays below the tab's grab bar
+      let s = Math.max(0.8, Math.min(1, p.s * 0.85));
+      // with its tab standing over it, the card stays below the tab's grab bar (the card reaches about 84px above its dot)
       const t = open[el.dataset.cmd];
-      if (isTab(t) && Math.hypot(t._wx - el._ax, t._wz - el._az) < 60) { const q = project(b, t._wx, H0 - 40 * TAB_K, t._wz); if (q) s = Math.min(s, Math.max(0.35, (p.y - q.y - 4) / h)); }
-      const tf = `translate(${(p.x - w / 2).toFixed(1)}px,${(p.y - h).toFixed(1)}px) scale(${s.toFixed(3)})`;
+      if (isTab(t) && Math.hypot(t._wx - el._ax, t._wz - el._az) < 60) { const q = project(b, t._wx, H0 - 40 * TAB_K, t._wz); if (q) s = Math.min(s, Math.max(0.45, (p.y - q.y - 6) / 84)); }
+      const tf = `translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px) scale(${s.toFixed(3)})`;
       if (tf !== el._tf) { el._tf = tf; el.style.transform = tf; }
       const op = Math.min(1, (p.s - 0.18) * 4).toFixed(2); if (op !== el._op) { el._op = op; el.style.opacity = op; }
       const z = String(Math.max(1, Math.min(3900, Math.round(200000 / p.zc)))); if (z !== el._z) { el._z = z; el.style.zIndex = z; }
@@ -1425,7 +1501,7 @@ body.at-home .dock{display:none}
   let SEA = null; try { SEA = window.AllieSea && AllieSea.create(sea, bc); } catch (err) { console.error("sea", err); }
   if (!SEA) root.classList.add("nogl");
   // Character cells in screen pixels: small, so the boat's planks and the ripples keep their detail.
-  const CELL = [4, 7], BOAT_SCALE = 210;
+  const CELL = [3, 4], BOAT_SCALE = 210;
   let dprS = 1, MONO = "";
   function sizeScene() {
     dprS = Math.min(2, devicePixelRatio || 1);
@@ -1460,7 +1536,7 @@ body.at-home .dock{display:none}
   function propList() {
     if (!SEA) return [];
     const M = AllieSea.M4, S0 = PLACES.studio, top = SEA.props.islandTop;
-    return [{ mesh: "island", M: M.T(S0.x, 0, S0.z) }, { mesh: "lighthouse", M: M.T(S0.x, top - 6, S0.z) }, { mesh: "bench", M: benchMat() }, { mesh: "bottle", M: bottleMat() }, { mesh: "post", M: M.T(POST[0], 0, POST[2]) }];
+    return [{ mesh: "island", M: M.T(S0.x, 0, S0.z) }, { mesh: "lighthouse", M: M.T(S0.x, top - 6, S0.z) }, { mesh: "bench", M: benchMat() }, { mesh: "bottle", M: bottleMat() }, { mesh: "post", M: M.T(POST[0], POST[1], POST[2]) }, { mesh: "islet", M: M.T(ISLE[0], 0, ISLE[1]) }];
   }
   const boatPoint = p => { const R = BP.R, q = p.map(v => v * BOAT_SCALE); return [0, 1, 2].map(i => R[i][0] * q[0] + R[i][1] * q[1] + R[i][2] * q[2] + BP.pos[i]); };
 
@@ -1471,7 +1547,7 @@ body.at-home .dock{display:none}
   function perchPoint() {
     const pr = BIRD.perch;
     // at a place: the top of the post on the beach, the boat's bow, the lighthouse railing, or riding the bottle
-    if (pr === "home") return [POST[0], (SEA ? SEA.props.postTop : 70) - 1, POST[2]];
+    if (pr === "home") return [POST[0], POST[1] + (SEA ? SEA.props.postTop : 70) - 1, POST[2]];
     if (pr === "studio") { const P = PLACES.studio, a = P.a0 + 0.45, y = (SEA ? SEA.props.islandTop : 150) - 6 + 471; return [P.x + Math.sin(a) * 76, y, P.z + Math.cos(a) * 76]; }
     if (pr === "journal") return M4p(bottleMat(), [-19, 62, 0]);
     if (pr === "craft") { const B = AllieSea.BENCH; return M4p(benchMat(), [-B.w / 2 + 16, B.top, -B.d / 2 + 12]); }
@@ -1577,7 +1653,7 @@ body.at-home .dock{display:none}
       const fl = FL.map(e => ({ x: e._ax, y: 16 + e._bob + 36, z: e._az, r: 18, c: FLOAT_RGB[e.dataset.cmd].map(v => v * 0.55), r3: b.R, u3: b.U }));
       const S0 = PLACES.studio, J = PLACES.journal, aim = camAim();
       SEA.render({ T: reduce ? T * 0.2 : T, b, FOC, theme: root.dataset.theme === "light" ? "light" : "dark", dim: dimNow, boat: { R: BP.R, pos: BP.pos, scale: BOAT_SCALE }, panels, floats: fl, gull: pose,
-        props: propList(), shore: SHORE, ripples: [[0, 0, 170, 1], [S0.x, S0.z, 500, 0.75], [J.x, J.z, 34, 0.7]],
+        props: propList(), isle: [ISLE[0], ISLE[1], AllieSea.ISLET.r], beam: { p: [S0.x, (SEA.props.islandTop - 6) + SEA.props.lamp, S0.z], a: T * 0.42 }, ripples: [[0, 0, 170, 0.55], [S0.x, S0.z, 500, 0.5], [J.x, J.z, 34, 0.7]],
         shadowAt: { x: CAM.x, y: 0, z: CAM.z, r: HERE === "studio" ? 1150 : HERE === "home" ? 800 : HERE === "craft" ? 320 : 650 } });
       placeBench(b);
     }
@@ -2083,7 +2159,7 @@ body.at-home .dock{display:none}
   try { if (localStorage.getItem("allie.voice") === "0") setVoice(false); } catch (e) {}
 
   addEventListener("keydown", e => {
-    if (e.key === "Escape") { if (busy) { stopTalking(); return; } if (!bar.hidden) { openChat(false); return; } if (open.settings) { closeSheet(); return; } if (HERE === "craft") { travel("studio"); return; } }
+    if (e.key === "Escape") { if (busy) { stopTalking(); return; } if (!bar.hidden) { openChat(false); return; } if (open.settings) { closeSheet(); return; } if (!paper.hidden) { closePaper(); return; } if (HERE === "craft") { travel("studio"); return; } }
     if (e.target.matches("input,textarea,select")) return;
     if (e.key === "+" || e.key === "=") zoomBy(1.1);
     else if (e.key === "-") zoomBy(1 / 1.1);
@@ -2094,11 +2170,16 @@ body.at-home .dock{display:none}
 
   /* ---------------- Live bits: the timer pill, the clock, the "now" line ---------------- */
   // While the work timer runs, its floating button shows the time instead of its name.
-  const timerFloat = $('.float[data-cmd="time"] span');
-  function island() {
-    const on = !!S.timer; timerFloat.parentNode.classList.toggle("live", on);
-    timerFloat.textContent = on ? "● " + clockOf(running()) : "timer"; timerFloat.parentNode._bw = 0;
+  const timerBtn = $('.float[data-cmd="time"]'), timerFloat = $("small", timerBtn);
+  function island() { timerBtn.classList.toggle("live", !!S.timer); floatStatuses(); }
+  // The clock in the top right corner.
+  const ckHM = $("#clock .ck-hm"), ckAP = $("#clock .ck-ap"), ckD = $("#clock .ck-d");
+  function tickClock(now) {
+    const h = now.getHours(), m = now.getMinutes();
+    ckHM.textContent = `${(h % 12) || 12}:${String(m).padStart(2, "0")}`; ckAP.textContent = h < 12 ? "AM" : "PM";
+    ckD.textContent = now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }).toUpperCase();
   }
+  tickClock(new Date());
   let lastMin = -1;
   setInterval(() => {
     const now = new Date();
@@ -2109,8 +2190,9 @@ body.at-home .dock{display:none}
       if (p) $$('[data-live="proj"]').forEach(e => { e.textContent = hm(projTotal(p, timeRange === "today" ? D0.getTime() : timeRange === "week" ? D0.getTime() - 6 * 864e5 : 0)); });
       $$('[data-live="today-time"]').forEach(e => { e.textContent = hm(dayTotal(TODAY)); });
     }
+    if (now.getSeconds() % 5 === 0) floatStatuses();
     if (now.getMinutes() !== lastMin) {
-      lastMin = now.getMinutes();
+      lastMin = now.getMinutes(); tickClock(now);
       if (open.today && !open.today.contains(document.activeElement)) refresh("today");
     }
   }, 1000);

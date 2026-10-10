@@ -2,6 +2,16 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.10.0 (2026-10-10)
+- A new night look, after the reference pictures: tiny glowing cyan pixel characters (now 3 x 4 pixels, finer than before) on a darker sea, a big pixel moon with a narrow path of glitter under it, soft cumulus clouds low on the horizon, stars, and a subtle glow on the bright parts. By day the sun no longer floods the water.
+- Things in the world catch a rim of light on their edges (the lighthouse, rocks, boat, bench), so they stand out against the dark like in the references.
+- The lighthouse is more detailed, stands on a rocky island and sweeps a beam across the sky. Home is now a little rocky islet with Allie's post on it instead of a long beach.
+- Labels and tab buttons are cards: a dark rounded card with an icon, a name and a live status line ("0 kcal", "nothing soon"), joined by a thin line to a glowing dot on the thing itself. Only the current place's buttons show.
+- A clock with the date in the top right, all in white. The chat is a pill with a sparkle and a round send button. The top-left buttons are round to match.
+- Allie has a soft pink glow so she fits into the scene.
+- The journal works: click the bottle (or its label, or say "open my journal") and a page unrolls. Write, press Log it, and it's saved; the arrows flip back through older pages. Allie never replies there. Entries are saved in data.json under journal.
+- Fixed: clicking a place's label (My Life, Studio, Journal) didn't take you there, because the swipe handler caught the click.
+
 ## 0.9.0 (2026-10-10)
 - A little world instead of one screen. Home is a beach at the water's edge: waves roll in with white foam, Allie sits on a weathered post facing you, and the moon (night) or a warm sun (day) hangs over the sea. Out on the water are My Life (the boat), the Studio (a lighthouse on a rocky island), the journal (a bottle drifting by the island) and a workbench by the lighthouse.
 - Chat lives on the beach: a single line at the bottom that opens into the full conversation as soon as you start typing (the – button shrinks it again). Everything you and Allie say is kept there, between launches too.

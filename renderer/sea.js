@@ -325,6 +325,36 @@
     box(mb, [-12, t, -d + 10], [30, t + 4, -d + 22], COL.benchTop); box(mb, [8, t + 4, -d + 12], [24, t + 8, -d + 20], COL.bench);
     return { mesh: mb.done() };
   }
+  // Home: a little sandy islet with the post on it, a dome of sand ringed by wet sand, boulders round one side and a few
+  // rocks breaking the water nearby. ISLET.r is its radius; isletHeight(x, z) is the sand's height (island-local).
+  const ISLET = { r: 125 };
+  function isletHeight(x, z) {
+    const r = Math.hypot(x, z), a = Math.atan2(z, x), R = ISLET.r * (1 + 0.09 * Math.sin(a * 3 + 1) + 0.05 * Math.sin(a * 7 + 2));
+    const t = r / R; return t >= 1.25 ? -12 : 20 * Math.pow(Math.max(0, 1 - t * t), 1.15) + fbm(x * 0.02, z * 0.02, 3) * 6 * Math.max(0, 1 - t) - 12 * sm(0.9, 1.25, t);
+  }
+  function buildIslet() {
+    const mb = meshBuilder(), NR = 34, NA = 110, rows = [];
+    for (let i = 0; i <= NR; i++) {
+      const row = [];
+      for (let j = 0; j < NA; j++) {
+        const a = j / NA * Math.PI * 2, r = i / NR * ISLET.r * 1.3, x = Math.cos(a) * r, z = Math.sin(a) * r, h = isletHeight(x, z);
+        const c = mix3(mix3(COL.sand, COL.rock, 0.7), COL.wetSand, sm(10, 0, h)), n = fbm(x * 0.05, z * 0.05, 2);
+        row.push(mb.v([x, h, z], mix3(c, COL.rockDark, Math.max(0, n) * 0.5 + 0.3), [0, 0]));
+      }
+      rows.push(row);
+    }
+    for (let i = 0; i < NR; i++) for (let j = 0; j < NA; j++) {
+      const a = rows[i][j], b = rows[i][(j + 1) % NA], c = rows[i + 1][j], d = rows[i + 1][(j + 1) % NA]; mb.tri(a, c, b); mb.tri(b, c, d);
+    }
+    // boulders round the back and left, a cluster at the post's foot, rocks out in the water
+    for (let k = 0; k < 18; k++) {
+      const a = k * 0.36 + hash(k, 1) * 0.3, r = ISLET.r * (0.55 + hash(k, 2) * 0.55), s = 14 + hash(k, 3) * 26, x = Math.cos(a) * r, z = Math.sin(a) * r;
+      rock(mb, [x, isletHeight(x, z) - s * 0.2, z], [s * (1 + hash(k, 4) * 0.5), s * (0.6 + hash(k, 5) * 0.4), s], 70 + k * 2.3, 10);
+    }
+    for (const [x, z, s, k] of [[-48, 4, 13, 1], [-22, 30, 9, 2], [-60, -20, 10, 3], [-34, -28, 7, 4], [-14, 6, 6, 5]]) rock(mb, [x, isletHeight(x, z) - 2, z], [s * 1.2, s * 0.7, s], 90 + k, 10);
+    for (const [x, z, s, k] of [[190, -50, 15, 1], [215, -15, 9, 2], [-200, 90, 12, 3], [140, 170, 8, 4]]) rock(mb, [x, -8, z], [s * 1.3, s * 0.8, s], 110 + k, 9);
+    return { mesh: mb.done() };
+  }
   // A green glass bottle with a cork and a rolled letter inside, lying in the water.
   function buildBottle() {
     const mb = meshBuilder(), seg = 24;
@@ -377,20 +407,22 @@
   // Lg: where the glitter path on the water points. The sea's colours (cDeep … cHi) are the first version's palette.
   const LOOKS = {
     dark: {
-      L: [-0.72, 0.62, 0.3], LCol: [0.62, 0.86, 0.92], LInt: 1.35, Lf: [0.5, 0.3, 1], fill: [0.07, 0.15, 0.16], rimCol: [0.55, 1.0, 0.92], rimInt: 1.4,
-      sky: [0.02, 0.05, 0.06], ground: [0.004, 0.02, 0.025], Lg: [-0.2, 0.19, -1], glit: 0.45, refl: 0.8, base: -0.03, exposure: 1.05, birdExp: 1.0, Lbird: [-0.45, 0.6, 0.65],
-      cDeep: [0.002, 0.014, 0.018], cBg: [0.01, 0.045, 0.052], cLo: [0.04, 0.15, 0.16], cHi: [0.5, 0.86, 0.78],
-      sDeep: [0.02, 0.03, 0.03], sBg: [0.07, 0.09, 0.085], sLo: [0.17, 0.21, 0.2], sHi: [0.72, 0.8, 0.74], discCol: [0.86, 0.99, 0.95], discBg: 0.72, foamCol: [0.8, 0.97, 0.93], foamBg: 0.32, kDeep: [0.002, 0.008, 0.012], kBg: [0.006, 0.03, 0.038], kLo: [0.04, 0.13, 0.15], kHi: [0.62, 0.92, 0.86],
-      sandL: 0.5, skyTop: 0.02, skyHor: 0.11, stars: 0.75, disc: 1.0, lamp: 2.4, boatTint: [0.82, 0.97, 0.97], boatAscii: 0.5,
-      glow: [0.5, 1.15], glowCol: [0.35, 0.8, 0.75], glowAmt: 0.06, wood: [0.72, 0.86, 0.86], panel: [0.04, 0.1, 0.11], rim: [0.2, 0.5, 0.46]
+      L: [-0.72, 0.62, 0.3], LCol: [0.6, 0.88, 0.95], LInt: 0.55, Lf: [0.4, 0.35, 1], fill: [0.07, 0.15, 0.17], rimCol: [0.45, 0.95, 0.95], rimInt: 2.4, alb: 0.5,
+      sky: [0.02, 0.05, 0.06], ground: [0.004, 0.02, 0.025], Lg: [0.0, 0.215, -1], glit: 1.1, refl: 0.8, base: -0.11, exposure: 1.1, birdExp: 0.95, Lbird: [-0.35, 0.55, 0.75],
+      cDeep: [0.0015, 0.006, 0.008], cBg: [0.004, 0.02, 0.024], cLo: [0.012, 0.1, 0.115], cHi: [0.55, 1.0, 0.95],
+      kDeep: [0.0008, 0.003, 0.005], kBg: [0.002, 0.01, 0.013], kLo: [0.025, 0.12, 0.14], kHi: [0.7, 1.0, 0.97],
+      discCol: [0.75, 0.98, 0.95], discBg: 0.3, foamCol: [0.7, 1.0, 0.96], foamBg: 0.08, boost: 0.7,
+      skyTop: 0.0, skyHor: 0.03, stars: 0.6, disc: 0.8, wave: 0.6, cloud: 0.85, beam: 0.55, lamp: 3.2, boatTint: [0.82, 1.0, 1.0], boatAscii: 0.8,
+      bloom: 0.32, bloomThr: 0.5, glow: [0.5, 1.15], glowCol: [0.3, 0.8, 0.8], glowAmt: 0.0, wood: [1.1, 1.35, 1.4], panel: [0.03, 0.08, 0.09], rim: [0.2, 0.5, 0.5]
     },
     light: {
-      L: [-0.74, 0.6, 0.28], LCol: [1.0, 0.88, 0.68], LInt: 2.6, Lf: [0.5, 0.3, 1], fill: [0.34, 0.4, 0.34], rimCol: [1.0, 0.92, 0.72], rimInt: 2.0,
-      sky: [0.34, 0.44, 0.38], ground: [0.08, 0.2, 0.13], Lg: [-0.5, 0.2, -1], glit: 1.3, refl: 1.0, base: 0.2, exposure: 1.1, birdExp: 1.0, Lbird: [-0.45, 0.6, 0.65],
-      cDeep: [0.12, 0.33, 0.22], cBg: [0.24, 0.5, 0.35], cLo: [0.12, 0.31, 0.2], cHi: [1.0, 0.96, 0.76],
-      sDeep: [0.36, 0.3, 0.2], sBg: [0.6, 0.52, 0.36], sLo: [0.5, 0.42, 0.28], sHi: [1.0, 0.95, 0.78], discCol: [1.0, 1.0, 0.95], discBg: 1.0, foamCol: [1.0, 1.0, 0.97], foamBg: 0.72, kDeep: [0.4, 0.55, 0.48], kBg: [0.62, 0.74, 0.62], kLo: [0.55, 0.7, 0.6], kHi: [1.0, 0.98, 0.86],
-      sandL: 0.55, skyTop: 0.42, skyHor: 0.72, stars: 0, disc: 1.6, lamp: 1.2, boatTint: [1.0, 0.98, 0.9], boatAscii: 0.45,
-      glow: [0.02, 1.08], glowCol: [1.0, 0.84, 0.5], glowAmt: 0.75, wood: [1.0, 0.98, 0.93], panel: [0.7, 0.74, 0.62], rim: [1, 0.98, 0.88]
+      L: [-0.74, 0.6, 0.28], LCol: [1.0, 0.88, 0.68], LInt: 2.6, Lf: [0.5, 0.3, 1], fill: [0.34, 0.4, 0.34], rimCol: [1.0, 0.92, 0.72], rimInt: 2.0, alb: 1.0,
+      sky: [0.34, 0.44, 0.38], ground: [0.08, 0.2, 0.13], Lg: [-0.42, 0.2, -1], glit: 0.55, refl: 1.0, base: 0.12, exposure: 1.05, birdExp: 1.0, Lbird: [-0.45, 0.6, 0.65],
+      cDeep: [0.1, 0.3, 0.2], cBg: [0.2, 0.45, 0.31], cLo: [0.1, 0.28, 0.18], cHi: [1.0, 0.96, 0.76],
+      kDeep: [0.42, 0.56, 0.48], kBg: [0.66, 0.76, 0.63], kLo: [0.55, 0.7, 0.58], kHi: [1.0, 0.98, 0.86],
+      discCol: [1.0, 1.0, 0.95], discBg: 1.0, foamCol: [1.0, 1.0, 0.97], foamBg: 0.75, boost: 0.25,
+      skyTop: 0.42, skyHor: 0.72, stars: 0, disc: 1.3, wave: 0.35, cloud: 0.7, beam: 0, lamp: 1.2, boatTint: [1.0, 0.98, 0.9], boatAscii: 0.55,
+      bloom: 0.18, bloomThr: 0.85, glow: [0.02, 1.08], glowCol: [1.0, 0.84, 0.5], glowAmt: 0.7, wood: [1.0, 0.98, 0.93], panel: [0.7, 0.74, 0.62], rim: [1, 0.98, 0.88]
     }
   };
   const nrm = v => { const l = Math.hypot(...v); return v.map(x => x / l); };
@@ -421,7 +453,8 @@ void main(){ if(uMirror<0.&&vW.y<0.) discard;
   float key=max(dot(N,uL),0.), fil=max(dot(N,normalize(uLf)),0.)*.8+.2;
   float spec=pow(max(dot(N,H),0.),mix(110.,10.,rough))*(1.-rough*.6);
   // rim: edges turned toward the light catch it, like the sun on the gunwale and the bow in the reference
-  float rim=pow(1.-max(dot(n,V),0.),3.)*(.25+.75*smoothstep(-.2,.7,dot(n,uL)))+pow(max(dot(N,H),0.),40.)*smoothstep(.6,.95,n.y)*.6;
+  vec3 Ls=normalize(uL-V*dot(uL,V)+vec3(0,.35,0));
+  float rim=pow(1.-max(dot(n,V),0.),2.2)*(.15+.85*smoothstep(-.1,.6,dot(n,Ls)))*1.5+pow(max(dot(N,H),0.),40.)*smoothstep(.6,.95,n.y)*.6;
   vec3 amb=mix(uGround,uSky,N.y*.5+.5)*ao;
   vec3 col=alb*(amb+uLC*key*sh+uFill*fil*ao)+uLC*spec*sh*.8+uRim*rim*(.3+.7*sh)*ao;
   o=vec4(col*uFade,1.);}`;
@@ -453,15 +486,16 @@ void main(){ if(uMirror<0.&&vW.y<0.) discard;
   o=vec4(uMirror<0.?pow(col,vec3(2.2)):col,1.);}`;
   // the island, lighthouse, bottle and post: vertex colours lit like the boat; the lamp glows, glass shines
   const PROP_FS = F3 + COMMON + `in vec3 vW,vN,vC;in vec2 vA;uniform vec3 uL,uLC,uSky,uGround,uC,uLf,uFill,uRim;uniform sampler2DShadow uSh;uniform mat4 uSVP;
-uniform float uMirror,uFlip,uLamp;out vec4 o;
+uniform float uMirror,uFlip,uLamp,uAlb;out vec4 o;
 void main(){ if(uMirror<0.&&vW.y<0.) discard;
   vec3 n=normalize(vN); if(!gl_FrontFacing) n=-n; n*=uFlip; float m=vA.x;
   if(m>.5&&m<1.5){ o=vec4(vC*uLamp,1.); return; }
   vec3 V=normalize(uC-vW), H=normalize(uL+V); float sh=shadowAt(uSh,uSVP,vW), glass=step(1.5,m)*step(m,2.5);
   float key=max(dot(n,uL),0.), fil=max(dot(n,normalize(uLf)),0.)*.8+.2;
-  float rim=pow(1.-max(dot(n,V),0.),3.)*(.25+.75*smoothstep(-.2,.7,dot(n,uL)));
+  vec3 Ls=normalize(uL-V*dot(uL,V)+vec3(0,.35,0));
+  float rim=pow(1.-max(dot(n,V),0.),2.2)*(.15+.85*smoothstep(-.1,.6,dot(n,Ls)))*1.5*(1.-.75*smoothstep(.55,.95,n.y)); // flat tops seen low don't glow, only the outlines
   float spec=pow(max(dot(n,H),0.),mix(22.,140.,glass))*mix(.1,1.6,glass);
-  vec3 alb=vC*(1.-.4*(1.-smoothstep(-2.,10.,vW.y)));
+  vec3 alb=vC*uAlb*(1.-.4*(1.-smoothstep(-2.,10.,vW.y)));
   vec3 col=alb*(mix(uGround,uSky,n.y*.5+.5)+uLC*key*sh+uFill*fil)+uLC*spec*sh+uRim*rim*(.3+.7*sh)*(1.+glass);
   o=vec4(col,1.);}`;
   // The water. Every pixel finds where its ray meets the sea and works out how bright the sea is there: the first
@@ -471,8 +505,9 @@ void main(){ if(uMirror<0.&&vW.y<0.) discard;
   const QUAD_VS = V3 + `in vec2 aP;void main(){gl_Position=vec4(aP,0.,1.);}`;
   const WATER_FS = F3 + COMMON + `
 uniform sampler2D uScene,uDepth,uRefl;uniform sampler2DShadow uSh;uniform mat4 uSVP;
-uniform vec2 uRes,uScr,uBoat,uBoatAx,uBoatSz,uToCam;uniform vec3 uC,uLg,uR,uU,uB;
-uniform float uF,uT,uNear,uFar,uGlit,uReflAmt,uBase,uPanN,uRipN,uShore,uSandL,uSkyTop,uSkyHor,uStars,uDisc;uniform vec4 uPan[16],uRip[4];out vec4 o;
+uniform vec2 uRes,uScr,uBoat,uBoatAx,uBoatSz,uToCam;uniform vec3 uC,uLg,uR,uU,uB,uBeamP;uniform vec4 uIsle;
+uniform float uF,uT,uNear,uFar,uGlit,uReflAmt,uBase,uPanN,uRipN,uSkyTop,uSkyHor,uStars,uDisc,uWave,uCloud,uBeamA,uBeam;uniform vec4 uPan[16],uRip[4];out vec4 o;
+float fbm2(vec2 p){ return vn(p)*.5+vn(p*2.03+1.7)*.25+vn(p*4.1-3.1)*.125+vn(p*8.3+5.)*.0625; }
 // rings rippling out from something rocking in the water: R = (x, z, size, strength)
 float rings(vec2 P,vec4 R){
   vec2 q=P-R.xy; float r=length(q*vec2(1.,1.2)), s0=R.z/170.;
@@ -481,19 +516,29 @@ float rings(vec2 P,vec4 R){
   float c=.5+.5*cos(ph), ring=(pow(c,16.)+.35*pow(.5+.5*cos(ph*2.+1.3),26.))*smoothstep(R.z*.9,R.z*1.95,r)*(.35+.65*exp(-r/(2600.*s0)));
   return ring*(.25+1.1*smoothstep(.2,.65,vn(P*vec2(.0035,.005)+7.)))*R.w;
 }
+// The swell: long wave fronts rolling in, drawn as thin bright lines along their crests that stay about one character
+// wide at any distance, wiggling and breaking up like the reference.
+float crestLine(float ph,float k,float lw){ float d=1.-sin(ph), w=.5*k*k*lw*lw; return 1.-smoothstep(w*.3,w*1.6,d); }
+float crests(vec2 P,float dist){
+  vec2 w=P+vec2(vn(P*.004+uT*.03)-.5,vn(P*.003-uT*.02)-.5)*160.;
+  float lw=2.+dist*.0062;
+  float c=crestLine(dot(w,vec2(.05,.998))*.045-uT*1.05,.045,lw)*.75+crestLine(dot(w,vec2(-.22,.975))*.071-uT*1.32+1.3,.071,lw)*.55+crestLine(dot(w,vec2(.3,.954))*.11-uT*1.7+2.1,.11,lw)*.4;
+  float broken=smoothstep(.25,.6,vn(P*vec2(.011,.028)+vec2(uT*.08,0.)));
+  return min(c,1.2)*(.25+.75*broken)*smoothstep(12000.,900.,dist)*(.35+.65*smoothstep(5000.,800.,dist));
+}
 float sea(vec2 P,float dist){
   vec2 q=P-uBoat;
-  float streak=smoothstep(.56,.92,vn(vec2(P.x*.0008+uT*.01,P.y*.015-uT*.1)))*.5;
-  float fine=vn(P*vec2(.018,.05)+vec2(uT*.35,0.)), ring=0.;
+  float streak=smoothstep(.62,.94,vn(vec2(P.x*.0008+uT*.01,P.y*.015-uT*.1)))*.2;
+  float fine=vn(P*vec2(.018,.05)+vec2(uT*.35,0.))*.7, ring=0.;
   for(int i=0;i<4;i++){ if(float(i)>=uRipN) break; ring+=rings(P,uRip[i]); }
-  float l=uBase+.12+.1*fine+streak*.8+ring*.9;
+  float l=uBase+.08+.08*fine+streak*.6+ring*.34+crests(P,dist)*uWave*(.55+.45*smoothstep(900.,3500.,dist));
   vec2 bl=vec2(dot(q,uBoatAx),dot(q,vec2(-uBoatAx.y,uBoatAx.x)))/uBoatSz; l*=1.-.6*exp(-pow(max(length(bl)-.6,0.),2.)*2.5);
   for(int i=0;i<16;i++){ if(float(i)>=uPanN) break; vec4 R=uPan[i];
     vec2 q2=P-R.xy, tc=uC.xz-R.xy; tc=dot(tc,tc)>1.?normalize(tc):uToCam;
     float dx=abs(dot(q2,vec2(tc.y,-tc.x)))/R.z, dz=dot(q2,tc);
     float colm=1.-smoothstep(.7,1.05,dx), down=smoothstep(-12.,20.,dz)*exp(-max(dz,0.)/R.w);
-    l+=colm*down*(.2+.8*(.5+.5*sin(dz*.1-uT*2.2+vn(P*.02)*4.)))*.35; }
-  return l*mix(1.,.3,smoothstep(2500.,9000.,dist));
+    l+=colm*down*(.2+.8*(.5+.5*sin(dz*.1-uT*2.2+vn(P*.02)*4.)))*.3; }
+  return l*mix(1.,.3,smoothstep(3000.,14000.,dist));
 }
 // wave slopes for the glitter and the wobble in the reflections
 vec3 waves(vec2 p,float t){
@@ -503,83 +548,118 @@ vec3 waves(vec2 p,float t){
   vec2 rp=p-uBoat; float r=length(rp); g+=rp/max(r,1.)*smoothstep(150.,330.,r)*exp(-r/1400.)*cos(r*.034-t*1.1)*.09;
   return normalize(vec3(-g.x,1.,-g.y));
 }
-// the sky: darker overhead, lighter toward the horizon, a halo and a disc where the moon or sun is, stars at night
-float sky(vec3 R){
-  float e=max(R.y,0.), m=max(dot(R,uLg),0.);
-  float l=mix(uSkyHor,uSkyTop,pow(e,.45))+pow(m,24.)*.16*uDisc+pow(m,300.)*.4*uDisc+smoothstep(.9985,.99885,m)*2.;
-  vec2 c=floor(vec2(atan(R.x,-R.z),asin(clamp(R.y,-1.,1.)))*260.);
-  l+=step(.9965,h21(c))*uStars*(.55+.45*sin(uT*1.7+h21(c+3.)*30.))*smoothstep(.02,.12,e);
+// The sky: dark overhead, a little lighter at the horizon, stars, banks of cloud low on either side lit at their
+// edges, and the moon (or sun): a big disc with faint markings and a soft halo.
+float sky(vec3 R,out float cloud){
+  float e=max(R.y,0.), m=max(dot(R,uLg),0.), az=atan(R.x,-R.z), maz=atan(uLg.x,-uLg.z);
+  float l=mix(uSkyHor,uSkyTop,pow(e,.4))+pow(m,18.)*.14*uDisc+pow(m,260.)*.35*uDisc;
+  float disc=smoothstep(.9976,.99785,m);
+  if(disc>0.){ vec3 t=normalize(cross(uLg,vec3(0,1,0))), b=cross(t,uLg); vec2 q=vec2(dot(R,t),dot(R,b))*90.;
+    l+=disc*(1.15-.4*smoothstep(.45,.7,fbm2(q*.9+3.))-.25*smoothstep(.55,.8,fbm2(q*2.3))); }
+  vec2 c=floor(vec2(az,asin(clamp(R.y,-1.,1.)))*300.);
+  float star=step(.9972,h21(c))*uStars*(.4+.6*h21(c+7.))*(.5+.5*sin(uT*1.7+h21(c+3.)*30.))*smoothstep(.03,.14,e);
+  // clouds: soft heaps of cumulus low over the horizon on either side, dotted and faint, lit at their edges by the moon
+  float side=smoothstep(.2,.45,abs(az-maz)), a2=az+uT*.003, eh=e/(.06+.22*fbm2(vec2(a2*2.2,3.1)));
+  float dn=fbm2(vec2(a2*7.,e*17.))+.45*fbm2(vec2(a2*19.,e*44.)+2.)-.55-eh*.42+.15;
+  cloud=smoothstep(0.,.16,dn)*side*uCloud*smoothstep(-.005,.015,e);
+  float edge=smoothstep(0.,.05,dn)*(1.-smoothstep(.05,.22,dn)), facing=.5+.5*cos(az-maz);
+  l=mix(l+star,uSkyHor*.4+fbm2(vec2(a2*30.,e*70.))*.12+edge*(.14+.22*facing),cloud);
   return l;
+}
+// The lighthouse beam: two shafts of light turning slowly from the lamp. How close does this pixel's ray pass to them?
+float beam(vec3 C,vec3 d,float tMax){
+  if(uBeam<=0.) return 0.;
+  float b=0.;
+  for(int k=0;k<2;k++){
+    float a=uBeamA+float(k)*3.14159; vec3 bd=normalize(vec3(sin(a),-.02,cos(a)));
+    vec3 w0=C-uBeamP; float A=dot(d,d),Bq=dot(d,bd),D=dot(d,w0),E=dot(bd,w0),den=A-Bq*Bq;
+    if(abs(den)<1e-6) continue;
+    float t=clamp((Bq*E-D)/den,0.,tMax), s=clamp((A*E-Bq*D)/den,0.,2600.);
+    float dist=length(w0+t*d-s*bd), r=7.+s*.09;
+    b+=exp(-dist*dist/(r*r))*pow(1.-s/2600.,1.6)*(.4+.6*exp(-s/500.));
+  }
+  return b*uBeam;
 }
 void main(){
   vec2 px=gl_FragCoord.xy/uRes, sp=px*uScr-uScr*.5;
   vec3 dir=uR*sp.x+uU*sp.y-uB*uF;
   vec4 sc=texture(uScene,px); float dz=texture(uDepth,px).r;
-  float zb=dz<1.?2.*uNear*uFar/(uFar+uNear-(dz*2.-1.)*(uFar-uNear)):1e9;
-  if(dir.y>-1e-4){ o=zb<1e8?vec4(sc.rgb,0.):vec4(sky(normalize(dir)),0.,1.,1.); return; }
-  float tw=-uC.y/dir.y, zw=tw*uF; vec3 P=uC+dir*tw;
-  if(zb<zw){ o=vec4(sc.rgb,0.); return; }
+  float zb=dz<1.?2.*uNear*uFar/(uFar+uNear-(dz*2.-1.)*(uFar-uNear)):1e9, dl=length(dir);
+  float tSurf=dir.y<-1e-4?-uC.y/dir.y:1e9, tGeo=zb<1e8?zb/uF:1e9;
+  float bm=beam(uC,dir,min(tSurf,tGeo));
+  if(dir.y>-1e-4){ float cl; if(zb<1e8){ o=vec4(sc.rgb+vec3(.6,.95,.95)*bm,0.); return; } o=vec4(sky(normalize(dir),cl)+bm,0.,1.,1.); return; }
+  float tw=tSurf, zw=tw*uF; vec3 P=uC+dir*tw;
+  if(zb<zw){ o=vec4(sc.rgb+vec3(.6,.95,.95)*bm,0.); return; }
   float dist=length(P-uC);
   vec3 V=-normalize(dir); float sh=shadowAt(uSh,uSVP,P);
-  // the beach: the water's edge runs back and forth along the shore; sand beyond it, wet and shiny just behind it
-  float edge=uShore+26.*sin(uT*.55+P.x*.0016)+14.*sin(uT*1.3+P.x*.004+1.)-10.;
-  if(uShore>0.&&P.z>edge){
-    float back=P.z-edge, wet=1.-smoothstep(0.,80.,back);
-    float rip=.5+.25*sin(P.x*.05+vn(P.xz*.01)*6.)+.25*sin(P.z*.08+P.x*.015);
-    float ls=uSandL*(.72+.28*rip)*(1.-.45*wet)+wet*.35*pow(max(dot(reflect(-V,vec3(0,1,0)),uLg),0.),14.);
-    o=vec4(ls*mix(1.,.6,1.-sh)*mix(1.,.4,smoothstep(3000.,12000.,dist)),1.,0.,1.); return;
-  }
   float l=sea(P.xz,dist), foam=0.;
-  // near the shore: breaking waves rolling in as lines of white water, and a wide lacy wash where it runs up the sand
-  if(uShore>0.){ float to=edge-P.z;
-    if(to<900.){
-      float lace=vn(P.xz*vec2(.035,.09)+vec2(uT*.25,uT*.6))*.6+vn(P.xz*vec2(.11,.2)-uT*.9)*.4;
-      float crest=pow(.5+.5*sin(to*.032+uT*1.5+vn(P.xz*.003)*5.),7.)*smoothstep(850.,60.,to)*smoothstep(.25,.6,vn(P.xz*vec2(.006,.02)+uT*.15)+.15);
-      float trail=pow(.5+.5*sin(to*.032+uT*1.5+vn(P.xz*.003)*5.-.9),3.)*smoothstep(500.,40.,to)*.45*lace;
-      float wash=smoothstep(140.,0.,to)*smoothstep(.25,.65,lace+.2*sin(uT*.55+P.x*.0016));
-      foam=clamp(crest*(.55+.6*lace)+trail+wash,0.,1.);
-      l+=foam*.75; } }
+  // white water around the little island at home: a lacy ring where the waves lap at the sand
+  if(uIsle.w>0.){
+    vec2 q=P.xz-uIsle.xy; float r=length(q), an=atan(q.y,q.x);
+    float edge=uIsle.z*(1.+.09*sin(an*3.+1.)+.05*sin(an*7.+2.))+7.*sin(uT*.8+an*2.)+5.*sin(uT*1.9+an*5.);
+    float to=r-edge;
+    if(to>-20.&&to<360.){
+      float lace=vn(q*vec2(.05,.07)+uT*.3)*.6+vn(q*.15-uT*.8)*.4;
+      float lap=smoothstep(30.,0.,to)*smoothstep(.2,.6,lace+.15*sin(uT*.8+an*2.));
+      float roll=pow(.5+.5*sin(to*.06-uT*1.6),6.)*smoothstep(320.,30.,to)*smoothstep(.35,.7,lace)*.6;
+      foam=clamp(lap+roll,0.,1.); l+=foam*.7;
+    }
+  }
   vec3 N=waves(P.xz,uT), Rv=reflect(-V,N);
-  vec3 mN=normalize(N+vec3(vn(P.xz*.09+uT*.7)-.5,0.,vn(P.xz*.11-uT*.6+9.)-.5)*.3);
-  float gl=pow(max(dot(reflect(-V,mN),uLg),0.),120.)*1.4+pow(max(dot(Rv,uLg),0.),9.)*.28;
-  l+=gl*uGlit*sh*smoothstep(14000.,2500.,dist);
+  vec3 mN=normalize(N+vec3(vn(P.xz*.09+uT*.7)-.5,0.,vn(P.xz*.11-uT*.6+9.)-.5)*.18);
+  // the moon's path: bright glints on the tiny facets that tip toward the moon, densest straight below it
+  float gl=pow(max(dot(reflect(-V,mN),uLg),0.),140.)*1.5+pow(max(dot(Rv,uLg),0.),30.)*.08;
+  // kept to a narrow column under the moon, like the reference, so the sea around it stays dark
+  float path=smoothstep(.86,.995,dot(normalize(dir.xz),normalize(uLg.xz)));
+  l+=gl*uGlit*sh*smoothstep(16000.,2500.,dist)*(.6+.8*crests(P.xz,dist))*(.12+.88*path)*(.45+.55*smoothstep(600.,4000.,dist));
   vec4 rf=texture(uRefl,px+(N.xz*vec2(.03,.05)+vec2(vn(P.xz*vec2(.01,.06)+uT*.4)-.5,0.)*.02)*(700./max(zw,700.)));
   float rl=dot(rf.rgb,vec3(.3,.59,.11))*uReflAmt; l=mix(l,rl*1.1+l*.35,clamp(rf.a,0.,1.)*.85);
   l*=mix(1.,.72,1.-sh);
-  if(zb<1e8){ float under=(zb-zw)/uF*length(dir); l=mix(l,dot(sc.rgb,vec3(.3,.59,.11))*.55,exp(-under/38.)*.75); }
+  if(zb<1e8){ float under=(zb-zw)/uF*dl; l=mix(l,dot(sc.rgb,vec3(.3,.59,.11))*.55,exp(-under/38.)*.75); }
+  l+=bm*.8;
   // far out, the sea melts into the haze at the horizon
-  l=mix(l,uSkyHor*.85,smoothstep(5000.,30000.,dist));
+  l=mix(l,uSkyHor*.9,smoothstep(6000.,34000.,dist));
   o=vec4(l,foam*.45*mix(1.,.65,1.-sh),0.,1.);
 }`;
-  // Turns the scene into ASCII, the first version's look: each small cell becomes a character picked by how bright it
-  // is, in the sea's palette, with a soft vignette and the sun's warm glow by day. The boat keeps its own lit colours
-  // with the same characters printed over it, so it reads as a solid 3D thing in an ASCII world.
+  // Turns the scene into ASCII: each small cell becomes a pixel-font character picked by how bright it is, coloured from
+  // the sea's or the sky's palette. The boat, lighthouse, island and the rest keep their own lit colours with the same
+  // characters printed over them, so they read as solid 3D things in an ASCII world. The result is linear and can go
+  // above 1; the glow pass picks up the bright parts.
   const ASCII_FS = F3 + COMMON + `
-uniform sampler2D uImg,uAtlas;uniform vec2 uRes,uCell,uGlow;uniform float uN,uExp,uDim,uGlowAmt,uBoatAscii;uniform vec3 uDiscCol,uFoamCol;uniform float uDiscBg,uFoamBg;
-uniform vec3 cDeep,cBg,cLo,cHi,sDeep,sBg,sLo,sHi,kDeep,kBg,kLo,kHi,uGlowCol,uBoatTint;out vec4 o;
+uniform sampler2D uImg,uAtlas;uniform vec2 uRes,uCell,uGlow;uniform float uN,uExp,uDim,uGlowAmt,uBoatAscii,uBoost;uniform vec3 uDiscCol,uFoamCol;uniform float uDiscBg,uFoamBg;
+uniform vec3 cDeep,cBg,cLo,cHi,kDeep,kBg,kLo,kHi,uGlowCol,uBoatTint;out vec4 o;
 float luma(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}
-vec3 boatCol(vec3 c){return pow(aces(c*uExp),vec3(1./2.2))*uBoatTint;}
+vec3 lit(vec3 c){return aces(c*uExp)*uBoatTint;}
 void main(){
   vec2 fc=gl_FragCoord.xy, cell=floor(fc/uCell), inC=fract(fc/uCell), cuv=(cell+.5)*uCell/uRes, uv=fc/uRes;
   vec4 s=texture(uImg,cuv), px=texture(uImg,uv);
-  float asp=uRes.x/uRes.y, vig=mix(.5,1.,smoothstep(1.3,.35,length((cuv-.5)*vec2(1.3,1.))));
+  float asp=uRes.x/uRes.y, vig=mix(.55,1.,smoothstep(1.35,.35,length((cuv-.5)*vec2(1.25,1.))));
   vec2 gd=(cuv-uGlow)*vec2(asp,1.); float glow=uGlowAmt*exp(-dot(gd,gd)/.3);
-  float l=(s.a>.5?s.r:luma(boatCol(s.rgb))*.9)*vig*uDim+glow;
+  float l=(s.a>.5?s.r:luma(lit(s.rgb))*1.1)*vig*uDim+glow;
   float h=fract(sin(dot(cell,vec2(12.9898,78.233)))*43758.5453);
-  float lv=clamp(l,0.,1.), idx=clamp(floor(min(lv*1.05,.999)*uN+(h-.5)*(s.a>.5&&s.b>.5?2.2:.9)),0.,uN-1.);
+  float lv=clamp(l,0.,1.), idx=clamp(floor(pow(lv,1.1)*uN*1.08+(h-.5)*.8),0.,uN-1.);
   float cov=texture(uAtlas,vec2((idx+inC.x)/uN,1.-inC.y)).a;
-  // the sea's colours, or the sand's (green channel) or the sky's (blue channel)
-  float sw=s.a>.5?smoothstep(.7,.95,s.g):0., kw=s.a>.5?s.b:0., fo=s.a>.5?clamp(s.g/.45,0.,1.)*(1.-sw):0.;
-  vec3 pDeep=mix(mix(cDeep,sDeep,sw),kDeep,kw), pBg=mix(mix(cBg,sBg,sw),kBg,kw), pLo=mix(mix(cLo,sLo,sw),kLo,kw), pHi=mix(mix(cHi,sHi,sw),kHi,kw);
-  vec3 bg=mix(pDeep,pBg,smoothstep(0.,.55,lv))+uGlowCol*glow*.25, fg=mix(pLo,pHi,smoothstep(.1,.85,lv));
-  // white water: brighter characters on a pale ground
-  fg=mix(fg,uFoamCol,fo); bg=mix(bg,uFoamCol*uFoamBg,fo*.7);
+  float kw=s.a>.5?s.b:0., fo=s.a>.5?clamp(s.g/.45,0.,1.):0.;
+  vec3 pDeep=mix(cDeep,kDeep,kw), pBg=mix(cBg,kBg,kw), pLo=mix(cLo,kLo,kw), pHi=mix(cHi,kHi,kw);
+  vec3 bg=mix(pDeep,pBg,smoothstep(0.,.6,lv))+uGlowCol*glow*.25, fg=mix(pLo,pHi,smoothstep(.1,.9,lv))*(1.+uBoost*smoothstep(.55,1.,l));
+  fg=mix(fg,uFoamCol*(1.+uBoost*.5),fo); bg=mix(bg,uFoamCol*uFoamBg,fo*.6);
   float disc=s.a>.5&&s.b>.5?smoothstep(1.2,1.6,s.r):0.;
-  bg=mix(bg,uDiscCol*uDiscBg,disc); fg=mix(fg,uDiscCol,disc);
+  bg=mix(bg,uDiscCol*uDiscBg,disc); fg=mix(fg,uDiscCol*(1.+uBoost),disc);
   vec3 sea=mix(bg,fg,cov);
-  vec3 pb=boatCol(px.rgb)*vig*uDim, boat=mix(pb,mix(pb*.45,pb*1.18+.02,cov),uBoatAscii);
-  o=vec4(mix(boat,sea,px.a),1.);
+  vec3 pb=lit(px.rgb)*vig*uDim, solid=mix(pb,mix(pb*.22,pb*1.3,cov),uBoatAscii);
+  o=vec4(mix(solid,sea,px.a),1.);
 }`;
+  // The glow: the bright parts of the ASCII picture, blurred at quarter size and laid back over it.
+  const BLUR_FS = F3 + `uniform sampler2D uImg;uniform vec2 uDst,uStep;uniform float uThr;out vec4 o;
+vec3 tap(vec2 uv){ vec3 c=texture(uImg,uv).rgb; return max(c-uThr,0.); }
+void main(){ vec2 uv=gl_FragCoord.xy/uDst, d=uStep/uDst;
+  vec3 c=tap(uv)*.2270;
+  c+=(tap(uv+d*1.3846)+tap(uv-d*1.3846))*.3162; c+=(tap(uv+d*3.2308)+tap(uv-d*3.2308))*.0703;
+  o=vec4(c,1.); }`;
+  // the last step: the ASCII picture plus its glow, to the screen
+  const FINAL_FS = F3 + `uniform sampler2D uImg,uBloom,uBloom2;uniform vec2 uRes;uniform float uBloomAmt;out vec4 o;
+void main(){ vec2 uv=gl_FragCoord.xy/uRes; vec3 c=texture(uImg,uv).rgb+texture(uBloom,uv).rgb*uBloomAmt+texture(uBloom2,uv).rgb*uBloomAmt*.6;
+  c=c/(1.+max(c-1.,0.)*.5); o=vec4(pow(clamp(c,0.,1.),vec3(1./2.2)),1.); }`;
 
   /* ---------------- GL plumbing ---------------- */
   function programs(gl, defs) {
@@ -629,13 +709,13 @@ void main(){
     if (!gl || !bgl) return null;
     const hdr = !!gl.getExtension("EXT_color_buffer_float");
     const CF = hdr ? [gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT] : [gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE];
-    const P = programs(gl, { depth: [BOAT_VS, F3 + "out vec4 o;void main(){o=vec4(1.);}"], pdepth: [GULL_VS, F3 + "out vec4 o;void main(){o=vec4(1.);}"], boat: [BOAT_VS, BOAT_FS], prop: [GULL_VS, PROP_FS], card: [CARD_VS, CARD_FS], gull: [GULL_VS, GULL_FS], water: [QUAD_VS, WATER_FS], ascii: [QUAD_VS, ASCII_FS] });
+    const P = programs(gl, { depth: [BOAT_VS, F3 + "out vec4 o;void main(){o=vec4(1.);}"], pdepth: [GULL_VS, F3 + "out vec4 o;void main(){o=vec4(1.);}"], boat: [BOAT_VS, BOAT_FS], prop: [GULL_VS, PROP_FS], card: [CARD_VS, CARD_FS], gull: [GULL_VS, GULL_FS], water: [QUAD_VS, WATER_FS], ascii: [QUAD_VS, ASCII_FS], blur: [QUAD_VS, BLUR_FS], final: [QUAD_VS, FINAL_FS] });
     const BP = programs(bgl, { gull: [GULL_VS, GULL_FS] });
     const quadBuf = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
-    const quad = { water: vao(gl, P.water, [["aP", quadBuf, 2]]), ascii: vao(gl, P.ascii, [["aP", quadBuf, 2]]) };
+    const quad = {}; for (const k of ["water", "ascii", "blur", "final"]) quad[k] = vao(gl, P[k], [["aP", quadBuf, 2]]);
     const gullMain = gullVAOs(gl, P.gull), gullTop = gullVAOs(bgl, BP.gull);
     // the props, each with a VAO for lighting and one for the shadow pass
-    const PROPS = { island: buildIsland(), lighthouse: buildLighthouse(), bench: buildBench(), bottle: buildBottle(), post: buildPost() }, propVAO = {};
+    const PROPS = { island: buildIsland(), lighthouse: buildLighthouse(), bench: buildBench(), bottle: buildBottle(), post: buildPost(), islet: buildIslet() }, propVAO = {};
     for (const k in PROPS) { const g = PROPS[k].mesh, at = p => [["aP", g.pos, 3], ["aN", g.nor, 3], ["aC", g.col, 3], ["aA", g.aux, 2]]; propVAO[k] = { lit: vao(gl, P.prop, at(), g.idx), depth: vao(gl, P.pdepth, at(), g.idx) }; }
     // cards for the reflection: rebuilt every frame
     const cardVAO = gl.createVertexArray(), cardBuf = gl.createBuffer(); gl.bindVertexArray(cardVAO); gl.bindBuffer(gl.ARRAY_BUFFER, cardBuf);
@@ -649,9 +729,14 @@ void main(){
     const shadowFB = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFB); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, shadowTex, 0);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    let RT = null, cellPx = [4, 7], atlas = null, glyphs = " .·:-=+*o#%@";
+    let RT = null, cellPx = [3, 4], atlas = null;
+    // A tiny pixel font, 4 x 6 with the right column and bottom rows left blank so characters stay apart, from empty to full.
+    // 3 x 4 pixel glyphs (the last column and row are the gap between characters), darkest to brightest
+    const GLYPHS = [
+      ["...", "...", "...", "..."], ["...", "...", "#..", "..."], ["...", "##.", "...", "..."], ["#..", "...", "#..", "..."], ["##.", "...", "##.", "..."],
+      ["...", "##.", "##.", "..."], ["#..", "##.", "#..", "..."], ["##.", "#..", "##.", "..."], ["##.", "##.", "##.", "..."], ["###", "###", "###", "###"]];
     function targets(w, h) {
-      if (RT) { for (const t of [RT.scene, RT.depth, RT.refl, RT.comp]) gl.deleteTexture(t); gl.deleteRenderbuffer(RT.reflDepth); for (const f of [RT.sceneFB, RT.reflFB, RT.compFB]) gl.deleteFramebuffer(f); }
+      if (RT) { for (const t of [RT.scene, RT.depth, RT.refl, RT.comp, RT.ascii, RT.b1, RT.b2, RT.b3, RT.b4]) gl.deleteTexture(t); gl.deleteRenderbuffer(RT.reflDepth); for (const f of [RT.sceneFB, RT.reflFB, RT.compFB, RT.asciiFB, RT.b1FB, RT.b2FB, RT.b3FB, RT.b4FB]) gl.deleteFramebuffer(f); }
       const r = { w, h, rw: Math.ceil(w / 2), rh: Math.ceil(h / 2) };
       r.scene = texture(gl, w, h, ...CF, gl.LINEAR); r.depth = texture(gl, w, h, gl.DEPTH_COMPONENT24, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, gl.NEAREST);
       r.sceneFB = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, r.sceneFB);
@@ -661,12 +746,16 @@ void main(){
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, r.refl, 0); gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, r.reflDepth);
       r.comp = texture(gl, w, h, ...CF, gl.LINEAR); r.compFB = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, r.compFB);
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, r.comp, 0);
+      // the ASCII picture, and the glow at a quarter and an eighth of the size
+      const fb = (k, tw, th) => { r[k] = texture(gl, tw, th, ...CF, gl.LINEAR); r[k + "FB"] = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, r[k + "FB"]); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, r[k], 0); };
+      fb("ascii", w, h); r.qw = Math.ceil(w / 4); r.qh = Math.ceil(h / 4); r.ew = Math.ceil(w / 8); r.eh = Math.ceil(h / 8);
+      fb("b1", r.qw, r.qh); fb("b2", r.qw, r.qh); fb("b3", r.ew, r.eh); fb("b4", r.ew, r.eh);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); RT = r;
     }
-    function makeAtlas(cw, ch, font) {
-      const c = document.createElement("canvas"), g = c.getContext("2d"); c.width = cw * glyphs.length; c.height = ch;
-      g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = `600 ${Math.max(5, Math.round(ch * 0.98))}px ${font}`;
-      [...glyphs].forEach((s, i) => g.fillText(s, i * cw + cw / 2, ch / 2 + ch * 0.06));
+    function makeAtlas(cw, ch) {
+      const c = document.createElement("canvas"), g = c.getContext("2d"); c.width = cw * GLYPHS.length; c.height = ch;
+      g.fillStyle = "#fff"; const px = cw / 3, py = ch / 4;
+      GLYPHS.forEach((rows, i) => rows.forEach((row, y) => [...row].forEach((ch_, x) => { if (ch_ === "#") g.fillRect(Math.round(i * cw + x * px), Math.round(y * py), Math.max(1, Math.round(px)), Math.max(1, Math.round(py))); })));
       if (atlas) gl.deleteTexture(atlas);
       atlas = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, atlas); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
       for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
@@ -695,8 +784,8 @@ void main(){
       W = w; H = h; dpr = d;
       seaCanvas.width = birdCanvas.width = Math.round(w * d); seaCanvas.height = birdCanvas.height = Math.round(h * d);
       targets(seaCanvas.width, seaCanvas.height);
-      cellPx = [Math.max(3, Math.round(cell[0] * d)), Math.max(5, Math.round(cell[1] * d))];
-      makeAtlas(cellPx[0], cellPx[1], font);
+      const k = Math.max(1, Math.round(d)); cellPx = [cell[0] * k, cell[1] * k]; // whole pixels per glyph pixel, so they stay crisp
+      makeAtlas(cellPx[0], cellPx[1]);
     }
 
     function drawBoat(prog, VP, F, mirror) {
@@ -717,7 +806,7 @@ void main(){
       const u = prog.u; gl.useProgram(prog.p); gl.uniformMatrix4fv(u.uVP, false, VP); gl.uniform1f(u.uMirror, mirror);
       if (!depthOnly) {
         lightUniforms(gl, u, F.look, F.C); gl.uniform3fv(u.uLf, F.look.Lf); gl.uniform3fv(u.uFill, F.look.fill); gl.uniform3fv(u.uRim, F.look.rimCol.map(x => x * F.look.rimInt * 0.8));
-        gl.uniformMatrix4fv(u.uSVP, false, F.shadowVP); gl.uniform1f(u.uLamp, F.look.lamp); gl.uniform1f(u.uFlip, mirror);
+        gl.uniformMatrix4fv(u.uSVP, false, F.shadowVP); gl.uniform1f(u.uLamp, F.look.lamp); gl.uniform1f(u.uFlip, mirror); gl.uniform1f(u.uAlb, F.look.alb);
         gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, shadowTex); gl.uniform1i(u.uSh, 0);
       }
       for (const p of F.props) { const o = propVAO[p.mesh][depthOnly ? "depth" : "lit"]; gl.uniformMatrix4fv(u.uM, false, p.M); gl.bindVertexArray(o.v); gl.drawElements(gl.TRIANGLES, o.n, o.type, 0); }
@@ -776,8 +865,11 @@ void main(){
       gl.uniform3fv(u.uLg, nrm(look.Lg)); gl.uniform1f(u.uGlit, look.glit); gl.uniform1f(u.uReflAmt, look.refl); gl.uniform1f(u.uBase, look.base);
       // ripples around the boat, the island and the bottle; the beach; the sky
       const rips = new Float32Array(16); (F.ripples || [[bc[0], bc[2], 170, 1]]).slice(0, 4).forEach((r, i) => rips.set(r, i * 4));
-      gl.uniform4fv(u.uRip, rips); gl.uniform1f(u.uRipN, Math.min(4, (F.ripples || [0]).length)); gl.uniform1f(u.uShore, F.shore || 0);
-      gl.uniform1f(u.uSandL, look.sandL); gl.uniform1f(u.uSkyTop, look.skyTop); gl.uniform1f(u.uSkyHor, look.skyHor); gl.uniform1f(u.uStars, look.stars); gl.uniform1f(u.uDisc, look.disc);
+      gl.uniform4fv(u.uRip, rips); gl.uniform1f(u.uRipN, Math.min(4, (F.ripples || [0]).length));
+      gl.uniform4fv(u.uIsle, F.isle ? [F.isle[0], F.isle[1], F.isle[2], 1] : [0, 0, 0, 0]);
+      gl.uniform1f(u.uWave, look.wave); gl.uniform1f(u.uCloud, look.cloud);
+      gl.uniform3fv(u.uBeamP, F.beam ? F.beam.p : [0, -1e4, 0]); gl.uniform1f(u.uBeamA, F.beam ? F.beam.a : 0); gl.uniform1f(u.uBeam, F.beam ? look.beam : 0);
+      gl.uniform1f(u.uSkyTop, look.skyTop); gl.uniform1f(u.uSkyHor, look.skyHor); gl.uniform1f(u.uStars, look.stars); gl.uniform1f(u.uDisc, look.disc);
       const yaw = Math.atan2(-F.boat.R[2][0], F.boat.R[0][0]);
       gl.uniform2f(u.uBoat, bc[0], bc[2]); gl.uniform2f(u.uBoatAx, Math.cos(yaw), -Math.sin(yaw)); gl.uniform2f(u.uBoatSz, F.boat.scale * 1.05, F.boat.scale * 0.36);
       const pans = new Float32Array(64); let pn = 0;
@@ -785,13 +877,13 @@ void main(){
       gl.uniform4fv(u.uPan, pans); gl.uniform1f(u.uPanN, pn);
       gl.bindVertexArray(quad.water.v); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       // 5. ASCII
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, seaCanvas.width, seaCanvas.height);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, RT.asciiFB); gl.viewport(0, 0, RT.w, RT.h);
       u = P.ascii.u; gl.useProgram(P.ascii.p);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, RT.comp); gl.uniform1i(u.uImg, 0);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, atlas); gl.uniform1i(u.uAtlas, 1);
-      gl.uniform2f(u.uRes, seaCanvas.width, seaCanvas.height); gl.uniform2fv(u.uCell, cellPx); gl.uniform1f(u.uN, glyphs.length);
+      gl.uniform2f(u.uRes, seaCanvas.width, seaCanvas.height); gl.uniform2fv(u.uCell, cellPx); gl.uniform1f(u.uN, GLYPHS.length);
       gl.uniform1f(u.uExp, look.exposure); gl.uniform1f(u.uDim, F.dim); gl.uniform1f(u.uBoatAscii, look.boatAscii);
-      for (const k of ["cDeep", "cBg", "cLo", "cHi", "sDeep", "sBg", "sLo", "sHi", "kDeep", "kBg", "kLo", "kHi"]) gl.uniform3fv(u[k], look[k]); gl.uniform3fv(u.uDiscCol, look.discCol); gl.uniform1f(u.uDiscBg, look.discBg); gl.uniform3fv(u.uFoamCol, look.foamCol); gl.uniform1f(u.uFoamBg, look.foamBg); gl.uniform3fv(u.uBoatTint, look.boatTint);
+      for (const k of ["cDeep", "cBg", "cLo", "cHi", "kDeep", "kBg", "kLo", "kHi"]) gl.uniform3fv(u[k], look[k]); gl.uniform1f(u.uBoost, look.boost); gl.uniform3fv(u.uDiscCol, look.discCol); gl.uniform1f(u.uDiscBg, look.discBg); gl.uniform3fv(u.uFoamCol, look.foamCol); gl.uniform1f(u.uFoamBg, look.foamBg); gl.uniform3fv(u.uBoatTint, look.boatTint);
       {
         const Lg = nrm(look.Lg), z = Lg[0] * F.b.B[0] + Lg[1] * F.b.B[1] + Lg[2] * F.b.B[2], x = Lg[0] * F.b.R[0] + Lg[2] * F.b.R[2], y = Lg[0] * F.b.U[0] + Lg[1] * F.b.U[1] + Lg[2] * F.b.U[2];
         // screen position of the light's direction (in view-space, -z is forward); behind you it fades out
@@ -800,6 +892,20 @@ void main(){
         gl.uniform2f(u.uGlow, gx, gy); gl.uniform3fv(u.uGlowCol, look.glowCol); gl.uniform1f(u.uGlowAmt, look.glowAmt * fade);
       }
       gl.bindVertexArray(quad.ascii.v); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.bindVertexArray(null);
+      // 6. the glow: bright parts blurred at a quarter and an eighth of the size
+      const blur = (src, dst, w2, h2, dx, dy, thr) => {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, RT[dst + "FB"]); gl.viewport(0, 0, w2, h2); const bu = P.blur.u; gl.useProgram(P.blur.p);
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, RT[src]); gl.uniform1i(bu.uImg, 0);
+        gl.uniform2f(bu.uDst, w2, h2); gl.uniform2f(bu.uStep, dx, dy); gl.uniform1f(bu.uThr, thr);
+        gl.bindVertexArray(quad.blur.v); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      };
+      blur("ascii", "b1", RT.qw, RT.qh, 1, 0, look.bloomThr); blur("b1", "b2", RT.qw, RT.qh, 0, 1, 0);
+      blur("b2", "b3", RT.ew, RT.eh, 1.4, 0, 0); blur("b3", "b4", RT.ew, RT.eh, 0, 1.4, 0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, seaCanvas.width, seaCanvas.height);
+      u = P.final.u; gl.useProgram(P.final.p);
+      [[u.uImg, RT.ascii], [u.uBloom, RT.b2], [u.uBloom2, RT.b4]].forEach(([loc, t], i) => { gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, t); gl.uniform1i(loc, i); });
+      gl.uniform2f(u.uRes, seaCanvas.width, seaCanvas.height); gl.uniform1f(u.uBloomAmt, look.bloom * F.dim);
+      gl.bindVertexArray(quad.final.v); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.bindVertexArray(null);
 
       // Allie, on her own layer above the tabs
       bgl.viewport(0, 0, birdCanvas.width, birdCanvas.height); bgl.clearColor(0, 0, 0, 0); bgl.clear(bgl.COLOR_BUFFER_BIT | bgl.DEPTH_BUFFER_BIT);
@@ -814,5 +920,5 @@ void main(){
     };
   }
 
-  window.AllieSea = { create, parseGLB, bowTip, buildGull, gullPose, M4, TERRACE, BENCH };
+  window.AllieSea = { create, parseGLB, bowTip, buildGull, gullPose, M4, TERRACE, BENCH, ISLET, isletHeight };
 })();

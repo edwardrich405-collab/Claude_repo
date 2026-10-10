@@ -55,8 +55,11 @@ test("the world: only sleep, settings, home, chat and thinking stay fixed; every
   assert.match(h, /if \(key === "settings"\) return openSheet\(\);/);
   // tabs carry a grab bar for moving them around the water
   assert.match(h, /class="grab" data-grab/);
-  // floating buttons are app icons: an icon in a circle with the name under it
-  assert.match(h, /class="float" data-cmd="\$\{k\}"[^`]*<i>\$\{icon\(PANELS\[k\]\.ic\)\}<\/i><span>/);
+  // floating buttons and place labels are tags: a dot, a leader line and a card with an icon, a name and a status line
+  assert.match(h, /const tagHTML = [^\n]*class="tag-dot"[^\n]*class="tag-lead"[^\n]*class="tag-card">\$\{icon\(ic\)\}/);
+  assert.match(h, /floats\.innerHTML = FLOATS\.map\(\(\[k, n\]\) => tagHTML\("float"/);
+  // the clock in the top right
+  assert.match(chrome, /class="clock" id="clock"/);
   // the sea is WebGL2 with a plain fallback
   const sea = fs.readFileSync(path.join(R, "sea.js"), "utf8");
   new vm.Script(sea);

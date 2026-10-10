@@ -1,4 +1,4 @@
-# Handoff: the sea world redesign (0.7.0 to 0.9.0)
+# Handoff: the sea world redesign (0.7.0 to 0.10.0)
 
 For Claude working on Allison locally. These versions were built in a cloud session on the branch
 `claude/gifted-ride-ptgarb`. Read docs/plan.md first (rules and how to work), then this file.
@@ -9,13 +9,27 @@ and the things he rejected, so they don't come back by accident.
 ## What Jack decided
 
 **Look**
-- ASCII, video-game, dreamy. Not realism. The water, sky and sand are drawn as ASCII characters in a small cell
-  (4 x 7 px). Jack rejected a halftone-dot look and a realistic, bright version, and asked for the first version's
+- ASCII, video-game, dreamy. Not realism. The water and sky are drawn as tiny pixel-font characters in a 3 x 4 px
+  cell (`CELL` in index.html, `GLYPHS` in sea.js: 10 glyphs on a 3 x 4 grid, darkest to brightest). Jack rejected a halftone-dot look and a realistic, bright version, and asked for the first version's
   characters and darker palette back.
 - The boat is the only semi-real thing: a real 3D model with a rim light and a light character overlay, so it reads
   as solid 3D inside the ASCII world.
 - Dark mode: dark teal night, a moon, stars. Jack wants it dark, so don't brighten it.
 - Light mode: a brighter, warm green day with a sun.
+
+**The 0.10.0 look (from Jack's two reference pictures)**
+- Night: glowing cyan characters on near-black, a big pixel moon with a narrow glitter path under it (kept to a column
+  by the `path` mask in `WATER_FS`), stars, soft fbm cumulus clouds at the horizon sides, a dark sea.
+- Glow is subtle: a bloom pass on the bright parts only. Jack said it was too much at first, so keep `bloom` /
+  `bloomThr` in `LOOKS` modest.
+- Rim light is faked in `PROP_FS` and `BOAT_FS`: edges turned toward the moon/sun get a bright outline; flat tops seen
+  low don't (otherwise the islet looked like snow). Jack likes this.
+- The sun must not flood the water by day (`glit`, `base` in `LOOKS.light`).
+- Labels and tab buttons are "tags": a dot on the object, a thin leader line, and a dark rounded card with an outline
+  icon, a mono name and a live status line (`tagHTML`, `floatStatus`). Only the current place's buttons show.
+- A clock with the date, top right, all white (`#clock`, `tickClock`). The chat is a pill with a sparkle and a round
+  cyan send button. Top-left buttons are round.
+- Allie has a soft pink CSS glow (`#bird` filter) so she fits in.
 
 **Allie**
 - A pink gull, pink in both modes. On the beach she faces the camera.
@@ -44,11 +58,11 @@ All positions are in world units. The water is y = 0, x runs right, z runs towar
 
 | Place | Name in code | Where | What's there |
 | --- | --- | --- | --- |
-| Beach (home) | `home` | shore line at z = 2300 | Allie on a post (POST), the chat |
+| Islet (home) | `home` | islet at `ISLE` (-760, 2100), view from (-600, 1280) | Allie on a post (POST), the chat |
 | The boat, "My Life" | `life` | (0, 0) | ring of 450: Today, Mail, Calendar, To-do, Calories |
-| Lighthouse island, "Studio" | `studio` | (-1750, -1500) | ring of 760: Video editing, AI influencer, Clock, Money, 3D jobs |
+| Lighthouse island, "Studio" | `studio` | (-1750, -1050) | ring of 760: Video editing, AI influencer, Clock, Money, 3D jobs |
 | Workbench, build mode | `craft` | on a terrace on the island (sea.js `TERRACE`) | the widget mat |
-| Bottle, the journal | `journal` | (-1180, -860) | nothing to open yet (see What's next) |
+| Bottle, the journal | `journal` | (-720, -480) | the journal page (see "The journal") |
 
 - **Defined in:** `PLACES`, `POST` and `SHORE` in renderer/index.html.
 - **Travelling:** `travel(name)` sets `HERE` (and the orbit pivot `PIV`), sends Allie with `birdTo(name, view)`, and
@@ -118,9 +132,10 @@ half. The Clock is the old work timer (`time`).
 1. shadow map
 2. reflection pass (boat, props, tab/button cards, Allie, mirrored)
 3. boat and props
-4. water shader
-5. ASCII pass
-6. Allie, drawn on her own canvas above the tabs
+4. water shader (sea, sky, moon, clouds, lighthouse beam, islet foam)
+5. ASCII pass into an HDR target (`RT.ascii`)
+6. bloom: blurred at quarter and eighth size (`BLUR_FS`), then combined on screen (`FINAL_FS`)
+7. Allie, drawn on her own canvas above the tabs
 
 **The water shader** (`WATER_FS`) does three things:
 - It ray-casts every pixel to the water plane, then shades the water with ripple rings around each place, the beach
@@ -155,6 +170,19 @@ palette.
     registry, script order.
   - tests/brain.test.js: `go_to` covers every place.
 
+## The journal (built in 0.10.0, stage 1)
+
+- Clicking the bottle (the 3D bottle itself, its label, or "open my journal") travels there and unrolls a paper page
+  (`#paper`, `openPaper` / `closePaper` in index.html).
+- Jack writes; "Log it" saves `{ id, d, text }` to `S.journal` (data.json). The unlogged draft is kept in localStorage
+  `allie.jdraft`. The arrows flip through logged pages (read-only). Done or Esc closes it. Allie never replies there.
+- Still to do: brain tools `journal_add` and `journal_search` so Allie can write in it or recall from it when asked.
+
+## A bug fixed in 0.10.0
+Clicking a place label did nothing: the swipe handler on the viewport (`vp` pointerdown) captured the pointer, so the
+click never reached the label. Labels (`.place`), floats and the journal page are now skipped by that handler. Any new
+clickable thing in the world needs the same.
+
 ## Widgets (Jack's next step)
 
 The workbench is where Jack will build new widgets with you. Here's how to add one:
@@ -186,14 +214,11 @@ Ideas for later:
 
 ## What's next (agreed, not built)
 
-**Stage 2: the journal.**
-- Clicking the bottle makes a rolled page slide out of it and unroll across the screen.
-- Jack writes, and it autosaves. He flips back through older pages. Done rolls the page back into the bottle.
-- Allie never replies to what Jack writes there.
+**Stage 2: the journal.** The page itself is built (see above). Still to do:
 - She can append when asked ("write in my journal that …") and find old entries ("what did I write about …").
 - This needs brain tools: `journal_add`, `journal_search`.
 - Store entries in data.json under `journal: [{ id, d, text }]`.
-- The bottle and its perch already exist: `PLACES.journal`, `bottleMat()`.
+- Store entries the same way the page does (`S.journal`).
 
 **Technical list from Jack (after the visuals):**
 - **Faster launch.**
