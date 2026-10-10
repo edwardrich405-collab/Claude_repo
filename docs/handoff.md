@@ -1,4 +1,4 @@
-# Handoff: the sea world redesign (0.7.0 to 0.10.0)
+# Handoff: the sea world redesign (0.7.0 to 0.11.0)
 
 For Claude working on Allison locally. These versions were built in a cloud session on the branch
 `claude/gifted-ride-ptgarb`. Read docs/plan.md first (rules and how to work), then this file.
@@ -29,7 +29,9 @@ and the things he rejected, so they don't come back by accident.
   icon, a mono name and a live status line (`tagHTML`, `floatStatus`). Only the current place's buttons show.
 - A clock with the date, top right, all white (`#clock`, `tickClock`). The chat is a pill with a sparkle and a round
   cyan send button. Top-left buttons are round.
-- Allie has a soft pink CSS glow (`#bird` filter) so she fits in.
+- Allie fits in without a CSS blur (Jack rejected that: "looks like a gaussian blur"). `GULL_FS` prints a light 3 x 4
+  character grid on her (`uAsc`, aligned to the scene's cells), adds the same faked moonlit rim as the props, and she is
+  also drawn into the main scene (`uLin` = linear output) so the ASCII pass and bloom treat her like everything else.
 
 **Allie**
 - A pink gull, pink in both modes. On the beach she faces the camera.
@@ -40,8 +42,9 @@ and the things he rejected, so they don't come back by accident.
 - Each place has a ring of floating app-icon buttons, and tabs open standing above their button, facing outward.
 - You swipe to circle around the place. Tabs are seen face on as you go round.
 - A grab bar under each tab moves it, like the bar under a Vision Pro window.
-- **Fixed controls only:** sleep, settings and home (top left), plus the chat and thinking indicator at the bottom. No
-  mic button, no stop button. Jack asked for these to be removed.
+- **Fixed controls only:** sleep, settings and home (top left), plus the chat, the thinking indicator and (since 0.11.0)
+  a stop button at the bottom. No mic button. The stop button (`#stop`) shows only while Allie is busy (`setBusy`); at
+  home it sits beside the chat line.
 - **Settings** is a gear button. It opens as a sheet on the right while the camera backs off, so you can see the world
   behind it.
 
@@ -222,8 +225,9 @@ Ideas for later:
 
 **Technical list from Jack (after the visuals):**
 - **Faster launch.**
-- **Interrupting her:** Allie should stop talking and listen when Jack starts talking. She currently only stops on
-  "stop": see `onHeard` in index.html.
+- **Interrupting her:** done in 0.11.0. In `onHeard`, while she's speaking, anything heard that is at least two words and
+  mostly *not* words from her current line (`said`) stops her, and the rest of the sentence is taken as Jack's. If
+  echo still gets through on Jack's speakers, raise the 0.5 threshold or require more words.
 - **Transcription:** it's poor. For example, "today" comes out as "to day". The speech code is in src/voice.js and
   src/speech-text.js.
 

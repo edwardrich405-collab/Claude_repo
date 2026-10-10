@@ -34,13 +34,16 @@ test("design-pass fixes stay fixed", () => {
   assert.doesNotMatch(h, /panel\.entering|@keyframes pop\b/);
 });
 
-test("the world: only sleep, settings, home, chat and thinking stay fixed; every tab has a place", () => {
+test("the world: only sleep, settings, home, chat, stop and thinking stay fixed; every tab has a place", () => {
   const h = fs.readFileSync(path.join(R, "index.html"), "utf8");
   const chrome = h.slice(h.indexOf('<div class="dragbar">'), h.indexOf('<script src="voices.js">'));
   const ids = [...chrome.matchAll(/<button[^>]*id="([^"]+)"/g)].map(m => m[1]).sort();
-  assert.deepStrictEqual(ids, ["chat", "cl-min", "home", "send", "settings", "sleep"]); // cl-min shrinks the beach chat back to one line
+  assert.deepStrictEqual(ids, ["chat", "cl-min", "home", "send", "settings", "sleep", "stop"]); // cl-min shrinks the beach chat back to one line
   assert.match(chrome, /id="think"/);
-  assert.doesNotMatch(h, /id="mic"|id="stop"|class="rail"/);
+  assert.doesNotMatch(h, /id="mic"|class="rail"/);
+  // Allie stops when Jack talks over her (not on her own echo), and a stop button shows while she talks
+  assert.match(h, /if \(w\.length < 2 \|\| own \/ w\.length >= 0\.5\) return;\n\s*stopTalking\(\);/);
+  assert.match(h, /sb\.hidden = !b/);
   // the sea, the boat and Allie's body live in sea.js, loaded before the page script
   assert.match(h, /<script src="sea.js"><\/script>/);
   // every tab has a floating button on the ring (tools/screenshots.js clicks them by data-cmd); settings is a fixed

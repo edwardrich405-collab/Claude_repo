@@ -467,7 +467,7 @@ void main(){ vec2 h=vS*.5; float rad=vS.x<70.?h.x:16.; vec2 q=abs((vU-.5)*vS)-h+
   // Allie
   const GULL_VS = V3 + `in vec3 aP,aN,aC;in vec2 aA;uniform mat4 uVP,uM;uniform float uMirror;out vec3 vW,vN,vC;out vec2 vA;
 void main(){vec4 w=uM*vec4(aP,1.);vW=w.xyz;vN=normalize(transpose(inverse(mat3(uM)))*aN);vC=aC;vA=aA;w.y*=uMirror;gl_Position=uVP*w;}`;
-  const GULL_FS = F3 + COMMON + `in vec3 vW,vN,vC;in vec2 vA;uniform vec3 uL,uLC,uSky,uGround,uC;uniform float uExp,uMirror,uDither,uFlip;out vec4 o;
+  const GULL_FS = F3 + COMMON + `in vec3 vW,vN,vC;in vec2 vA;uniform vec3 uL,uLC,uSky,uGround,uC;uniform float uExp,uMirror,uDither,uFlip,uLin,uAsc;uniform vec2 uCell;out vec4 o;
 void main(){ if(uMirror<0.&&vW.y<0.) discard;
   vec3 n=normalize(vN); if(!gl_FrontFacing) n=-n; n*=uFlip; vec3 V=normalize(uC-vW), H=normalize(uL+V);
   float part=vA.x, wrap=(dot(n,uL)+.4)/1.4, dif=max(wrap,0.);
@@ -479,11 +479,16 @@ void main(){ if(uMirror<0.&&vW.y<0.) discard;
   vec3 lc=mix(vec3(dot(uLC,vec3(.333))),uLC,.3), amb=mix(vec3(.12,.08,.1),mix(uGround,uSky,n.y*.5+.5),.4);
   vec3 col=alb*(amb*1.6+lc*dif*.8)+uLC*pow(max(dot(n,H),0.),gloss)*(part>2.5&&part<3.5?1.2:.12);
   col+=alb*lc*pow(1.-max(dot(n,V),0.),3.)*.35; // rim light through the feathers
+  { vec3 Ls=normalize(uL-V*dot(uL,V)+vec3(0,.35,0)); col+=mix(alb,uLC,.5)*pow(1.-max(dot(n,V),0.),2.2)*smoothstep(-.1,.6,dot(n,Ls))*.7; } // the scene's moonlit outline
   col+=alb*vec3(.25,.05,.1)*max(dot(-n,uL),0.)*.4; // a touch of light through the thin wings
   col=aces(col*uExp);
   if(uDither>0.){ vec2 fc=floor(gl_FragCoord.xy/uDither); float d=fract(sin(dot(fc,vec2(12.9898,78.233)))*43758.5453);
     col=floor(col*14.+d)/14.; col*=.93+.07*step(.5,fract((fc.x+fc.y)*.5)); }
-  o=vec4(uMirror<0.?pow(col,vec3(2.2)):col,1.);}`;
+  // on her own layer: a light print of the scene's 3 x 4 pixel characters, so she sits in the ASCII world
+  if(uAsc>0.){ vec2 c=floor(mod(gl_FragCoord.xy,uCell)/uCell*vec2(3.,4.)); float gx=c.x, gy=3.-c.y;
+    float on=(gx>1.5||gy>2.5)?0.:step(gx+gy*2.+.5,dot(col,vec3(.3,.59,.11))*9.+1.);
+    col=mix(col,col*mix(.5,1.2,on),uAsc); }
+  o=vec4(uMirror<0.||uLin>.5?pow(col,vec3(2.2)):col,1.);}`;
   // the island, lighthouse, bottle and post: vertex colours lit like the boat; the lamp glows, glass shines
   const PROP_FS = F3 + COMMON + `in vec3 vW,vN,vC;in vec2 vA;uniform vec3 uL,uLC,uSky,uGround,uC,uLf,uFill,uRim;uniform sampler2DShadow uSh;uniform mat4 uSVP;
 uniform float uMirror,uFlip,uLamp,uAlb;out vec4 o;
@@ -812,9 +817,10 @@ void main(){ vec2 uv=gl_FragCoord.xy/uRes; vec3 c=texture(uImg,uv).rgb+texture(u
       for (const p of F.props) { const o = propVAO[p.mesh][depthOnly ? "depth" : "lit"]; gl.uniformMatrix4fv(u.uM, false, p.M); gl.bindVertexArray(o.v); gl.drawElements(gl.TRIANGLES, o.n, o.type, 0); }
       gl.bindVertexArray(null);
     }
-    function gullUniforms(g, prog, VP, F, dither) {
+    function gullUniforms(g, prog, VP, F, dither, lin = 0, asc = 0) {
       const u = prog.u; g.useProgram(prog.p); g.uniformMatrix4fv(u.uVP, false, VP); lightUniforms(g, u, { ...F.look, L: F.look.Lbird }, F.C);
       g.uniform1f(u.uExp, F.look.birdExp * F.dim); g.uniform1f(u.uDither, dither);
+      g.uniform1f(u.uLin, lin); g.uniform1f(u.uAsc, asc); g.uniform2fv(u.uCell, cellPx);
     }
 
     // F: { T, b (camera basis), FOC, W, H, theme, dim, boat: { R, pos, scale }, panels: [{x,z,w,h}], floats: [{x,y,z,r,c}], gull: pose|null }
@@ -853,6 +859,7 @@ void main(){ vec2 uv=gl_FragCoord.xy/uRes; vec3 c=texture(uImg,uv).rgb+texture(u
       // 3. the boat
       gl.bindFramebuffer(gl.FRAMEBUFFER, RT.sceneFB); gl.viewport(0, 0, RT.w, RT.h); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       drawBoat(P.boat, VP, F, 1); drawProps(P.prop, VP, F, 1);
+      if (mats) { gullUniforms(gl, P.gull, VP, F, 0, 1); drawGull(gl, P.gull, gullMain, mats, 1); } // Allie in the scene too: she gets the same characters and glow
       // 4. the water around and through it
       gl.disable(gl.DEPTH_TEST);
       gl.bindFramebuffer(gl.FRAMEBUFFER, RT.compFB); gl.viewport(0, 0, RT.w, RT.h);
@@ -911,7 +918,7 @@ void main(){ vec2 uv=gl_FragCoord.xy/uRes; vec3 c=texture(uImg,uv).rgb+texture(u
       bgl.viewport(0, 0, birdCanvas.width, birdCanvas.height); bgl.clearColor(0, 0, 0, 0); bgl.clear(bgl.COLOR_BUFFER_BIT | bgl.DEPTH_BUFFER_BIT);
       if (mats) {
         bgl.enable(bgl.DEPTH_TEST); bgl.disable(bgl.CULL_FACE);
-        gullUniforms(bgl, BP.gull, VP, F, Math.max(1, Math.round(dpr * 1.5))); drawGull(bgl, BP.gull, gullTop, mats, 1);
+        gullUniforms(bgl, BP.gull, VP, F, Math.max(1, Math.round(dpr * 1.5)), 0, 0.55); drawGull(bgl, BP.gull, gullTop, mats, 1);
       }
     }
     return {

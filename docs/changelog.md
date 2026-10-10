@@ -2,6 +2,11 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.11.0 (2026-10-10)
+- Talk over Allie and she stops and listens, then answers what you said. She ignores her own voice coming back through the speakers (if most of what the mic hears is words she's saying right now). "Stop" on its own still just stops her.
+- A stop button sits next to the chat button (beside the chat line at home) while Allie is talking or thinking. Click it to cut her off.
+- Allie fits the scene better: she's printed with the same tiny pixel characters as everything else, catches the same moonlit outline as the lighthouse and rocks, and is also drawn into the scene itself, so any glow around her is the scene's own glow rather than a blur.
+
 ## 0.10.0 (2026-10-10)
 - A new night look, after the reference pictures: tiny glowing cyan pixel characters (now 3 x 4 pixels, finer than before) on a darker sea, a big pixel moon with a narrow path of glitter under it, soft cumulus clouds low on the horizon, stars, and a subtle glow on the bright parts. By day the sun no longer floods the water.
 - Things in the world catch a rim of light on their edges (the lighthouse, rocks, boat, bench), so they stand out against the dark like in the references.

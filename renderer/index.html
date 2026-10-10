@@ -58,7 +58,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 #viewport.panning{cursor:grabbing}
 #sea,#bird{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 #sea{pointer-events:none}
-#bird{pointer-events:none;z-index:4000;filter:drop-shadow(0 0 3px rgba(255,150,200,.55)) drop-shadow(0 0 12px rgba(255,120,185,.3))}
+#bird{pointer-events:none;z-index:4000}
 #world,#floats{position:absolute;left:0;top:0;width:0;height:0}
 .nogl #viewport{background:radial-gradient(70% 60% at 50% 48%,#0f3a3c,var(--bg))}
 :root[data-theme="light"].nogl #viewport{background:radial-gradient(70% 60% at 30% 20%,#7aa77f,var(--bg))}
@@ -268,8 +268,13 @@ body.at-home .chatlog{display:flex}
 .cl-min{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:0;background:none;color:var(--label-3);font:600 18px/1 var(--font);display:grid;place-items:center}
 .cl-min:hover{background:var(--fill);color:var(--label)}
 body.at-home.sheet-open .chatlog{display:none}
-body.at-home .dock .captions,body.at-home .dock .controls,body.at-home #bar{display:none}
-body.at-home .dock{display:none}
+body.at-home .dock .captions,body.at-home .dock .controls .chat,body.at-home #bar{display:none}
+/* the stop button: next to the chat button, or beside the chat line at home; only while Allie talks or thinks */
+#stop[hidden]{display:none}
+#stop{color:#ff9db4;border-color:color-mix(in srgb,#ff9db4 45%,transparent)}
+body.at-home #stop{position:absolute;left:calc(50% + min(280px,50vw - 16px) + 12px);bottom:4px} /* the dock is the containing block */
+@media (max-width:720px){body.at-home #stop{left:auto;right:0;bottom:66px}}
+body.at-home .dock > :not(.controls){display:none}
 .cl-h{display:flex;align-items:baseline;gap:10px;padding:16px 18px 10px;border-bottom:1px solid var(--hair)}
 .cl-h b{font:600 18px var(--mono);letter-spacing:.01em}
 .cl-h small{font-size:12.5px;color:var(--label-3)}
@@ -587,6 +592,7 @@ body.at-home .dock{display:none}
   <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/></symbol>
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 18.5V6.5a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 6.5v7a2.5 2.5 0 0 1-2.5 2.5H8.5z"/></symbol>
   <symbol id="i-brief" viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="12.5" rx="3"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3.5 12.5h17"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.2 1.2M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2"/></symbol>
@@ -648,6 +654,7 @@ body.at-home .dock{display:none}
   </form>
   <div class="controls">
     <button class="fx chat" id="chat" type="button" aria-pressed="false" aria-label="Type to Allie" title="Chat"><svg class="i"><use href="#i-chat"/></svg></button>
+    <button class="fx stop" id="stop" type="button" aria-label="Stop Allie talking" title="Stop" hidden><svg class="i"><use href="#i-stop"/></svg></button>
   </div>
 </div>
 
@@ -1745,9 +1752,10 @@ body.at-home .dock{display:none}
     return (bufs[id] = await actx.decodeAudioData(arr.buffer));
   }
   const later = (fn, ms) => { const s0 = seq; setTimeout(() => { if (s0 === seq) fn(); }, ms); };
-  function setBusy(b) { busy = b; }
+  let said = ""; // what she is saying right now, so her own voice coming back through the mic is not taken for Jack's
+  function setBusy(b) { busy = b; const sb = document.getElementById("stop"); if (sb) sb.hidden = !b; }
   function reveal(text, dur, keep = true) {
-    clearInterval(typer); logMsg("allie", text, keep);
+    clearInterval(typer); logMsg("allie", text, keep); said = text;
     const words = text.split(" ");
     capA.innerHTML = words.map(w => `<span class="w">${esc(w)}</span>`).join(" ");
     const spans = [...capA.children], total = text.length + 1, t0 = performance.now(), ms = Math.max(400, dur * 920);
@@ -1889,6 +1897,7 @@ body.at-home .dock{display:none}
 
   /* ---------------- Dock: chat ---------------- */
   const bar = $("#bar"), chatBtn = $("#chat");
+  $("#stop").addEventListener("click", () => { stopTalking(); if (DESK) allie.micReset(); });
   function openChat(on = true) { bar.hidden = !on; chatBtn.setAttribute("aria-pressed", on); if (on) setTimeout(() => $("#ask").focus({ preventScroll: true }), 30); }
   chatBtn.addEventListener("click", () => openChat(bar.hidden));
   bar.addEventListener("submit", e => { e.preventDefault(); const v = $("#ask").value; $("#ask").value = ""; ask(v); });
@@ -2005,8 +2014,14 @@ body.at-home .dock{display:none}
     const s = clean(text);
     if (!s) return;
     if (sleeping) { if (final && WAKE.test(s)) { const rest = s.replace(/^.*?\b(allie|ally|alley|allison|alison|ali|hey ollie)\b[\s,]*/, ""); setSleep(false); if (rest.split(" ").length > 2 && !/^(wake up|are you there)/.test(rest)) later(() => ask(cap1(rest)), 1800); } return; }
-    // While she talks, only "stop" interrupts, so she doesn't answer her own voice.
-    if (busy && state === "speaking") { if (/\b(stop|shush|quiet|enough)\b/.test(s)) { stopTalking(); allie.micReset(); } return; }
+    // Jack talking over her: she stops and listens. What the mic hears is ignored if it's mostly her own words echoing
+    // back from the speakers; "stop" alone just stops her.
+    if (busy && state === "speaking") {
+      if (/\b(stop|shush|quiet|enough)\b/.test(s)) { stopTalking(); allie.micReset(); return; }
+      const w = s.split(" ").filter(x => x.length > 2), mine = new Set(said.toLowerCase().replace(/[^a-z0-9' ]+/g, " ").split(/\s+/)), own = w.filter(x => mine.has(x)).length;
+      if (w.length < 2 || own / w.length >= 0.5) return;
+      stopTalking();
+    }
     if (state !== "thinking") { capU.textContent = cap1(s); if (state === "idle") setState("listening");
       clearTimeout(heardT); heardT = setTimeout(() => { if (state === "listening") { setState("idle"); capU.textContent = ""; } }, 5000); }
     if (final) { if (s.split(" ").length >= 1 && s.length > 2) ask(cap1(s)); else if (state === "listening") setState("idle"); }
