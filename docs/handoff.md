@@ -92,6 +92,7 @@ All positions are in world units. The water is y = 0, x runs right, z runs towar
 - Zooming: `zoomBy(f, cx, cy)`. With a cursor point (the wheel), the look-at point slides toward the spot under the
   cursor (`ZX`/`ZZ`, eased in `camStep`) so it stays put on screen, capped at 1600 from the place's centre. Keys pass no
   point and zoom into the middle.
+- After a cursor zoom, `orbit()` turns around that spot (`ORB`) instead of the place (`PIV`); travel and `flyCam` clear it. `pickAt()` picks the spot: a tall object near the cursor (lighthouse, post, boat, bottle), else the water under it.
 - Allie's on-screen size is nearly constant while zooming (`gullPose`: `BIRD.scale`); Jack asked for that.
 
 **Tabs are 3D cards.** `put(el, b)` projects each tab's corners and draws it with a CSS `matrix3d`. When it's face on at

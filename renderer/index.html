@@ -999,7 +999,7 @@ body.at-home .dock > :not(.controls){display:none}
   const TABPLACE = {}; for (const p in PLACES) for (const k of PLACES[p].keys || []) TABPLACE[k] = p;
   // the first tab of a ring faces the beach, so it's the one you see as you arrive from home
   for (const p in PLACES) PLACES[p].a0 = p === "life" ? 0 : Math.atan2(PLACES.home.x - PLACES[p].x, PLACES.home.z - PLACES[p].z);
-  let HERE = "home", PIV = PLACES.home;
+  let HERE = "home", PIV = PLACES.home, ORB = null; // ORB: the spot you last zoomed into, which turning then circles
 
   /* ---------------- The rings: tabs stand above their buttons, facing outward ---------------- */
   // Each place has a ring of floating buttons around it, and a tab opens standing just above its button, facing out,
@@ -1145,7 +1145,7 @@ body.at-home .dock > :not(.controls){display:none}
     const tt = { x: t.x, y: t.y, z: t.z, d: clampD(t.d), p: clampP(t.p), a: CAM.a + wrapA(t.a - CAM.a) };
     if (!camAnim) { CV.a = INR.va; CV.p = INR.vp; CV.x = CV.y = CV.z = CV.d = 0; }
     // a long trip across the water takes longer than a turn to the next tab
-    INR.va = INR.vp = 0; ZD = ZX = ZZ = null; camAnim = { t: tt, resp: Math.min(1.5, CAM_RESPONSE + Math.hypot(tt.x - CAM.x, tt.z - CAM.z) / 3600) };
+    INR.va = INR.vp = 0; ZD = ZX = ZZ = ORB = null; camAnim = { t: tt, resp: Math.min(1.5, CAM_RESPONSE + Math.hypot(tt.x - CAM.x, tt.z - CAM.z) / 3600) };
     if (calmMotion()) { Object.assign(CAM, tt); camAnim = null; for (const k in CV) CV[k] = 0; vp.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 240, easing: "ease-out" }); }
   }
   function camSpring(dt) {
@@ -1171,7 +1171,7 @@ body.at-home .dock > :not(.controls){display:none}
   const homeView = () => placeView(HERE, true);
   // Where you are decides what swiping turns around, which labels show and whether the beach chat is out.
   function setHere(name) {
-    if (!PLACES[name]) return; HERE = name; PIV = PLACES[name];
+    if (!PLACES[name]) return; HERE = name; PIV = PLACES[name]; ORB = null;
     if (name !== "home") { VISITS[name] = Date.now(); try { localStorage.setItem("allie.visits", JSON.stringify(VISITS)); } catch (e) {} }
     for (const el of LABELS) { const sub = $("small", el), t = visitText(el.dataset.place); if (sub.textContent !== t) sub.textContent = t; }
     document.body.classList.toggle("at-home", name === "home"); homeBtn.setAttribute("aria-pressed", String(name === "home"));
@@ -1212,7 +1212,7 @@ body.at-home .dock > :not(.controls){display:none}
   function orbit(da, dp) {
     if (da && HERE === "home") da = Math.max(-0.7, Math.min(0.7, CAM.a + da)) - CAM.a;
     if (da && HERE === "craft") { const a0 = PLACES.craft.yaw; da = a0 + Math.max(-0.6, Math.min(0.6, wrapA(CAM.a + da - a0))) - CAM.a; }
-    if (da) { const c = Math.cos(da), s = Math.sin(da), x = CAM.x - PIV.x, z = CAM.z - PIV.z; CAM.x = PIV.x + c * x + s * z; CAM.z = PIV.z + c * z - s * x; CAM.a += da; }
+    if (da) { const O = ORB || PIV, c = Math.cos(da), s = Math.sin(da), x = CAM.x - O.x, z = CAM.z - O.z; CAM.x = O.x + c * x + s * z; CAM.z = O.z + c * z - s * x; CAM.a += da; }
     if (dp) CAM.p = HERE === "home" ? Math.max(0.03, Math.min(0.5, CAM.p + dp)) : HERE === "craft" ? Math.max(0.5, Math.min(1.3, CAM.p + dp)) : clampP(CAM.p + dp);
   }
   // Zoom eases toward its target; a released swipe keeps turning and slows down.
@@ -1229,14 +1229,24 @@ body.at-home .dock > :not(.controls){display:none}
   function userCam() { camAnim = null; }
   // Zoom toward what's under the cursor (cx, cy): the look-at point slides so that spot stays put on screen, without
   // straying more than 1600 from the place. Keys zoom into the middle.
+  // What's under the cursor: a tall thing (the lighthouse, the post, the boat, the bottle) if it's near the cursor on
+  // screen, else the spot on the water. The lighthouse and Allie's post mostly stand above the horizon, where a ray
+  // never meets the water.
+  function pickAt(cx, cy) {
+    const b = basis(CAM), S = PLACES.studio, top = SEA ? SEA.props.islandTop + SEA.props.lamp : 600, bp = bottlePos();
+    const things = [[S.x, S.z, [0, top * 0.5, top]], [0, 0, [0, 40]], [bp[0], bp[2], [10]], [POST[0], POST[2], [0, POST[1] + 40]]];
+    let best = null, bd = 110;
+    for (const [x, z, ys] of things) for (const y of ys) { const q = project(b, x, y, z); if (!q) continue; const d = Math.hypot(q.x - cx, q.y - cy); if (d < bd) { bd = d; best = { x, z }; } }
+    return best || rayAt(b, cx, cy, 0);
+  }
   function zoomBy(f, cx, cy) {
     userCam(); INR.va = INR.vp = 0;
     const d0 = ZD === null ? CAM.d : ZD; ZD = clampD(d0 / f);
-    const hit = cx === undefined || HERE === "craft" ? null : rayAt(basis(CAM), cx, cy, 0);
+    const hit = cx === undefined || HERE === "craft" ? null : pickAt(cx, cy);
     if (hit) {
       const r = ZD / d0; let x = hit.x + ((ZX === null ? CAM.x : ZX) - hit.x) * r, z = hit.z + ((ZZ === null ? CAM.z : ZZ) - hit.z) * r;
       const dx = x - PIV.x, dz = z - PIV.z, m = Math.hypot(dx, dz); if (m > 1600) { x = PIV.x + dx / m * 1600; z = PIV.z + dz / m * 1600; }
-      ZX = x; ZZ = z;
+      ZX = x; ZZ = z; ORB = { x: hit.x, z: hit.z };
     }
     if (ZD > homeView().d * 0.72) focusKey = null;
   }

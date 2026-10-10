@@ -2,6 +2,9 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.13.1 (2026-10-10)
+- After zooming in on something, dragging to turn circles around it instead of the middle of the place. Zooming also now works on tall things above the horizon (the lighthouse, Allie's post): the cursor snaps to them when it's near. Going somewhere (or opening a tab) goes back to circling the place.
+
 ## 0.13.0 (2026-10-10)
 - Scrolling zooms toward whatever is under the mouse instead of the middle of the screen, like a map. The + and - keys still zoom into the middle.
 - Allie keeps about the same size on screen as you zoom in and out (she only grows a little up close).
