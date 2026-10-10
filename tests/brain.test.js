@@ -4,17 +4,17 @@ const brain = require("../src/brain");
 
 test("local brain runs a tool, then answers", async () => {
   const sent = [], replies = [
-    { message: { content: "", tool_calls: [{ function: { name: "add_task", arguments: { title: "Call Sam" } } }] } },
-    { message: { content: "<think></think>Added it." } },
+    { choices: [{ message: { content: "", tool_calls: [{ id: "c1", type: "function", function: { name: "add_task", arguments: "{\"title\":\"Call Sam\"}" } }] } }] },
+    { choices: [{ message: { content: "Added it." } }] },
   ];
   const fakeFetch = async (url, o) => { sent.push(JSON.parse(o.body)); return { ok: true, json: async () => replies.shift() }; };
   const acts = [];
   const say = await brain._thinkLocal("remind me to call Sam", "state", async (n, i) => { acts.push([n, i.title]); return "added #1"; }, fakeFetch);
   assert.strictEqual(say, "Added it.");
   assert.deepStrictEqual(acts, [["add_task", "Call Sam"]]);
-  assert.strictEqual(sent[0].think, false);
+  assert.strictEqual(sent[0].model, "bonsai-2-27b");
   assert.ok(sent[0].tools.some(t => t.function.name === "open_panel"));
-  assert.strictEqual(sent[1].messages.at(-1).role, "tool");
+  assert.strictEqual(sent[1].messages.at(-1).role, "tool"); assert.strictEqual(sent[1].messages.at(-1).tool_call_id, "c1");
 });
 
 test("local brain says when Ollama is off", async () => {

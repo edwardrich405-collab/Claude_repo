@@ -36,8 +36,10 @@ When he says goodnight or tells you to sleep, use the sleep tool and say nothing
 let client = null;
 function setKey(key) { client = key ? new Anthropic({ apiKey: key }) : null; }
 
-// Which brain answers: "claude" (needs the key) or "local" (a free model on this PC through Ollama, no web search).
-const LOCAL = { url: "http://127.0.0.1:11434", model: "qwen3:30b-a3b" };
+// Which brain answers: "claude" (needs the key) or "local": Bonsai 2 27B, a free model on this PC served by PrismML's
+// llama.cpp build (Desktop\Allison-Setup\Bonsai-demo), OpenAI-style API with native tool calls, no web search.
+const LOCAL = { url: "http://127.0.0.1:8080", model: "bonsai-2-27b", name: "Bonsai 2 27B",
+  start: "C:\\Users\\jacks\\Desktop\\Allison-Setup\\Bonsai-demo\\scripts\\start_llama_server.ps1" };
 let mode = "claude";
 const setMode = m => { mode = m === "local" ? "local" : "claude"; };
 const getMode = () => mode;
@@ -80,29 +82,29 @@ async function think(text, context, onAction) {
   }
 }
 
-// The same tools and personality, run by the local model through Ollama's chat API.
+// The same tools and personality, run by the local model through its OpenAI-style chat API.
 const LOCAL_TOOLS = TOOLS.map(t => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.input_schema } }));
 async function thinkLocal(text, context, onAction, fetchFn = fetch) {
   history.push({ role: "user", content: text });
   while (history.length > 16) history.shift();
   while (history.length && history[0].role !== "user") history.shift();
-  const msgs = [{ role: "system", content: SYSTEM + "\nAnswer general questions from what you know. You can't search the web right now, so only for live things (news, prices, weather, today's scores) say you can't check. /no_think" }]
+  const msgs = [{ role: "system", content: SYSTEM + "\nAnswer general questions from what you know. You can't search the web right now, so only for live things (news, prices, weather, today's scores) say you can't check." }]
     .concat(history.slice(0, -1), { role: "user", content: `${text}\n\n<app_state>\n${context}\n</app_state>` });
   const say = s => { s = String(s || "").replace(/^[\s\S]*<\/think>/, "").replace(/<think>[\s\S]*$/, "").trim() || "Done."; history.push({ role: "assistant", content: s }); return s; };
   for (let turn = 0; turn < 6; turn++) {
     let res;
-    try { res = await fetchFn(LOCAL.url + "/api/chat", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model: LOCAL.model, messages: msgs, tools: LOCAL_TOOLS, stream: false, think: false, keep_alive: "30m", options: { temperature: 0.7, num_ctx: 8192 } }) }); }
+    try { res = await fetchFn(LOCAL.url + "/v1/chat/completions", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ model: LOCAL.model, messages: msgs, tools: LOCAL_TOOLS, stream: false, temperature: 0.7, max_tokens: 600 }) }); }
     catch (e) { throw new Error("local model offline: " + e.message); }
     if (!res.ok) throw new Error("local model offline: " + res.status + " " + (await res.text()).slice(0, 200));
-    const m = (await res.json()).message || {}, calls = m.tool_calls || [];
+    const j = await res.json(), m = (j.choices && j.choices[0] && j.choices[0].message) || j.message || {}, calls = m.tool_calls || [];
     msgs.push({ role: "assistant", content: m.content || "", tool_calls: calls.length ? calls : undefined });
     if (!calls.length) return say(m.content);
-    for (const c of calls) {
+    for (const [i, c] of calls.entries()) {
       const f = c.function || {}; let args = f.arguments || {}, out = "done";
       if (typeof args === "string") { try { args = JSON.parse(args); } catch (e) { args = {}; } }
       try { out = (await onAction(f.name, args)) || "done"; } catch (e) { out = "failed: " + e.message; }
-      msgs.push({ role: "tool", tool_name: f.name, content: String(out) });
+      msgs.push({ role: "tool", tool_call_id: c.id || "call_" + turn + "_" + i, name: f.name, content: String(out) });
     }
   }
   return say("Done.");

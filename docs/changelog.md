@@ -2,6 +2,11 @@
 
 Newest first. Plain words, so Allie can read this to explain her own updates.
 
+## 0.14.0 (2026-10-10)
+- Allie's local brain is now Bonsai 2 27B instead of Qwen. It answers in about 2 to 3 seconds instead of about a minute, uses about 7 GB of graphics memory instead of 19 (so it's fine next to ComfyUI), and does the same tool calls (to-dos, tabs, travelling).
+- When Local is chosen, Allie starts the Bonsai server by herself if it isn't already running.
+- Fixed: the mic never turned on if the screen reloaded right after the ears loaded.
+
 ## 0.13.1 (2026-10-10)
 - After zooming in on something, dragging to turn circles around it instead of the middle of the place. Zooming also now works on tall things above the horizon (the lighthouse, Allie's post): the cursor snaps to them when it's near. Going somewhere (or opening a tab) goes back to circling the place.
 

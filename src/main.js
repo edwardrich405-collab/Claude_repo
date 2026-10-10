@@ -39,7 +39,17 @@ ipcMain.handle("key:set", (e, key) => {
 ipcMain.on("key:has", e => { e.returnValue = brain.ready(); });
 // Claude or the local model; the choice is kept in brain.json next to Jack's data.
 ipcMain.on("brain:mode", e => { e.returnValue = brain.getMode(); });
-ipcMain.on("brain:setMode", (e, m) => { brain.setMode(m); try { fs.writeFileSync(file("brain.json"), JSON.stringify({ mode: brain.getMode() })); } catch (err) {} logLine("brain", brain.getMode()); e.returnValue = brain.getMode(); });
+ipcMain.on("brain:setMode", (e, m) => { brain.setMode(m); try { fs.writeFileSync(file("brain.json"), JSON.stringify({ mode: brain.getMode() })); } catch (err) {} logLine("brain", brain.getMode()); e.returnValue = brain.getMode(); startLocalBrain(); });
+// The local brain's server (Bonsai) is started in the background when it's chosen and not already running.
+async function startLocalBrain() {
+  if (brain.getMode() !== "local") return;
+  try { const r = await fetch(brain.LOCAL.url + "/health"); if (r.ok) return; } catch (err) {}
+  if (!fs.existsSync(brain.LOCAL.start)) return logLine("local brain not installed", brain.LOCAL.start);
+  const { spawn } = require("child_process");
+  spawn("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", brain.LOCAL.start],
+    { cwd: path.dirname(path.dirname(brain.LOCAL.start)), env: { ...process.env, BONSAI_CTX: "65536" }, detached: true, stdio: "ignore", windowsHide: true }).unref();
+  logLine("starting local brain", brain.LOCAL.name);
+}
 
 // Thinking: actions Claude picks are carried out by the window, which reports back.
 let actSeq = 0; const pending = new Map();
@@ -141,6 +151,7 @@ app.whenReady().then(() => {
   session.defaultSession.setPermissionCheckHandler((wc, perm) => perm === "media");
   brain.setKey(loadKey());
   try { brain.setMode(JSON.parse(fs.readFileSync(file("brain.json"), "utf8")).mode); } catch (e) {}
+  startLocalBrain();
   hub = makeHub(app, safeStorage, send, logLine);
   createWindow();
 });
